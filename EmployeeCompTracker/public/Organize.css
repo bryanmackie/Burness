@@ -1,0 +1,99 @@
+
+
+/* Reset some default styles to ensure consistent look */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  /* Set a background and font for the entire page */
+  body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f4f4f4;
+    padding: 20px;
+    color: #333;
+  }
+  
+  /* Main container to center the form */
+  form {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    max-width: 600px;
+    margin: auto;
+  }
+  
+  /* Heading and form title */
+  form h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #333;
+  }
+  
+  /* Style labels for a clean look */
+  label {
+    font-size: 16px;
+    margin-bottom: 8px;
+    display: block;
+  }
+  
+  /* Style for input fields, select dropdowns, and textareas */
+  input, select {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 16px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    transition: border-color 0.3s ease;
+  }
+  
+  /* Focus state for input fields and select dropdowns */
+  input:focus, select:focus {
+    border-color: #007bff;
+    outline: none;
+  }
+  
+  /* Disable state for First Name dropdown */
+  select:disabled {
+    background-color: #f4f4f4;
+  }
+  
+  /* Style the submit button */
+  button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 4px;
+    font-size: 16px;
+    width: 100%;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  /* Hover effect for the submit button */
+  button:hover {
+    background-color: #0056b3;
+  }
+  
+  /* Optional: Add some space between sections */
+  section {
+    margin-bottom: 30px;
+  }
+  
+  /* Responsive design: Stack the form fields on smaller screens */
+  @media (max-width: 600px) {
+    form {
+      padding: 15px;
+      margin: 10px;
+    }
+  
+    input, select, button {
+      font-size: 14px;
+    }
+  }
+  
+  
