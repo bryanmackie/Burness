@@ -103,22 +103,30 @@ document.addEventListener('DOMContentLoaded', () => {
     const formData = new FormData(e.target);
     const data = Object.fromEntries(formData.entries());
 
+    console.log('Data being sent to API:', data);
+
     try {
       const response = await fetch(`${API_BASE_URL}/update`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
-
+    
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+    
       const result = await response.json();
-      if (response.ok) {
+    
+      if (result.success) {
         alert(result.message || 'Compensation updated successfully!');
       } else {
         alert(result.message || 'Error updating compensation.');
       }
+    
     } catch (error) {
       console.error('Request failed:', error);
-      alert('Failed to update compensation. Please try again.');
+      alert(`Failed to update compensation. Please try again. ${error.message}`);
     }
   });
 
