@@ -6,10 +6,10 @@ dotenv.config();
 
 // Database configuration using environment variables
 const dbConfig = {
-  host: process.env.DB_HOST || 'localhost',
-  user: process.env.DB_USER || 'root',
-  password: process.env.DB_PASSWORD || 'Bm*7654321',
-  database: process.env.DB_NAME || 'burness_comp_tracker',
+  host: process.env.DB_HOST || 'db-burness-do-user-18914275-0.j.db.ondigitalocean.com',
+  user: process.env.DB_USER || 'doadmin',
+  password: process.env.DB_PASSWORD || 'AVNS_lxW2W7XmWyzcFOWSThQ',
+  database: process.env.DB_NAME || 'defaultdb',
 };
 
 // Create and export the database connection
