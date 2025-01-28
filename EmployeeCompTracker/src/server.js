@@ -3,9 +3,8 @@ import bodyParser from 'body-parser';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import createConnection from './config/db.js'; // Import the database connection
-
-// Load environment variables
 import dotenv from 'dotenv';
+
 dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
@@ -66,6 +65,9 @@ const startServer = async () => {
       }
 
       try {
+        // Start a transaction
+        await connection.beginTransaction();
+
         // Construct the SET clause dynamically
         const setClause = Object.keys(updates)
           .map((key) => `${key} = ?`)
@@ -88,28 +90,34 @@ const startServer = async () => {
         }
 
         // Insert into historical_salary_changes
-        await connection.execute(
+        const [salaryChangeResult] = await connection.execute(
           'INSERT INTO historical_salary_changes (first_name, last_name, title, salary, date_salary_set) VALUES (?, ?, ?, ?, ?)',
           [first_name, last_name, updates.title, updates.salary, updates.date_salary_set]
         );
 
         // Insert into historical_salary_comments
-        await connection.execute(
+        const [salaryCommentResult] = await connection.execute(
           'INSERT INTO historical_salary_comments (first_name, last_name, title, comment_logged, comment_date) VALUES (?, ?, ?, ?, ?)',
           [first_name, last_name, updates.title, updates.comment_logged, updates.comment_date]
         );
 
         // Insert into historical_bonuses
-        await connection.execute(
+        const [bonusResult] = await connection.execute(
           'INSERT INTO historical_bonuses (first_name, last_name, title, bonus, bonus_year) VALUES (?, ?, ?, ?, ?)',
           [first_name, last_name, updates.title, updates.bonus, updates.bonus_year]
         );
 
-        // Trigger pushInc to update latest_employee_data
+        // Insert into pushInc (assuming this is for updating latest_employee_data)
         await connection.execute('INSERT INTO pushInc (first_name, last_name) VALUES (?, ?)', [first_name, last_name]);
+
+        // Commit the transaction
+        await connection.commit();
 
         res.status(200).json({ success: true, message: 'Record updated and historical data inserted successfully.' });
       } catch (error) {
+        // Rollback transaction in case of any errors
+        await connection.rollback();
+        console.error('Error during transaction:', error);
         handleDatabaseError(res, error);
       }
     });
