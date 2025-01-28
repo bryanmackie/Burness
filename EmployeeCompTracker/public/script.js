@@ -1,4 +1,4 @@
-const API_BASE_URL = "http://localhost:3000";
+const API_BASE_URL = "https://burness.onrender.com";
 //const API_BASE_URL = process.env.API_BASE_URL || "http://localhost:3000";
 // Helper function to fetch data from the API
 async function fetchData(url) {
