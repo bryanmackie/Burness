@@ -10,6 +10,7 @@ const dbConfig = {
   user: process.env.DB_USER || 'doadmin',
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME || 'defaultdb',
+  port: '25060'
 };
 
 // Create and export the database connection
