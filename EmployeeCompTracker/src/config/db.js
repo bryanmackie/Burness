@@ -8,7 +8,7 @@ dotenv.config();
 const dbConfig = {
   host: process.env.DB_HOST || 'db-burness-do-user-18914275-0.j.db.ondigitalocean.com',
   user: process.env.DB_USER || 'doadmin',
-  password: process.env.DB_PASSWORD || 'AVNS_lxW2W7XmWyzcFOWSThQ',
+  password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME || 'defaultdb',
 };
 
