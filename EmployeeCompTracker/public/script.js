@@ -189,3 +189,22 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 });
+
+
+// JavaScript to toggle the dropdown visibility on button click
+document.querySelectorAll('.dropbtn').forEach(function(button) {
+  button.addEventListener('click', function(event) {
+    // Toggle display of the respective dropdown content
+    var dropdownContent = button.nextElementSibling;
+    
+    // Toggle the display state of dropdown content
+    dropdownContent.style.display = (dropdownContent.style.display === 'block') ? 'none' : 'block';
+    
+    // Optional: Close the dropdown if clicking anywhere outside of it
+    window.addEventListener('click', function(e) {
+      if (!e.target.matches('.dropbtn') && !e.target.closest('.dropdown')) {
+        dropdownContent.style.display = 'none';
+      }
+    });
+  });
+});

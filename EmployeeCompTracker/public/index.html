@@ -8,14 +8,14 @@
 </head>
 <body>
   <header>
-    <h1>Employee Compensation Tracker</h1>
+    <img class="logo" src="logo.png">
   </header>
 
   <main>
     <!-- Form for updating employee compensation -->
     <form id="updateForm" method="POST">
 
-      <h2>Update Compensation</h2>
+      <h2>Employee Compensation Tracker</h2>
 
       <label for="m_first">Your Name:</label>
       <input type="text" id="m_first" name="m_first" required/>
@@ -43,7 +43,7 @@
       <input type="date" id="date_salary_set" name="date_salary_set"/>
 
       <label for="comment_logged">Comment:</label>
-      <input type="text" id="comment_logged" name="comment_logged"/>
+      <textarea type="text" id="comment_logged" name="comment_logged" rows="4"></textarea>
 
       <label for="comment_date">Comment Date:</label>
       <input type="date" id="comment_date" name="comment_date"/>
@@ -57,36 +57,50 @@
       <button type="submit">Submit</button>
     </form>
 
-    <!-- Form for adding a new employee -->
-    <form id="addEmployeeForm">
-      <h2>Add Employee</h2>
-      <label for="add_first_name">First Name:</label>
-      <input type="text" id="add_first_name" name="add_first_name" required />
+   <!-- Container for Add and Delete Employee dropdowns -->
+   <div class="dropdown-container">
+    <!-- Dropdown for adding a new employee -->
+    <div class="dropdown">
+      <button class="dropbtn">Add Employee</button>
+      <div class="dropdown-content">
+        <form id="addEmployeeForm">
+          <h2>Add Employee</h2>
+          <label for="add_first_name">First Name:</label>
+          <input type="text" id="add_first_name" name="add_first_name" required />
 
-      <label for="add_last_name">Last Name:</label>
-      <input type="text" id="add_last_name" name="add_last_name" required />
+          <label for="add_last_name">Last Name:</label>
+          <input type="text" id="add_last_name" name="add_last_name" required />
 
-      <button type="submit">Add Employee</button>
-    </form>
+          <button type="submit">Add Employee</button>
+        </form>
+      </div>
+    </div>
 
-    <!-- Form for deleting an employee -->
-    <form id="deleteEmployeeForm">
-  <h4>Delete Employee</h4>
-  <label for="deleteLastName">Last Name:</label>
-  <select id="deleteLastName" name="delete_last_name" required>
-    <option value="">Select Last Name</option>
-    <!-- Last Name options will be inserted here dynamically -->
-  </select>
+    <!-- Dropdown for deleting an employee -->
+    <div class="dropdown">
+      <button class="dropbtn">Delete Employee</button>
+      <div class="dropdown-content">
+        <form id="deleteEmployeeForm">
+          <h4>Delete Employee</h4>
+          <label for="deleteLastName">Last Name:</label>
+          <select id="deleteLastName" name="delete_last_name" required>
+            <option value="">Select Last Name</option>
+            <!-- Last Name options will be inserted here dynamically -->
+          </select>
 
-  <label for="deleteFirstName">First Name:</label>
-  <select id="deleteFirstName" name="delete_first_name" disabled required>
-    <option value="">Select First Name</option>
-    <!-- First Name options will be inserted here dynamically -->
-  </select>
+          <label for="deleteFirstName">First Name:</label>
+          <select id="deleteFirstName" name="delete_first_name" disabled required>
+            <option value="">Select First Name</option>
+            <!-- First Name options will be inserted here dynamically -->
+          </select>
 
-  <button type="submit">Delete Employee</button>
-</form>
-  </main>
+          <button type="submit">Delete Employee</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</main>
+
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
   <script src="script.js"></script>
