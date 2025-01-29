@@ -88,25 +88,27 @@ const startServer = async () => {
         if (updateResult.affectedRows === 0) {
           return res.status(404).json({ success: false, message: 'Employee not found.' });
         }
-
+        if (salary != ""){
         // Insert into historical_salary_changes
         const [salaryChangeResult] = await connection.execute(
           'INSERT INTO historical_salary_changes (first_name, last_name, title, salary, date_salary_set) VALUES (?, ?, ?, ?, ?)',
           [first_name, last_name, updates.title, updates.salary, updates.date_salary_set]
         );
-
+      }
+      if (comment_logged != ""){
         // Insert into historical_salary_comments
         const [salaryCommentResult] = await connection.execute(
           'INSERT INTO historical_salary_comments (first_name, last_name, title, comment_logged, comment_date) VALUES (?, ?, ?, ?, ?)',
           [first_name, last_name, updates.title, updates.comment_logged, updates.comment_date]
         );
-
+      }
+      if (bonus != ""){
         // Insert into historical_bonuses
         const [bonusResult] = await connection.execute(
           'INSERT INTO historical_bonuses (first_name, last_name, title, bonus, bonus_year) VALUES (?, ?, ?, ?, ?)',
           [first_name, last_name, updates.title, updates.bonus, updates.bonus_year]
         );
-
+      }
         // Insert into pushInc (assuming this is for updating latest_employee_data)
         await connection.execute('INSERT INTO pushInc (first_name, last_name) VALUES (?, ?)', [first_name, last_name]);
 
