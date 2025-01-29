@@ -53,6 +53,7 @@ textarea#comment_logged {
   border-radius: 4px; /* Optional, for rounded corners */
   border: 1px solid #ddd; /* Border styling */
   transition: border-color 0.3s ease; /* Optional, for smooth focus transition */
+  font-family: inherit;
 }
 
 
