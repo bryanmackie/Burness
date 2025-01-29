@@ -58,54 +58,50 @@ const startServer = async () => {
 
     // Update employee compensation
     app.post('/update', async (req, res) => {
-      const { first_name, last_name, salary, comment_logged, bonus, title, date_salary_set, comment_date, bonus_year } = req.body;
+      const { first_name, last_name, salary, comment_logged, comment_date, bonus, title, date_salary_set, bonus_year } = req.body;
     
       if (!first_name || !last_name) {
         return res.status(400).json({ success: false, message: 'First and Last Name are required.' });
       }
     
-      // Initialize validCommentDate
-      let validCommentDate = null;
-    
-      // If comment_logged is present, then validate and assign comment_date
-      if (comment_logged) {
-        if (comment_date && !isNaN(Date.parse(comment_date))) {
-          validCommentDate = comment_date; // Valid date
-        } else {
-          validCommentDate = null; // Invalid date, set to NULL
-        }
-      }
+      // Sanitize inputs (e.g., set NULL for empty or invalid values)
+      const validSalary = salary || null;
+      const validBonus = bonus || null;
+      const validCommentDate = (comment_logged && comment_date && !isNaN(Date.parse(comment_date))) ? comment_date : null;
     
       try {
         // Start a transaction
         await connection.beginTransaction();
     
         // Construct the SET clause dynamically
-        const setClause = Object.keys(req.body)
-          .map((key) => `${key} = ?`)
-          .join(', ');
+        const setClause = [
+          'last_name = ?', 
+          'first_name = ?', 
+          'title = ?', 
+          'salary = ?', 
+          'date_salary_set = ?', 
+          'comment_logged = ?', 
+          'comment_date = ?', 
+          'bonus = ?', 
+          'bonus_year = ?'
+        ].join(', ');
     
-        // Extract values for the SET clause
-        const setValues = Object.values(req.body);
-    
-        // If validCommentDate is null, remove comment_date from the setValues
-        if (validCommentDate === null) {
-          const commentDateIndex = setValues.indexOf(comment_date);
-          if (commentDateIndex > -1) {
-            setValues.splice(commentDateIndex, 1); // Remove the invalid comment_date value
-          }
-        } else {
-          // If validCommentDate exists, add it to the query
-          setValues.push(validCommentDate);
-        }
-    
-        // Combine all values for the query (SET values + WHERE values)
-        const queryValues = [...setValues, first_name, last_name];
+        const setValues = [
+          last_name, 
+          first_name, 
+          title, 
+          validSalary, 
+          date_salary_set, 
+          comment_logged || null, // if no comment_logged, set it to NULL
+          validCommentDate, 
+          validBonus, 
+          bonus_year
+        ];
     
         // Execute the UPDATE query
         const [updateResult] = await connection.execute(
           `UPDATE employee_salary SET ${setClause} WHERE first_name = ? AND last_name = ?`,
-          queryValues
+          [...setValues, first_name, last_name]
         );
     
         if (updateResult.affectedRows === 0) {
@@ -113,26 +109,26 @@ const startServer = async () => {
         }
     
         // Conditionally insert into historical_salary_changes if salary is provided
-        if (salary) {
-          const [salaryChangeResult] = await connection.execute(
+        if (validSalary) {
+          await connection.execute(
             'INSERT INTO historical_salary_changes (first_name, last_name, title, salary, date_salary_set) VALUES (?, ?, ?, ?, ?)',
-            [first_name, last_name, title, salary, date_salary_set]
+            [first_name, last_name, title, validSalary, date_salary_set]
           );
         }
     
         // Conditionally insert into historical_salary_comments if comment_logged is provided
         if (comment_logged) {
-          const [salaryCommentResult] = await connection.execute(
+          await connection.execute(
             'INSERT INTO historical_salary_comments (first_name, last_name, title, comment_logged, comment_date) VALUES (?, ?, ?, ?, ?)',
             [first_name, last_name, title, comment_logged, validCommentDate]
           );
         }
     
         // Conditionally insert into historical_bonuses if bonus is provided
-        if (bonus) {
-          const [bonusResult] = await connection.execute(
+        if (validBonus) {
+          await connection.execute(
             'INSERT INTO historical_bonuses (first_name, last_name, title, bonus, bonus_year) VALUES (?, ?, ?, ?, ?)',
-            [first_name, last_name, title, bonus, bonus_year]
+            [first_name, last_name, title, validBonus, bonus_year]
           );
         }
     
