@@ -58,7 +58,17 @@ const startServer = async () => {
 
     // Update employee compensation
     app.post('/update', async (req, res) => {
-      const { first_name, last_name, salary, comment_logged, comment_date, bonus, title, date_salary_set, bonus_year } = req.body;
+      const { 
+        first_name, 
+        last_name, 
+        salary, 
+        comment_logged, 
+        comment_date, 
+        bonus, 
+        title, 
+        date_salary_set, 
+        bonus_year 
+      } = req.body;
     
       if (!first_name || !last_name) {
         return res.status(400).json({ success: false, message: 'First and Last Name are required.' });
@@ -67,6 +77,7 @@ const startServer = async () => {
       // Sanitize inputs (e.g., set NULL for empty or invalid values)
       const validSalary = salary || null;
       const validBonus = bonus || null;
+      const validBonusYear = (bonus_year && !isNaN(bonus_year) && Number.isInteger(Number(bonus_year))) ? Number(bonus_year) : null;
       const validCommentDate = (comment_logged && comment_date && !isNaN(Date.parse(comment_date))) ? comment_date : null;
     
       try {
@@ -95,7 +106,7 @@ const startServer = async () => {
           comment_logged || null, // if no comment_logged, set it to NULL
           validCommentDate, 
           validBonus, 
-          bonus_year
+          validBonusYear // Set to NULL if invalid or empty
         ];
     
         // Execute the UPDATE query
@@ -128,7 +139,7 @@ const startServer = async () => {
         if (validBonus) {
           await connection.execute(
             'INSERT INTO historical_bonuses (first_name, last_name, title, bonus, bonus_year) VALUES (?, ?, ?, ?, ?)',
-            [first_name, last_name, title, validBonus, bonus_year]
+            [first_name, last_name, title, validBonus, validBonusYear] // Use sanitized validBonusYear
           );
         }
     
@@ -146,7 +157,7 @@ const startServer = async () => {
         handleDatabaseError(res, error);
       }
     });
-
+    
     // Add a new employee
     app.post('/add-employee', async (req, res) => {
       const { add_first_name, add_last_name } = req.body;
