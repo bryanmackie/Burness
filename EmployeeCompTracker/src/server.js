@@ -30,12 +30,7 @@ const startServer = async () => {
     const connection = await createConnection(); // Create the database connection
     console.log('Database connected successfully.');
 
-    // Rest of your code...
-  } catch (error) {
-    console.error('Database connection failed:', error);
-    process.exit(1); // Exit the process if the database connection fails
-  }
-};
+
 
     // Routes
 
@@ -237,9 +232,10 @@ const startServer = async () => {
     app.listen(PORT, () => {
       console.log(`Server is running on https://burness.onrender.com`);
     });
+    // Rest of your code...
   } catch (error) {
-    console.error('Failed to start the server:', error);
-    process.exit(1);
+    console.error('Database connection failed:', error);
+    process.exit(1); // Exit the process if the database connection fails
   }
 };
 
