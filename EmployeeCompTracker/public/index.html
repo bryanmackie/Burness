@@ -15,12 +15,16 @@
     <!-- Form for updating employee compensation -->
     <form id="updateForm" method="POST">
       <h2>Update Compensation</h2>
+      <label for="m_first">Your Name:</label>
+      <input type="text" id="m_first" name="m_first" required/>
+
       <label for="lastName">Last Name:</label>
       <select id="lastName" name="last_name" required>
         <option value="">Select Last Name</option>
         <!-- Dynamically populated -->
       </select>
 
+      
       <label for="firstName">First Name:</label>
       <select id="firstName" name="first_name" disabled required>
         <option value="">Select First Name</option>

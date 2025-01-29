@@ -59,6 +59,7 @@ const startServer = async () => {
     // Update employee compensation
     app.post('/update', async (req, res) => {
       const { 
+        m_first,
         first_name, 
         last_name, 
         salary, 
@@ -86,6 +87,7 @@ const startServer = async () => {
     
         // Construct the SET clause dynamically
         const setClause = [
+         // 'm_first = ?',
           'last_name = ?', 
           'first_name = ?', 
           'title = ?', 
@@ -122,24 +124,24 @@ const startServer = async () => {
         // Conditionally insert into historical_salary_changes if salary is provided
         if (validSalary) {
           await connection.execute(
-            'INSERT INTO historical_salary_changes (first_name, last_name, title, salary, date_salary_set) VALUES (?, ?, ?, ?, ?)',
-            [first_name, last_name, title, validSalary, date_salary_set]
+            'INSERT INTO historical_salary_changes (m_first, first_name, last_name, title, salary, date_salary_set) VALUES (?, ?, ?, ?, ?, ?)',
+            [m_first, first_name, last_name, title, validSalary, date_salary_set]
           );
         }
     
         // Conditionally insert into historical_salary_comments if comment_logged is provided
         if (comment_logged) {
           await connection.execute(
-            'INSERT INTO historical_salary_comments (first_name, last_name, title, comment_logged, comment_date) VALUES (?, ?, ?, ?, ?)',
-            [first_name, last_name, title, comment_logged, validCommentDate]
+            'INSERT INTO historical_salary_comments (m_first, first_name, last_name, title, comment_logged, comment_date) VALUES (?, ?, ?, ?, ?, ?)',
+            [m_first, first_name, last_name, title, comment_logged, validCommentDate]
           );
         }
     
         // Conditionally insert into historical_bonuses if bonus is provided
         if (validBonus) {
           await connection.execute(
-            'INSERT INTO historical_bonuses (first_name, last_name, title, bonus, bonus_year) VALUES (?, ?, ?, ?, ?)',
-            [first_name, last_name, title, validBonus, validBonusYear] // Use sanitized validBonusYear
+            'INSERT INTO historical_bonuses (m_first, first_name, last_name, title, bonus, bonus_year) VALUES (?, ?, ?, ?, ?, ?)',
+            [m_first, first_name, last_name, title, validBonus, validBonusYear] // Use sanitized validBonusYear
           );
         }
     
@@ -157,7 +159,7 @@ const startServer = async () => {
         handleDatabaseError(res, error);
       }
     });
-    
+
     // Add a new employee
     app.post('/add-employee', async (req, res) => {
       const { add_first_name, add_last_name } = req.body;
