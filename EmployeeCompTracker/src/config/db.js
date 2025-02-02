@@ -1,27 +1,27 @@
-import mysql from 'mysql2/promise'; // Use promise-based MySQL
+import { Client } from 'pg';  // Import PostgreSQL client
 import dotenv from 'dotenv';
 
-// Load environment variables from .env file
 dotenv.config();
 
 // Database configuration using environment variables
 const dbConfig = {
-  host: process.env.DB_HOST || 'db-burness-do-user-18914275-0.j.db.ondigitalocean.com',
-  user: process.env.DB_USER || 'doadmin',
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME || 'defaultdb',
-  port: '25060'
+  host: process.env.DB_HOST,      // PostgreSQL connection info from Render (or other environments)
+  user: process.env.DB_USER,      // PostgreSQL user
+  password: process.env.DB_PASSWORD,  // Password for the PostgreSQL user
+  database: process.env.DB_NAME,  // Name of your PostgreSQL database
+  port: process.env.DB_PORT || 5432,  // Default PostgreSQL port (use your correct port if different)
 };
 
 // Create and export the database connection
 const createConnection = async () => {
+  const client = new Client(dbConfig);  // Create the client instance
   try {
-    const connection = await mysql.createConnection(dbConfig);
+    await client.connect();  // Establish the connection
     console.log('Database connected successfully.');
-    return connection;
+    return client;  // Return the client instance
   } catch (error) {
     console.error('Failed to connect to the database:', error);
-    process.exit(1); // Exit the process if the database connection fails
+    process.exit(1);  // Exit the process if the database connection fails
   }
 };
 
