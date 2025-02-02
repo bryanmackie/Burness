@@ -1,4 +1,6 @@
-import { Client } from 'pg';  // Import PostgreSQL client
+import pkg from 'pg';  // Import the entire pg package
+const { Client } = pkg; // Destructure the Client from the imported package
+
 import dotenv from 'dotenv';
 
 dotenv.config();
