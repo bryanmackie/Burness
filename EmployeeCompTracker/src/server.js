@@ -58,101 +58,61 @@ const startServer = async () => {
 
     // Update employee compensation
     app.post('/update', async (req, res) => {
-      const { 
-        m_first,
-        first_name, 
-        last_name, 
-        salary, 
-        comment_logged, 
-        comment_date, 
-        bonus, 
-        title, 
-        date_salary_set, 
-        bonus_year 
-      } = req.body;
+      const { first_name, last_name, primaryTitle, secondaryTitle, ...updates } = req.body;
     
       if (!first_name || !last_name) {
         return res.status(400).json({ success: false, message: 'First and Last Name are required.' });
       }
     
-      // Sanitize inputs (e.g., set NULL for empty or invalid values)
-      const validSalary = salary || null;
-      const validBonus = bonus || null;
-      const validBonusYear = (bonus_year && !isNaN(bonus_year) && Number.isInteger(Number(bonus_year))) ? Number(bonus_year) : null;
-      const validCommentDate = (comment_logged && comment_date && !isNaN(Date.parse(comment_date))) ? comment_date : null;
-    
       try {
-        // Start a transaction
-        await connection.query('BEGIN');
-    
         // Construct the SET clause dynamically
-        const setClause = [
-          'last_name = $1', 
-          'first_name = $2', 
-          'title = $3', 
-          'salary = $4', 
-          'date_salary_set = $5', 
-          'comment_logged = $6', 
-          'comment_date = $7', 
-          'bonus = $8', 
-          'bonus_year = $9'
-        ].join(', ');
-
-        const setValues = [
-          last_name, 
-          first_name, 
-          title, 
-          validSalary, 
-          date_salary_set, 
-          comment_logged || null,  // if no comment_logged, set it to NULL
-          validCommentDate, 
-          validBonus, 
-          validBonusYear  // Set to NULL if invalid or empty
-        ];
+        const setClause = Object.keys(updates)
+          .map((key) => `${key} = ?`)
+          .join(', ');
+    
+        // Extract values for the SET clause
+        const setValues = Object.values(updates);
+    
+        // Combine all values for the query (SET values + WHERE values)
+        const queryValues = [...setValues, first_name, last_name];
     
         // Execute the UPDATE query
-        const updateQuery = `UPDATE employee_salary SET ${setClause} WHERE first_name = $10 AND last_name = $11`;
-        await connection.query(updateQuery, [...setValues, first_name, last_name]);
+        const [updateResult] = await connection.execute(
+          `UPDATE employee_salary SET ${setClause} WHERE first_name = ? AND last_name = ?`,
+          queryValues
+        );
     
-        // Conditionally insert into historical_salary_changes if salary is provided
-        if (validSalary) {
-          await connection.query(
-            'INSERT INTO historical_salary_changes (m_first, first_name, last_name, title, salary, date_salary_set) VALUES ($1, $2, $3, $4, $5, $6)',
-            [m_first, first_name, last_name, title, validSalary, date_salary_set]
-          );
+        if (updateResult.affectedRows === 0) {
+          return res.status(404).json({ success: false, message: 'Employee not found.' });
         }
     
-        // Conditionally insert into historical_salary_comments if comment_logged is provided
-        if (comment_logged) {
-          await connection.query(
-            'INSERT INTO historical_salary_comments (m_first, first_name, last_name, title, comment_logged, comment_date) VALUES ($1, $2, $3, $4, $5, $6)',
-            [m_first, first_name, last_name, title, comment_logged, validCommentDate]
-          );
-        }
+        // Insert into historical_salary_changes
+        await connection.execute(
+          'INSERT INTO historical_salary_changes (first_name, last_name, primaryTitle, secondaryTitle, salary, date_salary_set) VALUES (?, ?, ?, ?, ?, ?)',
+          [first_name, last_name, primaryTitle, secondaryTitle, updates.salary, updates.date_salary_set]
+        );
     
-        // Conditionally insert into historical_bonuses if bonus is provided
-        if (validBonus) {
-          await connection.query(
-            'INSERT INTO historical_bonuses (m_first, first_name, last_name, title, bonus, bonus_year) VALUES ($1, $2, $3, $4, $5, $6)',
-            [m_first, first_name, last_name, title, validBonus, validBonusYear]  // Use sanitized validBonusYear
-          );
-        }
+        // Insert into historical_salary_comments
+        await connection.execute(
+          'INSERT INTO historical_salary_comments (first_name, last_name, primaryTitle, secondaryTitle, comment_logged, comment_date) VALUES (?, ?, ?, ?, ?, ?)',
+          [first_name, last_name, primaryTitle, secondaryTitle, updates.comment_logged, updates.comment_date]
+        );
     
-        // Insert into pushInc (assuming this is for updating latest_employee_data)
-        await connection.query('INSERT INTO pushInc (first_name, last_name) VALUES ($1, $2)', [first_name, last_name]);
+        // Insert into historical_bonuses
+        await connection.execute(
+          'INSERT INTO historical_bonuses (first_name, last_name, primaryTitle, secondaryTitle, bonus, bonus_year) VALUES (?, ?, ?, ?, ?, ?)',
+          [first_name, last_name, primaryTitle, secondaryTitle, updates.bonus, updates.bonus_year]
+        );
     
-        // Commit the transaction
-        await connection.query('COMMIT');
+        // Trigger pushInc to update latest_employee_data
+        await connection.execute('INSERT INTO pushInc (first_name, last_name) VALUES (?, ?)', [first_name, last_name]);
     
         res.status(200).json({ success: true, message: 'Record updated and historical data inserted successfully.' });
       } catch (error) {
-        // Rollback transaction in case of any errors
-        await connection.query('ROLLBACK');
-        console.error('Error during transaction:', error);
         handleDatabaseError(res, error);
       }
     });
-
+    
     // Add a new employee
     app.post('/add-employee', async (req, res) => {
       const { add_first_name, add_last_name } = req.body;
