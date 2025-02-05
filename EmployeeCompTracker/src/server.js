@@ -27,7 +27,7 @@ const handleDatabaseError = (res, error) => {
 // Initialize the database connection and start the server
 const startServer = async () => {
   try {
-    const connection = await createConnection();  // Create the database connection
+    const client = await createConnection();  // Create the database connection
     console.log('Database connected successfully.');
 
     // Routes
@@ -35,7 +35,7 @@ const startServer = async () => {
     // Get all employees
     app.get('/api/employees', async (req, res) => {
       try {
-        const result = await connection.query('SELECT first_name, last_name FROM latest_employee_data');
+        const result = await client.query('SELECT first_name, last_name FROM latest_employee_data');
         res.status(200).json({ success: true, data: result.rows });
       } catch (error) {
         handleDatabaseError(res, error);
@@ -46,7 +46,7 @@ const startServer = async () => {
     app.get('/api/first-names/:last_name', async (req, res) => {
       const { last_name } = req.params;
       try {
-        const result = await connection.query(
+        const result = await client.query(
           'SELECT first_name FROM latest_employee_data WHERE last_name = $1',
           [last_name]
         );
@@ -67,7 +67,7 @@ const startServer = async () => {
       try {
         // Construct the SET clause dynamically
         const setClause = Object.keys(updates)
-          .map((key) => `${key} = ?`)
+          .map((key) => `${key} = $${Object.keys(updates).indexOf(key) + 1}`)
           .join(', ');
     
         // Extract values for the SET clause
@@ -77,35 +77,35 @@ const startServer = async () => {
         const queryValues = [...setValues, first_name, last_name];
     
         // Execute the UPDATE query
-        const [updateResult] = await connection.execute(
-          `UPDATE employee_salary SET ${setClause} WHERE first_name = ? AND last_name = ?`,
+        const updateResult = await client.query(
+          `UPDATE employee_salary SET ${setClause} WHERE first_name = $${setValues.length + 1} AND last_name = $${setValues.length + 2}`,
           queryValues
         );
     
-        if (updateResult.affectedRows === 0) {
+        if (updateResult.rowCount === 0) {
           return res.status(404).json({ success: false, message: 'Employee not found.' });
         }
     
         // Insert into historical_salary_changes
-        await connection.execute(
-          'INSERT INTO historical_salary_changes (first_name, last_name, primaryTitle, secondaryTitle, salary, date_salary_set) VALUES (?, ?, ?, ?, ?, ?)',
+        await client.query(
+          'INSERT INTO historical_salary_changes (first_name, last_name, primaryTitle, secondaryTitle, salary, date_salary_set) VALUES ($1, $2, $3, $4, $5, $6)',
           [first_name, last_name, primaryTitle, secondaryTitle, updates.salary, updates.date_salary_set]
         );
     
         // Insert into historical_salary_comments
-        await connection.execute(
-          'INSERT INTO historical_salary_comments (first_name, last_name, primaryTitle, secondaryTitle, comment_logged, comment_date) VALUES (?, ?, ?, ?, ?, ?)',
+        await client.query(
+          'INSERT INTO historical_salary_comments (first_name, last_name, primaryTitle, secondaryTitle, comment_logged, comment_date) VALUES ($1, $2, $3, $4, $5, $6)',
           [first_name, last_name, primaryTitle, secondaryTitle, updates.comment_logged, updates.comment_date]
         );
     
         // Insert into historical_bonuses
-        await connection.execute(
-          'INSERT INTO historical_bonuses (first_name, last_name, primaryTitle, secondaryTitle, bonus, bonus_year) VALUES (?, ?, ?, ?, ?, ?)',
+        await client.query(
+          'INSERT INTO historical_bonuses (first_name, last_name, primaryTitle, secondaryTitle, bonus, bonus_year) VALUES ($1, $2, $3, $4, $5, $6)',
           [first_name, last_name, primaryTitle, secondaryTitle, updates.bonus, updates.bonus_year]
         );
     
         // Trigger pushInc to update latest_employee_data
-        await connection.execute('INSERT INTO pushInc (first_name, last_name) VALUES (?, ?)', [first_name, last_name]);
+        await client.query('INSERT INTO pushInc (first_name, last_name) VALUES ($1, $2)', [first_name, last_name]);
     
         res.status(200).json({ success: true, message: 'Record updated and historical data inserted successfully.' });
       } catch (error) {
@@ -123,13 +123,13 @@ const startServer = async () => {
 
       try {
         // Insert into employee_salary
-        await connection.query(
+        await client.query(
           'INSERT INTO employee_salary (first_name, last_name) VALUES ($1, $2)',
           [add_first_name, add_last_name]
         );
 
         // Trigger pushInc to update latest_employee_data
-        await connection.query('INSERT INTO pushInc (first_name, last_name) VALUES ($1, $2)', [add_first_name, add_last_name]);
+        await client.query('INSERT INTO pushInc (first_name, last_name) VALUES ($1, $2)', [add_first_name, add_last_name]);
 
         res.status(200).json({ success: true, message: 'Employee added successfully.' });
       } catch (error) {
@@ -147,13 +147,13 @@ const startServer = async () => {
 
       try {
         // Delete from employee_salary
-        await connection.query(
+        await client.query(
           'DELETE FROM employee_salary WHERE first_name = $1 AND last_name = $2',
           [delete_first_name, delete_last_name]
         );
 
         // Trigger pushInc to update latest_employee_data
-        await connection.query('INSERT INTO pushInc (first_name, last_name) VALUES ($1, $2)', [delete_first_name, delete_last_name]);
+        await client.query('INSERT INTO pushInc (first_name, last_name) VALUES ($1, $2)', [delete_first_name, delete_last_name]);
 
         res.status(200).json({ success: true, message: 'Employee deleted successfully.' });
       } catch (error) {
