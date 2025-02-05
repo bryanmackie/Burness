@@ -1,79 +1,234 @@
 const API_BASE_URL = "https://burness.onrender.com";
-document.addEventListener("DOMContentLoaded", () => {
-  // Fetch and populate employee data in the form when a user selects a name.
-  const employeeSelect = document.getElementById('employeeSelect');
-  const updateButton = document.getElementById('updateButton');
-  const employeeForm = document.getElementById('employeeForm');
+// const API_BASE_URL = process.env.API_BASE_URL || "http://localhost:3000";
 
-  // Populate dropdown list with employee names (first name, last name)
-  fetch('/api/employees')
-    .then(response => response.json())
-    .then(data => {
-      if (data.success) {
-        data.data.forEach(employee => {
-          const option = document.createElement('option');
-          option.value = `${employee.first_name} ${employee.last_name}`;
-          option.textContent = `${employee.first_name} ${employee.last_name}`;
-          employeeSelect.appendChild(option);
-        });
-      } else {
-        console.error('Error fetching employees:', data.message);
-      }
-    })
-    .catch(error => {
-      console.error('Error:', error);
+// Helper function to fetch data from the API
+async function fetchData(url) {
+  try {
+    const response = await fetch(url);
+    const data = await response.json();
+    if (!data.success) {
+      throw new Error(data.message || 'Failed to fetch data');
+    }
+    return data.data;
+  } catch (error) {
+    console.error('Error fetching data:', error);
+    alert('Failed to fetch data. Please try again.');
+    throw error;
+  }
+}
+
+// Fetch and populate Last Name dropdown (for Update Compensation form)
+async function populateLastNames() {
+  try {
+    const employees = await fetchData(`${API_BASE_URL}/api/employees`);
+    const lastNameSelect = document.getElementById('lastName');
+    const lastNames = [...new Set(employees.map(emp => emp.last_name))];
+
+    lastNames.forEach(lastName => {
+      const option = document.createElement('option');
+      option.value = lastName;
+      option.textContent = lastName;
+      lastNameSelect.appendChild(option);
+    });
+  } catch (error) {
+    console.error('Error populating last names:', error);
+  }
+}
+
+// Fetch and populate First Name dropdown (for Update Compensation form)
+async function populateFirstNames(lastName) {
+  const firstNameSelect = document.getElementById('firstName');
+  firstNameSelect.innerHTML = '<option value="">Select First Name</option>';
+  firstNameSelect.disabled = true;
+
+  if (lastName) {
+    try {
+      const employees = await fetchData(`${API_BASE_URL}/api/first-names/${lastName}`);
+      employees.forEach(emp => {
+        const option = document.createElement('option');
+        option.value = emp.first_name;
+        option.textContent = emp.first_name;
+        firstNameSelect.appendChild(option);
+      });
+      firstNameSelect.disabled = false;
+    } catch (error) {
+      console.error('Error populating first names:', error);
+    }
+  }
+}
+
+// Populate the Delete Employee dropdowns
+async function populateDeleteEmployeeDropdowns() {
+  try {
+    const employees = await fetchData(`${API_BASE_URL}/api/employees`);
+    const lastNameSelect = document.getElementById('deleteLastName');
+    const lastNames = [...new Set(employees.map(emp => emp.last_name))];
+
+    lastNames.forEach(lastName => {
+      const option = document.createElement('option');
+      option.value = lastName;
+      option.textContent = lastName;
+      lastNameSelect.appendChild(option);
+    });
+  } catch (error) {
+    console.error('Error populating delete employee dropdowns:', error);
+  }
+}
+//Handle primaryTitle dropdown
+document.getElementById('updateForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  const formData = new FormData(e.target);
+  const data = Object.fromEntries(formData.entries());
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/update`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
     });
 
-  // Handle the update when the update button is clicked
-  updateButton.addEventListener('click', (e) => {
+    const result = await response.json();
+    if (response.ok) {
+      alert(result.message || 'Compensation updated successfully!');
+    } else {
+      alert(result.message || 'Error updating compensation.');
+    }
+  } catch (error) {
+    console.error('Request failed:', error);
+  }
+});
+
+// Handle form submissions
+document.addEventListener('DOMContentLoaded', () => {
+  populateLastNames(); // For the Update Compensation form
+  populateDeleteEmployeeDropdowns(); // For the Delete Employee form
+
+  document.getElementById('lastName').addEventListener('change', (e) => {
+    populateFirstNames(e.target.value);
+  });
+
+  document.getElementById('deleteLastName').addEventListener('change', async (e) => {
+    const lastName = e.target.value;
+    const firstNameSelect = document.getElementById('deleteFirstName');
+
+    firstNameSelect.innerHTML = '<option value="">Select First Name</option>';
+    firstNameSelect.disabled = true;
+
+    if (lastName) {
+      await populateFirstNames(lastName);
+    }
+  });
+
+  // Handle Update Compensation form submission
+  document.getElementById('updateForm').addEventListener('submit', async (e) => {
     e.preventDefault();
 
-    const selectedEmployee = employeeSelect.value.split(' '); // Split first and last name
-    const firstName = selectedEmployee[0];
-    const lastName = selectedEmployee[1];
+    const formData = new FormData(e.target);
+    const data = Object.fromEntries(formData.entries());
 
-    // Collect form data and allow null submissions for optional fields
-    const data = {
-      m_first: document.getElementById('m_first').value,
-      first_name: firstName,
-      last_name: lastName,
-      primaryTitle: document.getElementById('primaryTitle').value || null,
-      secondaryTitle: document.getElementById('secondaryTitle').value || null,
-      salary: document.getElementById('salary').value ? parseInt(document.getElementById('salary').value) : null,
-      date_salary_set: document.getElementById('date_salary_set').value || null,
-      comment_logged: document.getElementById('comment_logged').value || null,
-      comment_date: document.getElementById('comment_date').value || null,
-      bonus: document.getElementById('bonus').value ? parseInt(document.getElementById('bonus').value) : null,
-      bonus_year: document.getElementById('bonus_year').value ? parseInt(document.getElementById('bonus_year').value) : null,
-    };
+    console.log('Data being sent to API:', data);
 
-    // Validate required fields: m_first, first_name, last_name
-    if (!data.m_first || !data.first_name || !data.last_name) {
-      alert('Please fill out Manager\'s First Name, First Name, and Last Name.');
+    try {
+      const response = await fetch(`${API_BASE_URL}/update`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+    
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+    
+      const result = await response.json();
+    
+      if (result.success) {
+        alert(result.message || 'Compensation updated successfully!');
+      } else {
+        alert(result.message || 'Error updating compensation.');
+      }
+    
+    } catch (error) {
+      console.error('Request failed:', error);
+      alert(`Failed to update compensation. Please try again. ${error.message}`);
+    }
+  });
+
+  // Handle Add Employee form submission
+  document.getElementById('addEmployeeForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const formData = new FormData(e.target);
+    const data = Object.fromEntries(formData.entries());
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/add-employee`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+
+      const result = await response.json();
+      if (response.ok) {
+        alert(result.message || 'Employee added successfully!');
+        await populateLastNames(); // Refresh the dropdowns
+      } else {
+        alert(result.message || 'Error adding employee.');
+      }
+    } catch (error) {
+      console.error('Request failed:', error);
+      alert('Failed to add employee. Please try again.');
+    }
+  });
+
+  // Handle Delete Employee form submission
+  document.getElementById('deleteEmployeeForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const deleteLastName = document.getElementById('deleteLastName').value;
+    const deleteFirstName = document.getElementById('deleteFirstName').value;
+
+    if (!deleteFirstName || !deleteLastName) {
+      alert('Please select an employee to delete.');
       return;
     }
 
-    // Send the data to the server to update employee information
-    fetch('/update', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
-    })
-      .then(response => response.json())
-      .then(data => {
-        if (data.success) {
-          alert('Employee data updated successfully!');
-          // Optionally, reset form after success
-          employeeForm.reset();
-        } else {
-          alert('Error: ' + data.message);
-        }
-      })
-      .catch((error) => {
-        console.error('Error:', error);
-        alert('An error occurred: ' + error.message);
+    try {
+      const response = await fetch(`${API_BASE_URL}/delete-employee`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ delete_first_name: deleteFirstName, delete_last_name: deleteLastName }),
       });
+
+      const result = await response.json();
+      if (response.ok) {
+        alert(result.message || 'Employee deleted successfully!');
+        await populateDeleteEmployeeDropdowns(); // Refresh the dropdowns
+      } else {
+        alert(result.message || 'Error deleting employee.');
+      }
+    } catch (error) {
+      console.error('Request failed:', error);
+      alert('Failed to delete employee. Please try again.');
+    }
+  });
+});
+
+
+// JavaScript to toggle the dropdown visibility on button click
+document.querySelectorAll('.dropbtn').forEach(function(button) {
+  button.addEventListener('click', function(event) {
+    // Toggle display of the respective dropdown content
+    var dropdownContent = button.nextElementSibling;
+    
+    // Toggle the display state of dropdown content
+    dropdownContent.style.display = (dropdownContent.style.display === 'block') ? 'none' : 'block';
+    
+    // Optional: Close the dropdown if clicking anywhere outside of it
+    window.addEventListener('click', function(e) {
+      if (!e.target.matches('.dropbtn') && !e.target.closest('.dropdown')) {
+        dropdownContent.style.display = 'none';
+      }
+    });
   });
 });
