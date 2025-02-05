@@ -58,10 +58,10 @@ const startServer = async () => {
 
     // Update employee compensation
     app.post('/update', async (req, res) => {
-      const { first_name, last_name, primaryTitle, secondaryTitle, ...updates } = req.body;
+      const { m_first, first_name, last_name, primaryTitle, secondaryTitle, ...updates } = req.body;
     
-      if (!first_name || !last_name) {
-        return res.status(400).json({ success: false, message: 'First and Last Name are required.' });
+      if (!m_first || !first_name || !last_name) {
+        return res.status(400).json({ success: false, message: 'Manager first name, First name, and Last name are required.' });
       }
     
       try {
@@ -86,22 +86,22 @@ const startServer = async () => {
           return res.status(404).json({ success: false, message: 'Employee not found.' });
         }
     
-        // Insert into historical_salary_changes
+        // Insert into historical_salary_changes (including m_first before first_name)
         await client.query(
-          'INSERT INTO historical_salary_changes (first_name, last_name, primaryTitle, secondaryTitle, salary, date_salary_set) VALUES ($1, $2, $3, $4, $5, $6)',
-          [first_name, last_name, primaryTitle, secondaryTitle, updates.salary, updates.date_salary_set]
+          'INSERT INTO historical_salary_changes (m_first, first_name, last_name, primaryTitle, secondaryTitle, salary, date_salary_set) VALUES ($1, $2, $3, $4, $5, $6, $7)',
+          [m_first, first_name, last_name, primaryTitle, secondaryTitle, updates.salary, updates.date_salary_set]
         );
     
-        // Insert into historical_salary_comments
+        // Insert into historical_salary_comments (including m_first before first_name)
         await client.query(
-          'INSERT INTO historical_salary_comments (first_name, last_name, primaryTitle, secondaryTitle, comment_logged, comment_date) VALUES ($1, $2, $3, $4, $5, $6)',
-          [first_name, last_name, primaryTitle, secondaryTitle, updates.comment_logged, updates.comment_date]
+          'INSERT INTO historical_salary_comments (m_first, first_name, last_name, primaryTitle, secondaryTitle, comment_logged, comment_date) VALUES ($1, $2, $3, $4, $5, $6, $7)',
+          [m_first, first_name, last_name, primaryTitle, secondaryTitle, updates.comment_logged, updates.comment_date]
         );
     
-        // Insert into historical_bonuses
+        // Insert into historical_bonuses (including m_first before first_name)
         await client.query(
-          'INSERT INTO historical_bonuses (first_name, last_name, primaryTitle, secondaryTitle, bonus, bonus_year) VALUES ($1, $2, $3, $4, $5, $6)',
-          [first_name, last_name, primaryTitle, secondaryTitle, updates.bonus, updates.bonus_year]
+          'INSERT INTO historical_bonuses (m_first, first_name, last_name, primaryTitle, secondaryTitle, bonus, bonus_year) VALUES ($1, $2, $3, $4, $5, $6, $7)',
+          [m_first, first_name, last_name, primaryTitle, secondaryTitle, updates.bonus, updates.bonus_year]
         );
     
         // Trigger pushInc to update latest_employee_data
@@ -115,10 +115,10 @@ const startServer = async () => {
     
     // Add a new employee
     app.post('/add-employee', async (req, res) => {
-      const { add_first_name, add_last_name } = req.body;
+      const { add_m_first, add_first_name, add_last_name } = req.body;
 
-      if (!add_first_name || !add_last_name) {
-        return res.status(400).json({ success: false, message: 'First and Last Name are required.' });
+      if (!add_m_first || !add_first_name || !add_last_name) {
+        return res.status(400).json({ success: false, message: 'Manager First Name, First Name, and Last Name are required.' });
       }
 
       try {
@@ -139,10 +139,10 @@ const startServer = async () => {
 
     // Delete an employee
     app.post('/delete-employee', async (req, res) => {
-      const { delete_first_name, delete_last_name } = req.body;
+      const { delete_m_first, delete_first_name, delete_last_name } = req.body;
 
-      if (!delete_first_name || !delete_last_name) {
-        return res.status(400).json({ success: false, message: 'First and Last Name are required.' });
+      if (!delete_m_first || !delete_first_name || !delete_last_name) {
+        return res.status(400).json({ success: false, message: 'Manager First Name, First Name, and Last Name are required.' });
       }
 
       try {
