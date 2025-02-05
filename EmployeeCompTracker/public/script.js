@@ -74,6 +74,26 @@ async function populateDeleteEmployeeDropdowns() {
     console.error('Error populating delete employee dropdowns:', error);
   }
 }
+async function populateDeleteFirstNames(lastName) {
+  const firstNameSelect = document.getElementById('deleteFirstName');
+  firstNameSelect.innerHTML = '<option value="">Select First Name</option>';
+  firstNameSelect.disabled = true;
+
+  if (lastName) {
+    try {
+      const employees = await fetchData(`${API_BASE_URL}/api/first-names/${lastName}`);
+      employees.forEach(emp => {
+        const option = document.createElement('option');
+        option.value = emp.first_name;
+        option.textContent = emp.first_name;
+        firstNameSelect.appendChild(option);
+      });
+      firstNameSelect.disabled = false;
+    } catch (error) {
+      console.error('Error populating first names:', error);
+    }
+  }
+}
 //Handle primaryTitle dropdown
 document.getElementById('updateForm').addEventListener('submit', async (e) => {
   e.preventDefault();
