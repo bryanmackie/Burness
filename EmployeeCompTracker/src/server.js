@@ -61,7 +61,7 @@ const startServer = async () => {
     app.post('/update', async (req, res) => {
       const {
         m_first, first_name, last_name, primaryTitle, secondaryTitle, salary,
-        date_salary_set, comment_logged, comment_date, bonus, bonus_year,
+        date_salary_set, comment_logged, comment_date, bonus, bonus_year
       } = req.body;
 
       // Validate required fields
