@@ -74,14 +74,14 @@ async function populateDeleteEmployeeDropdowns() {
     console.error('Error populating delete employee dropdowns:', error);
   }
 }
-async function populateDeleteFirstNames(lastName) {
+async function populateDeleteFirstNames(deleteLastName) {
   const firstNameSelect = document.getElementById('deleteFirstName');
   firstNameSelect.innerHTML = '<option value="">Select First Name</option>';
   firstNameSelect.disabled = true;
 
-  if (lastName) {
+  if (deleteLastName) {
     try {
-      const employees = await fetchData(`${API_BASE_URL}/api/first-names/${lastName}`);
+      const employees = await fetchData(`${API_BASE_URL}/api/first-names/${deleteLastName}`);
       employees.forEach(emp => {
         const option = document.createElement('option');
         option.value = emp.first_name;
