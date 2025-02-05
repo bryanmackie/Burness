@@ -60,35 +60,35 @@ async function populateFirstNames(lastName) {
 // Populate the Delete Employee dropdowns
 async function populateDeleteEmployeeDropdowns() {
   try {
-    const employees = await fetchData(`${API_BASE_URL}/api/employees`);
-    const lastNameSelect = document.getElementById('deleteLastName');
-    const lastNames = [...new Set(employees.map(emp => emp.last_name))];
+    const employee = await fetchData(`${API_BASE_URL}/api/employees`);
+    const deleteLastNameSelect = document.getElementById('deleteLastName');
+    const deleteLastNames = [...new Set(employee.map(emp => emp.last_name))];
 
-    lastNames.forEach(deleteLastName => {
+    deleteLastNames.forEach(deleteLastName => {
       const option = document.createElement('option');
       option.value = deleteLastName;
       option.textContent = deleteLastName;
-      lastNameSelect.appendChild(option);
+      deleteLastNameSelect.appendChild(option);
     });
   } catch (error) {
     console.error('Error populating delete employee dropdowns:', error);
   }
 }
 async function populateDeleteFirstNames(deleteLastName) {
-  const firstNameSelect = document.getElementById('deleteFirstName');
-  firstNameSelect.innerHTML = '<option value="">Select First Name</option>';
-  firstNameSelect.disabled = true;
+  const deleteFirstNameSelect = document.getElementById('deleteFirstName');
+  deleteFirstNameSelect.innerHTML = '<option value="">Select First Name</option>';
+  deleteFirstNameSelect.disabled = true;
 
   if (deleteLastName) {
     try {
-      const employees = await fetchData(`${API_BASE_URL}/api/first-names/${deleteLastName}`);
-      employees.forEach(emp => {
+      const employee = await fetchData(`${API_BASE_URL}/api/first-names/${deleteLastName}`);
+      employee.forEach(emp => {
         const option = document.createElement('option');
         option.value = emp.first_name;
         option.textContent = emp.first_name;
-        firstNameSelect.appendChild(option);
+        deleteFirstNameSelect.appendChild(option);
       });
-      firstNameSelect.disabled = false;
+      deleteFirstNameSelect.disabled = false;
     } catch (error) {
       console.error('Error populating first names:', error);
     }
