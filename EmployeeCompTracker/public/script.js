@@ -131,7 +131,7 @@ document.addEventListener('DOMContentLoaded', () => {
 document.getElementById('deleteLastName').addEventListener('change', (e) => {
     populateDeleteFirstNames(e.target.value);
   });
-  /*
+  
   document.getElementById('deleteLastName').addEventListener('change', async (e) => {
     const lastName = e.target.value;
     const firstNameSelect = document.getElementById('deleteFirstName');
@@ -142,7 +142,7 @@ document.getElementById('deleteLastName').addEventListener('change', (e) => {
     if (lastName) {
       await populateFirstNames(lastName);
     }
-  });*/
+  });
 
   // Handle Update Compensation form submission
   document.getElementById('updateForm').addEventListener('submit', async (e) => {
