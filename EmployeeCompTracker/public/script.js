@@ -36,7 +36,7 @@ async function populateLastNames() {
 }
 
 // Fetch and populate First Name dropdown (for Update Compensation form)
-/*async function populateFirstNames(lastName) {
+async function populateFirstNames(lastName) {
   const firstNameSelect = document.getElementById('firstName');
   firstNameSelect.innerHTML = '<option value="">Select First Name</option>';
   firstNameSelect.disabled = true;
@@ -55,7 +55,7 @@ async function populateLastNames() {
       console.error('Error populating first names:', error);
     }
   }
-}*/
+}
 
 // Populate the Delete Employee dropdowns
 async function populateDeleteEmployeeDropdowns() {
@@ -74,75 +74,6 @@ async function populateDeleteEmployeeDropdowns() {
     console.error('Error populating delete employee dropdowns:', error);
   }
 }
-/*async function populateDeleteFirstNames(deleteLastName) {
-  const deleteFirstNameSelect = document.getElementById('deleteFirstName');
-  deleteFirstNameSelect.innerHTML = '<option value="">Select First Name</option>';
-  deleteFirstNameSelect.disabled = true;
-
-  if (deleteLastName) {
-    try {
-      const employee = await fetchData(`${API_BASE_URL}/api/first-names/${deleteLastName}`);
-      employee.forEach(emp => {
-        const option = document.createElement('option');
-        option.value = emp.first_name;
-        option.textContent = emp.first_name;
-        deleteFirstNameSelect.appendChild(option);
-      });
-      deleteFirstNameSelect.disabled = false;
-    } catch (error) {
-      console.error('Error populating first names:', error);
-    }
-  }
-}*/
-document.addEventListener('DOMContentLoaded', () => {
-  // Populate Last Names for both forms
-  populateLastNames(); // For the Update Compensation form
-  populateDeleteEmployeeDropdowns(); // For the Delete Employee form
-
-  // Update the first name in the Update Employee form
-  document.getElementById('lastName').addEventListener('change', (e) => {
-    populateFirstNames(e.target.value); // Update first name in the Update form
-  });
-
-  // Update the first name in the Delete Employee form
-  document.getElementById('deleteLastName').addEventListener('change', async (e) => {
-    const lastName = e.target.value;
-    const firstNameSelect = document.getElementById('deleteFirstName');
-
-    // Clear existing options and disable the first name dropdown initially
-    firstNameSelect.innerHTML = '<option value="">Select First Name</option>';
-    firstNameSelect.disabled = true;
-
-    if (lastName) {
-      // Populate first name dropdown for Delete form
-      await populateDeleteFirstNames(lastName);
-    }
-  });
-});
-
-// Function to populate first names in the Update Employee form
-async function populateFirstNames(lastName) {
-  const firstNameSelect = document.getElementById('firstName');
-  firstNameSelect.innerHTML = '<option value="">Select First Name</option>';
-  firstNameSelect.disabled = true;
-
-  if (lastName) {
-    try {
-      const employees = await fetchData(`${API_BASE_URL}/api/first-names/${lastName}`);
-      employees.forEach(emp => {
-        const option = document.createElement('option');
-        option.value = emp.first_name;
-        option.textContent = emp.first_name;
-        firstNameSelect.appendChild(option);
-      });
-      firstNameSelect.disabled = false;
-    } catch (error) {
-      console.error('Error populating first names for Update form:', error);
-    }
-  }
-}
-
-// Function to populate first names in the Delete Employee form
 async function populateDeleteFirstNames(deleteLastName) {
   const deleteFirstNameSelect = document.getElementById('deleteFirstName');
   deleteFirstNameSelect.innerHTML = '<option value="">Select First Name</option>';
@@ -159,7 +90,7 @@ async function populateDeleteFirstNames(deleteLastName) {
       });
       deleteFirstNameSelect.disabled = false;
     } catch (error) {
-      console.error('Error populating first names for Delete form:', error);
+      console.error('Error populating first names:', error);
     }
   }
 }
@@ -190,14 +121,17 @@ document.getElementById('updateForm').addEventListener('submit', async (e) => {
 });
 
 // Handle form submissions
-/*document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', () => {
   populateLastNames(); // For the Update Compensation form
   populateDeleteEmployeeDropdowns(); // For the Delete Employee form
 
   document.getElementById('lastName').addEventListener('change', (e) => {
     populateFirstNames(e.target.value);
   });
-
+document.getElementById('deleteLastName').addEventListener('change', (e) => {
+    populateDeleteFirstNames(e.target.value);
+  });
+  /*
   document.getElementById('deleteLastName').addEventListener('change', async (e) => {
     const lastName = e.target.value;
     const firstNameSelect = document.getElementById('deleteFirstName');
