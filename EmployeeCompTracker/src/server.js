@@ -124,19 +124,19 @@ const startServer = async () => {
         // Insert into historical_salary_changes (including m_first before first_name)
         await client.query(
           'INSERT INTO historical_salary_changes (m_first, first_name, last_name, primaryTitle, secondaryTitle, salary, date_salary_set) VALUES ($1, $2, $3, $4, $5, $6, $7)',
-          [m_first, first_name, last_name, primaryTitle, secondaryTitle, updates.salary, updates.date_salary_set]
+          [m_first, first_name, last_name, primaryTitle, secondaryTitle, salary, date_salary_set]
         );
 
         // Insert into historical_salary_comments (including m_first before first_name)
         await client.query(
           'INSERT INTO historical_salary_comments (m_first, first_name, last_name, primaryTitle, secondaryTitle, comment_logged, comment_date) VALUES ($1, $2, $3, $4, $5, $6, $7)',
-          [m_first, first_name, last_name, primaryTitle, secondaryTitle, updates.comment_logged, updates.comment_date]
+          [m_first, first_name, last_name, primaryTitle, secondaryTitle, comment_logged, comment_date]
         );
 
         // Insert into historical_bonuses (including m_first before first_name)
         await client.query(
           'INSERT INTO historical_bonuses (m_first, first_name, last_name, primaryTitle, secondaryTitle, bonus, bonus_year) VALUES ($1, $2, $3, $4, $5, $6, $7)',
-          [m_first, first_name, last_name, primaryTitle, secondaryTitle, updates.bonus, updates.bonus_year]
+          [m_first, first_name, last_name, primaryTitle, secondaryTitle, bonus, bonus_year]
         );
 
         // Trigger pushInc to update latest_employee_data
