@@ -95,6 +95,32 @@ async function populateDeleteFirstNames(deleteLastName) {
   }
 }
 
+// Handle form submissions
+document.addEventListener('DOMContentLoaded', () => {
+  populateLastNames(); // For the Update Compensation form
+  populateDeleteEmployeeDropdowns(); // For the Delete Employee form
+
+  document.getElementById('lastName').addEventListener('change', (e) => {
+    populateFirstNames(e.target.value);
+  });
+document.getElementById('deleteLastName').addEventListener('change', (e) => {
+    populateDeleteFirstNames(e.target.value);
+  });
+  
+  document.getElementById('deleteLastName').addEventListener('change', async (e) => {
+    const deleteLastName = e.target.value;
+    const deleteFirstNameSelect = document.getElementById('deleteFirstName');
+
+    deleteFirstNameSelect.innerHTML = '<option value="">Select First Name</option>';
+    deleteFirstNameSelect.disabled = true;
+
+    if (deleteLastName) {
+      await populateDeleteFirstNames(deleteLastName);
+    }
+  });
+
+
+
 //Handle primaryTitle dropdown
 document.getElementById('updateForm').addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -120,29 +146,6 @@ document.getElementById('updateForm').addEventListener('submit', async (e) => {
   }
 });
 
-// Handle form submissions
-document.addEventListener('DOMContentLoaded', () => {
-  populateLastNames(); // For the Update Compensation form
-  populateDeleteEmployeeDropdowns(); // For the Delete Employee form
-
-  document.getElementById('lastName').addEventListener('change', (e) => {
-    populateFirstNames(e.target.value);
-  });
-document.getElementById('deleteLastName').addEventListener('change', (e) => {
-    populateDeleteFirstNames(e.target.value);
-  });
-  
-  document.getElementById('deleteLastName').addEventListener('change', async (e) => {
-    const lastName = e.target.value;
-    const firstNameSelect = document.getElementById('deleteFirstName');
-
-    firstNameSelect.innerHTML = '<option value="">Select First Name</option>';
-    firstNameSelect.disabled = true;
-
-    if (lastName) {
-      await populateFirstNames(lastName);
-    }
-  });
 
   // Handle Update Compensation form submission
   document.getElementById('updateForm').addEventListener('submit', async (e) => {
