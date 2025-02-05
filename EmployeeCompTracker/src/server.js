@@ -150,10 +150,10 @@ const startServer = async () => {
 
     // Add a new employee
     app.post('/add-employee', async (req, res) => {
-      const { add_m_first, add_first_name, add_last_name } = req.body;
+      const {add_first_name, add_last_name } = req.body;
 
       // Validate required fields
-      if (!add_m_first || !add_first_name || !add_last_name) {
+      if (!add_first_name || !add_last_name) {
         return res.status(400).json({ success: false, message: 'Manager First Name, First Name, and Last Name are required.' });
       }
 
@@ -175,10 +175,10 @@ const startServer = async () => {
 
     // Delete an employee
     app.post('/delete-employee', async (req, res) => {
-      const { delete_m_first, delete_first_name, delete_last_name } = req.body;
+      const {delete_first_name, delete_last_name } = req.body;
 
       // Validate required fields
-      if (!delete_m_first || !delete_first_name || !delete_last_name) {
+      if (!delete_first_name || !delete_last_name) {
         return res.status(400).json({ success: false, message: 'Manager First Name, First Name, and Last Name are required.' });
       }
 
