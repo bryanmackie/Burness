@@ -64,10 +64,10 @@ async function populateDeleteEmployeeDropdowns() {
     const lastNameSelect = document.getElementById('deleteLastName');
     const lastNames = [...new Set(employees.map(emp => emp.last_name))];
 
-    lastNames.forEach(lastName => {
+    lastNames.forEach(deleteLastName => {
       const option = document.createElement('option');
-      option.value = lastName;
-      option.textContent = lastName;
+      option.value = deleteLastName;
+      option.textContent = deleteLastName;
       lastNameSelect.appendChild(option);
     });
   } catch (error) {
