@@ -16,8 +16,83 @@ async function fetchData(url) {
     throw error;
   }
 }
+// Helper function to fetch employee data
+async function fetchEmployees() {
+  try {
+    return await fetchData(`${API_BASE_URL}/api/employees`);
+  } catch (error) {
+    console.error('Error fetching employees:', error);
+    return [];
+  }
+}
+
+// Helper function to populate a dropdown with unique values
+function populateDropdown(selectElement, values) {
+  selectElement.innerHTML = '<option value="">Select</option>'; // Clear current options
+  const fragment = document.createDocumentFragment();
+
+  values.forEach(value => {
+    const option = document.createElement('option');
+    option.value = value;
+    option.textContent = value;
+    fragment.appendChild(option);
+  });
+
+  selectElement.appendChild(fragment);
+}
 
 // Fetch and populate Last Name dropdown (for Update Compensation form)
+async function populateLastNames() {
+  const employees = await fetchEmployees();
+  const lastNames = [...new Set(employees.map(emp => emp.last_name))];
+  const lastNameSelect = document.getElementById('lastName');
+  populateDropdown(lastNameSelect, lastNames);
+}
+
+// Fetch and populate First Name dropdown (for either form)
+async function populateFirstNames(lastName, selectId) {
+  const firstNameSelect = document.getElementById(selectId);
+  firstNameSelect.innerHTML = '<option value="">Select First Name</option>';
+  firstNameSelect.disabled = true;
+
+  if (lastName) {
+    try {
+      const employees = await fetchData(`${API_BASE_URL}/api/first-names/${lastName}`);
+      const firstNames = employees.map(emp => emp.first_name);
+      populateDropdown(firstNameSelect, firstNames);
+      firstNameSelect.disabled = false;
+    } catch (error) {
+      console.error('Error populating first names:', error);
+    }
+  }
+}
+
+// Handle form submissions
+document.addEventListener('DOMContentLoaded', () => {
+  // Populate dropdowns when the page loads
+  populateLastNames(); // For the Update Compensation form
+  populateDeleteEmployeeDropdowns(); // For the Delete Employee form
+
+  // Event listeners for handling changes
+  document.getElementById('lastName').addEventListener('change', (e) => {
+    populateFirstNames(e.target.value, 'firstName'); // Populate first name for Update form
+  });
+
+  document.getElementById('deleteLastName').addEventListener('change', (e) => {
+    const deleteLastName = e.target.value;
+    populateFirstNames(deleteLastName, 'deleteFirstName'); // Populate first name for Delete form
+  });
+});
+
+// Populate the Delete Employee dropdowns
+async function populateDeleteEmployeeDropdowns() {
+  const employees = await fetchEmployees();
+  const deleteLastNames = [...new Set(employees.map(emp => emp.last_name))];
+  const deleteLastNameSelect = document.getElementById('deleteLastName');
+  populateDropdown(deleteLastNameSelect, deleteLastNames);
+}
+
+/*// Fetch and populate Last Name dropdown (for Update Compensation form)
 async function populateLastNames() {
   try {
     const employees = await fetchData(`${API_BASE_URL}/api/employees`);
@@ -117,7 +192,7 @@ document.getElementById('deleteLastName').addEventListener('change', (e) => {
     if (deleteLastName) {
       await populateDeleteFirstNames(deleteLastName);
     }
-  });
+  });*/
 
 
 
@@ -239,7 +314,7 @@ document.getElementById('updateForm').addEventListener('submit', async (e) => {
       alert('Failed to delete employee. Please try again.');
     }
   });
-});
+
 
 
 // JavaScript to toggle the dropdown visibility on button click
