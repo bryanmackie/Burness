@@ -25,7 +25,11 @@ const handleDatabaseError = (res, error) => {
 };
 
 const sanitizeNumber = (value) => {
-  return !Number.isNaN(value) && value !== null && value !== undefined ? value : null;
+  if (value === "" || value === null || value === undefined) {
+    return null;  // Replace empty string or null/undefined with NULL
+  }
+  const parsedValue = parseFloat(value);
+  return !Number.isNaN(parsedValue) ? parsedValue : null;  // If it's a valid number, return it, else NULL
 };
 
 // Initialize the database connection and start the server
