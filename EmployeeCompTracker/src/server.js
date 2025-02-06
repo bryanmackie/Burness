@@ -85,14 +85,7 @@ const startServer = async () => {
         const setClause = [];
         const setValues = [];
 
-        if (primaryTitle !== null) {
-          setClause.push(`primaryTitle = $${setValues.length + 1}`);
-          setValues.push(primaryTitle);
-        }
-        if (secondaryTitle !== null) {
-          setClause.push(`secondaryTitle = $${setValues.length + 1}`);
-          setValues.push(secondaryTitle);
-        }
+       
         if (sanitizedSalary !== null) {
           setClause.push(`salary = $${setValues.length + 1}`);
           setValues.push(sanitizedSalary);
@@ -117,7 +110,14 @@ const startServer = async () => {
           setClause.push(`bonus_year = $${setValues.length + 1}`);
           setValues.push(sanitizedBonusYear);
         }
-
+        if (primaryTitle !== null) {
+          setClause.push(`primaryTitle = $${setValues.length + 1}`);
+          setValues.push(primaryTitle);
+        }
+        if (secondaryTitle !== null) {
+          setClause.push(`secondaryTitle = $${setValues.length + 1}`);
+          setValues.push(secondaryTitle);
+        }
         if (setClause.length === 0) {
           return res.status(400).json({ success: false, message: 'No fields to update.' });
         }
@@ -135,7 +135,7 @@ const startServer = async () => {
         // Insert into historical_salary_changes (including m_first before first_name)
         await client.query(
           'INSERT INTO historical_salary_changes (m_first, first_name, last_name, primaryTitle, secondaryTitle, salary, date_salary_set) VALUES ($1, $2, $3, $4, $5, $6, $7)',
-          [m_first, first_name, last_name, primaryTitle, secondaryTitle, salary, date_salary_set]
+          [m_first, first_name, last_name, primaryTitle, secondaryTitle, sanitizedSalary, date_salary_set]
         );
 
         // Insert into historical_salary_comments (including m_first before first_name)
@@ -147,7 +147,7 @@ const startServer = async () => {
         // Insert into historical_bonuses (including m_first before first_name)
         await client.query(
           'INSERT INTO historical_bonuses (m_first, first_name, last_name, primaryTitle, secondaryTitle, bonus, bonus_year) VALUES ($1, $2, $3, $4, $5, $6, $7)',
-          [m_first, first_name, last_name, primaryTitle, secondaryTitle, bonus, bonus_year]
+          [m_first, first_name, last_name, primaryTitle, secondaryTitle, sanitizedBonus, sanitizedBonusYear]
         );
 
         // Trigger pushInc to update latest_employee_data
