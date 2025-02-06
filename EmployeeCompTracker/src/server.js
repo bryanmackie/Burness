@@ -24,6 +24,10 @@ const handleDatabaseError = (res, error) => {
   res.status(500).json({ success: false, message: 'Internal server error.' });
 };
 
+const sanitizeNumber = (value) => {
+  return !Number.isNaN(value) && value !== null && value !== undefined ? value : null;
+};
+
 // Initialize the database connection and start the server
 const startServer = async () => {
   try {
@@ -68,6 +72,9 @@ const startServer = async () => {
       if (!m_first || !first_name || !last_name) {
         return res.status(400).json({ success: false, message: 'Manager first name, First name, and Last name are required.' });
       }
+      const sanitizedSalary = sanitizeNumber(salary);
+      const sanitizedBonus = sanitizeNumber(bonus);
+      const sanitizedBonusYear = sanitizeNumber(bonus_year);
 
       try {
         // Construct the SET clause dynamically, only including non-null fields
@@ -84,7 +91,7 @@ const startServer = async () => {
         }
         if (salary !== null) {
           setClause.push(`salary = $${setValues.length + 1}`);
-          setValues.push(salary);
+          setValues.push(sanitizedSalary);
         }
         if (date_salary_set !== null) {
           setClause.push(`date_salary_set = $${setValues.length + 1}`);
@@ -100,11 +107,11 @@ const startServer = async () => {
         }
         if (bonus !== null) {
           setClause.push(`bonus = $${setValues.length + 1}`);
-          setValues.push(bonus);
+          setValues.push(sanitizedBonus);
         }
         if (bonus_year !== null) {
           setClause.push(`bonus_year = $${setValues.length + 1}`);
-          setValues.push(bonus_year);
+          setValues.push(sanitizedBonusYear);
         }
 
         if (setClause.length === 0) {
