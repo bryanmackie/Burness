@@ -89,7 +89,7 @@ const startServer = async () => {
           setClause.push(`secondaryTitle = $${setValues.length + 1}`);
           setValues.push(secondaryTitle);
         }
-        if (salary !== null) {
+        if (sanitizedSalary !== null) {
           setClause.push(`salary = $${setValues.length + 1}`);
           setValues.push(sanitizedSalary);
         }
@@ -105,11 +105,11 @@ const startServer = async () => {
           setClause.push(`comment_date = $${setValues.length + 1}`);
           setValues.push(comment_date);
         }
-        if (bonus !== null) {
+        if (sanitizedBonus !== null) {
           setClause.push(`bonus = $${setValues.length + 1}`);
           setValues.push(sanitizedBonus);
         }
-        if (bonus_year !== null) {
+        if (sanitizedBonusYear !== null) {
           setClause.push(`bonus_year = $${setValues.length + 1}`);
           setValues.push(sanitizedBonusYear);
         }
