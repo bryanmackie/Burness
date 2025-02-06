@@ -79,7 +79,8 @@ const startServer = async () => {
       const sanitizedSalary = sanitizeNumber(salary);
       const sanitizedBonus = sanitizeNumber(bonus);
       const sanitizedBonusYear = sanitizeNumber(bonus_year);
-
+      const sanitizedDateSalarySet = date_salary_set === "" ? null : date_salary_set;
+      const sanitizedCommentDate = comment_date === "" ? null : comment_date;
       try {
         // Construct the SET clause dynamically, only including non-null fields
         const setClause = [];
@@ -90,17 +91,17 @@ const startServer = async () => {
           setClause.push(`salary = $${setValues.length + 1}`);
           setValues.push(sanitizedSalary);
         }
-        if (date_salary_set !== null) {
+        if (sanitizedDateSalarySet !== null) {
           setClause.push(`date_salary_set = $${setValues.length + 1}`);
-          setValues.push(date_salary_set);
+          setValues.push(sanitizedDateSalarySet);
         }
         if (comment_logged !== null) {
           setClause.push(`comment_logged = $${setValues.length + 1}`);
           setValues.push(comment_logged);
         }
-        if (comment_date !== null) {
+        if (sanitizedCommentDate !== null) {
           setClause.push(`comment_date = $${setValues.length + 1}`);
-          setValues.push(comment_date);
+          setValues.push(sanitizedCommentDate);
         }
         if (sanitizedBonus !== null) {
           setClause.push(`bonus = $${setValues.length + 1}`);
@@ -135,13 +136,13 @@ const startServer = async () => {
         // Insert into historical_salary_changes (including m_first before first_name)
         await client.query(
           'INSERT INTO historical_salary_changes (m_first, first_name, last_name, primaryTitle, secondaryTitle, salary, date_salary_set) VALUES ($1, $2, $3, $4, $5, $6, $7)',
-          [m_first, first_name, last_name, primaryTitle, secondaryTitle, sanitizedSalary, date_salary_set]
+          [m_first, first_name, last_name, primaryTitle, secondaryTitle, sanitizedSalary, sanitizedDateSalarySet]
         );
 
         // Insert into historical_salary_comments (including m_first before first_name)
         await client.query(
           'INSERT INTO historical_salary_comments (m_first, first_name, last_name, primaryTitle, secondaryTitle, comment_logged, comment_date) VALUES ($1, $2, $3, $4, $5, $6, $7)',
-          [m_first, first_name, last_name, primaryTitle, secondaryTitle, comment_logged, comment_date]
+          [m_first, first_name, last_name, primaryTitle, secondaryTitle, comment_logged, sanitizedCommentDate]
         );
 
         // Insert into historical_bonuses (including m_first before first_name)
