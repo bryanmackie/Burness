@@ -142,6 +142,7 @@ document.getElementById('updateForm').addEventListener('submit', async (e) => {
     
       if (result.success) {
         alert(result.message || 'Compensation updated successfully!');
+        document.getElementById('updateForm').reset();
       } else {
         alert(result.message || 'Error updating compensation.');
       }
@@ -159,6 +160,11 @@ document.getElementById('updateForm').addEventListener('submit', async (e) => {
     const formData = new FormData(e.target);
     const data = Object.fromEntries(formData.entries());
 
+    if (!add_first_name || !add_last_name) {
+      alert('Please select an employee to delete.');
+      return;
+    }
+
     try {
       const response = await fetch(`${API_BASE_URL}/add-employee`, {
         method: 'POST',
@@ -169,6 +175,7 @@ document.getElementById('updateForm').addEventListener('submit', async (e) => {
       const result = await response.json();
       if (response.ok) {
         alert(result.message || 'Employee added successfully!');
+        document.getElementById('addEmployeeForm').reset();
         await populateLastNames(); // Refresh the dropdowns
       } else {
         alert(result.message || 'Error adding employee.');
@@ -201,6 +208,7 @@ document.getElementById('updateForm').addEventListener('submit', async (e) => {
       const result = await response.json();
       if (response.ok) {
         alert(result.message || 'Employee deleted successfully!');
+        document.getElementById('deleteEmployeeForm').reset();
         await populateDeleteEmployeeDropdowns(); // Refresh the dropdowns
       } else {
         alert(result.message || 'Error deleting employee.');
