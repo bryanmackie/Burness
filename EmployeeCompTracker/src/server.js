@@ -43,7 +43,7 @@ const startServer = async () => {
     // Get all employees
     app.get('/api/employees', async (req, res) => {
       try {
-        const result = await client.query('SELECT first_name, last_name FROM latest_employee_data');
+        const result = await client.query('SELECT first_name, last_name FROM latest_employee_data ORDER BY last_name ASC');
         res.status(200).json({ success: true, data: result.rows });
       } catch (error) {
         handleDatabaseError(res, error);
