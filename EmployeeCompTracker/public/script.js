@@ -93,7 +93,7 @@ async function populateDeleteEmployeeDropdowns() {
 }
 
 //Handle primaryTitle dropdown
-document.getElementById('updateForm').addEventListener('submit', async (e) => {
+/*document.getElementById('updateForm').addEventListener('submit', async (e) => {
   e.preventDefault();
 
   const formData = new FormData(e.target);
@@ -115,7 +115,7 @@ document.getElementById('updateForm').addEventListener('submit', async (e) => {
   } catch (error) {
     console.error('Request failed:', error);
   }
-});
+});*/
 
 
   // Handle Update Compensation form submission
