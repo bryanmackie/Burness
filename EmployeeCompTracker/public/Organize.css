@@ -171,3 +171,17 @@ section {
   }
 }
 
+.m_first::after {
+  content: "*";
+  color: red;
+}
+
+.firstName::after {
+  content: "*";
+  color: red;
+}
+
+.lastName::after {
+  content: "*";
+  color: red;
+}
