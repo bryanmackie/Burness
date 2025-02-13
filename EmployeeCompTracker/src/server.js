@@ -91,7 +91,7 @@ const startServer = async () => {
           setClause.push(`salary = $${setValues.length + 1}`);
           setValues.push(sanitizedSalary);
         }
-        if (sanitizedDateSalarySet !== null) {
+        if (sanitizedSalaryEffectiveDate !== null) {
           setClause.push(`salary_effective_date = $${setValues.length + 1}`);
           setValues.push(sanitizedSalaryEffectiveDate);
         }
