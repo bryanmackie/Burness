@@ -69,7 +69,7 @@ const startServer = async () => {
     app.post('/update', async (req, res) => {
       const {
         m_first, first_name, last_name, primaryTitle, secondaryTitle, salary,
-        date_salary_set, comment_logged, comment_date, bonus, bonus_year
+        salary_effective_date, comment_logged, comment_date, bonus, bonus_year
       } = req.body;
 
       // Validate required fields
@@ -79,7 +79,7 @@ const startServer = async () => {
       const sanitizedSalary = sanitizeNumber(salary);
       const sanitizedBonus = sanitizeNumber(bonus);
       const sanitizedBonusYear = sanitizeNumber(bonus_year);
-      const sanitizedDateSalarySet = date_salary_set === "" ? null : date_salary_set;
+      const sanitizedSalaryEffectiveDate = salary_effective_date === "" ? null : salary_effective_date;
       const sanitizedCommentDate = comment_date === "" ? null : comment_date;
       try {
         // Construct the SET clause dynamically, only including non-null fields
@@ -92,8 +92,8 @@ const startServer = async () => {
           setValues.push(sanitizedSalary);
         }
         if (sanitizedDateSalarySet !== null) {
-          setClause.push(`date_salary_set = $${setValues.length + 1}`);
-          setValues.push(sanitizedDateSalarySet);
+          setClause.push(`salary_effective_date = $${setValues.length + 1}`);
+          setValues.push(sanitizedSalaryEffectiveDate);
         }
         if (comment_logged !== null) {
           setClause.push(`comment_logged = $${setValues.length + 1}`);
@@ -136,8 +136,8 @@ const startServer = async () => {
         // Insert into historical_salary_changes (including m_first before first_name)
         if (sanitizedSalary){
         await client.query(
-          'INSERT INTO historical_salary_changes (m_first, first_name, last_name, primaryTitle, secondaryTitle, salary, date_salary_set) VALUES ($1, $2, $3, $4, $5, $6, $7)',
-          [m_first, first_name, last_name, primaryTitle, secondaryTitle, sanitizedSalary, sanitizedDateSalarySet]
+          'INSERT INTO historical_salary_changes (m_first, first_name, last_name, primaryTitle, secondaryTitle, salary, salary_effective_date) VALUES ($1, $2, $3, $4, $5, $6, $7)',
+          [m_first, first_name, last_name, primaryTitle, secondaryTitle, sanitizedSalary, sanitizedSalaryEffectiveDate]
         );
       }
       if (comment_logged) {
