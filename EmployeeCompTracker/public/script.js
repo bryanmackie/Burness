@@ -103,15 +103,28 @@ document.addEventListener('DOMContentLoaded', () => {
   overlay.style.display = 'flex';
   content.classList.add('blur'); // Apply blur effect to the content
 
-  submitButton.addEventListener('click', function () {
+  submitButton.addEventListener('click', async function () {
     const enteredPassphrase = passphraseInput.value.trim();
 
-    if (enteredPassphrase === validPassphrase) {
-      alert('Passphrase correct. You have access.');
-      overlay.style.display = 'none'; // Hide the overlay
-      content.classList.remove('blur'); // Remove the blur effect
-    } else {
-      alert('Incorrect passphrase. Access denied.');
+    try {
+      const response = await fetch('/verify-passphrase', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ passphrase: enteredPassphrase }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        alert('Passphrase correct. You have access.');
+        overlay.style.display = 'none';  // Hide the overlay
+        content.classList.remove('blur');  // Remove the blur effect
+      } else {
+        alert('Incorrect passphrase. Access denied.');
+      }
+    } catch (error) {
+      console.error('Error verifying passphrase:', error);
+      alert('Failed to verify passphrase. Please try again.');
     }
   });
 // Event listeners for handling changes in the dropdowns

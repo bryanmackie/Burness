@@ -18,6 +18,8 @@ app.use(express.static(path.join(__dirname, '../public')));
 // Parse JSON request bodies
 app.use(bodyParser.json());
 
+const validPassphrase = process.env.validPassphrase;
+
 // Helper function to handle database errors
 const handleDatabaseError = (res, error) => {
   console.error('Database error:', error);
@@ -31,7 +33,17 @@ const sanitizeNumber = (value) => {
   const parsedValue = parseFloat(value);
   return !Number.isNaN(parsedValue) ? parsedValue : null;  // If it's a valid number, return it, else NULL
 };
+// Endpoint to verify the passphrase
+app.post('/verify-passphrase', (req, res) => {
+  const { passphrase } = req.body;
 
+  // Validate the passphrase
+  if (passphrase === validPassphrase) {
+    res.json({ success: true, message: 'Passphrase correct. You have access.' });
+  } else {
+    res.json({ success: false, message: 'Incorrect passphrase. Access denied.' });
+  }
+});
 // Initialize the database connection and start the server
 const startServer = async () => {
   try {
