@@ -204,7 +204,18 @@ const startServer = async () => {
           'DELETE FROM employee_salary WHERE first_name = $1 AND last_name = $2',
           [delete_first_name, delete_last_name]
         );
-
+        await client.query(
+          'DELETE FROM historical_salary_changes WHERE first_name = $1 AND last_name = $2',
+          [delete_first_name, delete_last_name]
+        );
+        await client.query(
+          'DELETE FROM historical_salary_comments WHERE first_name = $1 AND last_name = $2',
+          [delete_first_name, delete_last_name]
+        );
+        await client.query(
+          'DELETE FROM historical_bonuses WHERE first_name = $1 AND last_name = $2',
+          [delete_first_name, delete_last_name]
+        );
         // Trigger pushInc to update latest_employee_data
         await client.query('INSERT INTO pushInc (first_name, last_name) VALUES ($1, $2)', [delete_first_name, delete_last_name]);
 

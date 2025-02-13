@@ -162,22 +162,30 @@ async function populateDeleteEmployeeDropdowns() {
   });
 
   // Handle Delete Employee form submission
-  document.getElementById('deleteEmployeeForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
+  // Handle Delete Employee form submission
+document.getElementById('deleteEmployeeForm').addEventListener('submit', async (e) => {
+  e.preventDefault(); // Prevent form submission so we can handle it with confirmation
 
-    const deleteLastName = document.getElementById('deleteLastName').value;
-    const deleteFirstName = document.getElementById('deleteFirstName').value;
+  const deleteLastName = document.getElementById('deleteLastName').value;
+  const deleteFirstName = document.getElementById('deleteFirstName').value;
 
-    if (!deleteFirstName || !deleteLastName) {
-      alert('Please select an employee to delete.');
-      return;
-    }
+  if (!deleteFirstName || !deleteLastName) {
+    alert('Please select an employee to delete.');
+    return;
+  }
 
+  // Confirmation prompt before proceeding with deletion
+  const confirmation = window.confirm(`Are you sure you want to delete ${deleteFirstName} ${deleteLastName}? This action cannot be undone.`);
+  
+  if (confirmation) {
     try {
       const response = await fetch(`${API_BASE_URL}/delete-employee`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ delete_first_name: deleteFirstName, delete_last_name: deleteLastName }),
+        body: JSON.stringify({
+          delete_first_name: deleteFirstName,
+          delete_last_name: deleteLastName,
+        }),
       });
 
       const result = await response.json();
@@ -192,7 +200,11 @@ async function populateDeleteEmployeeDropdowns() {
       console.error('Request failed:', error);
       alert('Failed to delete employee. Please try again.');
     }
-  });
+  } else {
+    console.log("Employee deletion canceled.");
+  }
+});
+
 
 
 
