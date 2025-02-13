@@ -78,22 +78,6 @@ async function populateFirstNames(lastName, selectId) {
   }
 }
 
-// Handle form submissions
-document.addEventListener('DOMContentLoaded', () => {
-  // Populate dropdowns when the page loads
-  populateLastNames(); // For the Update Compensation form
-  populateDeleteEmployeeDropdowns(); // For the Delete Employee form
-
-  // Event listeners for handling changes
-  document.getElementById('lastName').addEventListener('change', (e) => {
-    populateFirstNames(e.target.value, 'firstName'); // Populate first name for Update form
-  });
-
-  document.getElementById('deleteLastName').addEventListener('change', (e) => {
-    const deleteLastName = e.target.value;
-    populateFirstNames(deleteLastName, 'deleteFirstName'); // Populate first name for Delete form
-  });
-});
 
 // Populate the Delete Employee dropdowns
 async function populateDeleteEmployeeDropdowns() {
@@ -102,6 +86,43 @@ async function populateDeleteEmployeeDropdowns() {
   const deleteLastNameSelect = document.getElementById('deleteLastName');
   populateDropdown(deleteLastNameSelect, deleteLastNames);
 }
+document.addEventListener('DOMContentLoaded', () => {
+  // Populate dropdowns when the page loads
+  populateLastNames(); // For the Update Compensation form
+  populateDeleteEmployeeDropdowns(); // For the Delete Employee form
+
+  // Pop-up passphrase logic
+  const validPassphrase = 'your_secret_passphrase'; // Replace with your passphrase or fetch it from a secure source
+
+  const overlay = document.getElementById('overlay');
+  const content = document.getElementById('content');
+  const passphraseInput = document.getElementById('passphrase');
+  const submitButton = document.getElementById('submitPassphrase');
+
+  // Show the passphrase overlay when the page loads
+  overlay.style.display = 'flex';
+  content.classList.add('blur'); // Apply blur effect to the content
+
+  submitButton.addEventListener('click', function () {
+    const enteredPassphrase = passphraseInput.value.trim();
+
+    if (enteredPassphrase === validPassphrase) {
+      alert('Passphrase correct. You have access.');
+      overlay.style.display = 'none'; // Hide the overlay
+      content.classList.remove('blur'); // Remove the blur effect
+    } else {
+      alert('Incorrect passphrase. Access denied.');
+    }
+  });
+// Event listeners for handling changes in the dropdowns
+document.getElementById('lastName').addEventListener('change', (e) => {
+  populateFirstNames(e.target.value, 'firstName'); // Populate first name for Update form
+});
+
+document.getElementById('deleteLastName').addEventListener('change', (e) => {
+  const deleteLastName = e.target.value;
+  populateFirstNames(deleteLastName, 'deleteFirstName'); // Populate first name for Delete form
+});
 
   // Handle Update Compensation form submission
   document.getElementById('updateForm').addEventListener('submit', async (e) => {
@@ -235,4 +256,5 @@ document.querySelectorAll('.dropbtn').forEach(function(button) {
       }
     });
   });
+ });
 });
