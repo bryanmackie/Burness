@@ -1,6 +1,17 @@
 const API_BASE_URL = "https://burness.onrender.com";
 // const API_BASE_URL = process.env.API_BASE_URL || "http://localhost:3000";
+const validPassphrase = proccess.env.validPassphrase;  // This should be stored securely, ideally hashed
 
+document.getElementById('submitPassphrase').addEventListener('click', function() {
+  const enteredPassphrase = document.getElementById('passphrase').value;
+
+  if (enteredPassphrase === validPassphrase) {
+    alert("Passphrase correct. You have access.");
+    // Grant access to the protected area or perform sensitive action
+  } else {
+    alert("Incorrect passphrase. Access denied.");
+  }
+});
 // Helper function to fetch data from the API
 async function fetchData(url) {
   try {
