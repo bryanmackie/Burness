@@ -1,3 +1,6 @@
+import flatpickr from "flatpickr";
+import "flatpickr/dist/flatpickr.css";
+
 const API_BASE_URL = "https://burness.onrender.com";
 // const API_BASE_URL = process.env.API_BASE_URL || "http://localhost:3000";
 
@@ -261,4 +264,12 @@ document.querySelectorAll('.dropbtn').forEach(function(button) {
     });
   });
  });
+});
+
+flatpickr("#salary_effective_date", {
+  // Options for flatpickr to restrict to the 1st and 16th of each month
+  dateFormat: "Y-m-d",
+  disable: [
+    (date) => date.getDate() !== 1 && date.getDate() !== 16
+  ]
 });
