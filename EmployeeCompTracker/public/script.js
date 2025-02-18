@@ -232,3 +232,20 @@ document.addEventListener('DOMContentLoaded', () => {
     ]
   });
 });
+
+if (managerRole !== 'admin') {
+  // Show only restricted titles for non-admin users
+  const restrictedTitles = ["Junior Graphic Designer", "Communications Assistant", "Associate"];
+  const titleSelect = document.getElementById('primaryTitle');
+  titleSelect.innerHTML = "<option value=''>Select Primary Title</option>";
+  restrictedTitles.forEach(title => {
+    const option = document.createElement("option");
+    option.value = title;
+    option.textContent = title;
+    titleSelect.appendChild(option);
+  });
+
+  // Hide the Add/Delete employee sections for non-admin users
+  document.getElementById('addEmployeeContainer').style.display = 'none';
+  document.getElementById('deleteEmployeeContainer').style.display = 'none';
+}

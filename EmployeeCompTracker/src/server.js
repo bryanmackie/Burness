@@ -19,6 +19,7 @@ app.use(express.static(path.join(__dirname, '../public')));
 app.use(bodyParser.json());
 
 const validPassphrase = process.env.validPassphrase;
+const validPassphraseAdmin = process.env.validPassphraseAdmin;
 
 // Helper function to handle database errors
 const handleDatabaseError = (res, error) => {
@@ -34,16 +35,37 @@ const sanitizeNumber = (value) => {
   return !Number.isNaN(parsedValue) ? parsedValue : null;  // If it's a valid number, return it, else NULL
 };
 // Endpoint to verify the passphrase
-app.post('/verify-passphrase', (req, res) => {
+app.post('/verify-passphrase', async (req, res) => {
   const { passphrase } = req.body;
 
-  // Validate the passphrase
+  let role = '';
+  let employeesQuery = '';
+
+  // Validate the passphrase and assign role
   if (passphrase === validPassphrase) {
-    res.json({ success: true, message: 'Passphrase correct. You have access.' });
+    role = 'manager';
+    employeesQuery = 'SELECT first_name, last_name, id FROM employee_salary WHERE access_group != $1';
+  } else if (passphrase === validPassphraseAdmin) {
+    role = 'admin';
+    employeesQuery = 'SELECT first_name, last_name, id FROM employee_salary';
   } else {
-    res.json({ success: false, message: 'Incorrect passphrase. Access denied.' });
+    return res.status(403).json({ success: false, message: 'Incorrect passphrase. Access denied.' });
+  }
+
+  // Once role is assigned, fetch employee data based on the passphrase (role)
+  try {
+    const client = await createConnection();  // Assuming you have a function for DB connection
+    const result = await client.query(employeesQuery, ['restricted']); // Query the appropriate employee data
+    res.status(200).json({
+      success: true,
+      role: role,
+      employees: result.rows
+    });
+  } catch (error) {
+    handleDatabaseError(res, error);
   }
 });
+
 // Initialize the database connection and start the server
 const startServer = async () => {
   try {
@@ -52,36 +74,13 @@ const startServer = async () => {
 
     // Routes
 
-    // Get all employees
-    app.get('/api/employees', async (req, res) => {
-      try {
-        const result = await client.query('SELECT first_name, last_name FROM latest_employee_data ORDER BY last_name ASC');
-        res.status(200).json({ success: true, data: result.rows });
-      } catch (error) {
-        handleDatabaseError(res, error);
-      }
-    });
 
-    // Get first names by last name
-    app.get('/api/first-names/:last_name', async (req, res) => {
-      const { last_name } = req.params;
-      try {
-        const result = await client.query(
-          'SELECT first_name FROM latest_employee_data WHERE last_name = $1',
-          [last_name]
-        );
-        res.status(200).json({ success: true, data: result.rows });
-      } catch (error) {
-        handleDatabaseError(res, error);
-      }
-    });
-    // Routes
 
     // Update employee compensation
     app.post('/update', async (req, res) => {
       const {
         m_first, first_name, last_name, primaryTitle, secondaryTitle, salary,
-        salary_effective_date, comment_logged, comment_date, bonus, bonus_year
+        salary_effective_date, salarychangereason, comment_logged, comment_date, bonus, bonus_year
       } = req.body;
 
       // Validate required fields
@@ -106,6 +105,10 @@ const startServer = async () => {
         if (sanitizedSalaryEffectiveDate !== null) {
           setClause.push(`salary_effective_date = $${setValues.length + 1}`);
           setValues.push(sanitizedSalaryEffectiveDate);
+        }
+        if (sanitizedSalaryEffectiveDate !== null) {
+          setClause.push(`salarychangereason = $${setValues.length + 1}`);
+          setValues.push(salarychangereason);
         }
         if (comment_logged !== null) {
           setClause.push(`comment_logged = $${setValues.length + 1}`);
@@ -148,8 +151,8 @@ const startServer = async () => {
         // Insert into historical_salary_changes (including m_first before first_name)
         if (sanitizedSalary){
         await client.query(
-          'INSERT INTO historical_salary_changes (m_first, first_name, last_name, primaryTitle, secondaryTitle, salary, salary_effective_date) VALUES ($1, $2, $3, $4, $5, $6, $7)',
-          [m_first, first_name, last_name, primaryTitle, secondaryTitle, sanitizedSalary, sanitizedSalaryEffectiveDate]
+          'INSERT INTO historical_salary_changes (m_first, first_name, last_name, primaryTitle, secondaryTitle, salary, salary_effective_date, salarychangereason) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)',
+          [m_first, first_name, last_name, primaryTitle, secondaryTitle, sanitizedSalary, sanitizedSalaryEffectiveDate, salarychangereason]
         );
       }
       if (comment_logged) {
@@ -178,18 +181,18 @@ const startServer = async () => {
 
     // Add a new employee
     app.post('/add-employee', async (req, res) => {
-      const {add_first_name, add_last_name } = req.body;
+      const {add_first_name, add_last_name, employeeStatus } = req.body;
 
       // Validate required fields
-      if (!add_first_name || !add_last_name) {
-        return res.status(400).json({ success: false, message: 'Manager First Name, First Name, and Last Name are required.' });
+      if (!add_first_name || !add_last_name || !employeeStatus) {
+        return res.status(400).json({ success: false, message: 'First Name, Last Name, and Status are required.' });
       }
 
       try {
         // Insert into employee_salary
         await client.query(
-          'INSERT INTO employee_salary (first_name, last_name) VALUES ($1, $2)',
-          [add_first_name, add_last_name]
+          'INSERT INTO employee_salary (first_name, last_name, access_status) VALUES ($1, $2, $3)',
+          [add_first_name, add_last_name, employeeStatus]
         );
 
         // Trigger pushInc to update latest_employee_data

@@ -46,9 +46,6 @@
       <label for="primaryTitle">Primary Title:</label>
   <select id="primaryTitle" name="primaryTitle">
     <option value="">Select Primary Title</option>
-    <option value="President">President</option>
-    <option value="Principal">Principal</option>
-    <option value="Managing Director">Managing Director</option>
     <option value="Senior Vice President">Senior Vice President</option>
     <option value="Vice President">Vice President</option>
     <option value="Design Director">Design Director</option>
@@ -80,6 +77,14 @@
       <label for="salary_effective_date">Salary Effective Date:</label>
       <input type="date" id="salary_effective_date" name="salary_effective_date"/>
 
+      <label for="salarychangereason">Salary Change Reason:</label>
+      <select id="salarychangereason" name="salarychangereason">
+        <option value="">Select Primary Title</option>
+        <option value="Promotion">Promotion</option>
+        <option value="Annual Raise">Annual Raise</option>
+        <option value="Off-Cycle Adjustment">Off-Cycle Adjustment</option>
+      </select>
+
       <label for="comment_logged">Comment:</label>
       <textarea type="text" id="comment_logged" name="comment_logged" rows="4"></textarea>
 
@@ -95,53 +100,59 @@
       <button type="submit">Submit</button>
     </form>
 
-   <!-- Container for Add and Delete Employee dropdowns -->
-   <div class="dropdown-container">
-    <!-- Dropdown for adding a new employee -->
-    <div class="dropdown">
-      <button class="dropbtn">Add Employee</button>
-      <div class="dropdown-content">
-        <form id="addEmployeeForm">
-          <h2>Add Employee</h2>
-          <label for="add_first_name">First Name:</label>
-          <input type="text" id="add_first_name" name="add_first_name" required />
-
-          <label for="add_last_name">Last Name:</label>
-          <input type="text" id="add_last_name" name="add_last_name" required />
-
-          <button type="submit">Add Employee</button>
-        </form>
+     <!-- Container for Add and Delete Employee dropdowns -->
+     <div class="dropdown-container">
+      <!-- Dropdown for adding a new employee -->
+      <div class="dropdown" id="addEmployeeContainer">
+        <button class="dropbtn">Add Employee</button>
+        <div class="dropdown-content">
+          <form id="addEmployeeForm">
+            <h2>Add Employee</h2>
+            <label for="add_first_name">First Name:</label>
+            <input type="text" id="add_first_name" name="add_first_name" required />
+  
+            <label for="add_last_name">Last Name:</label>
+            <input type="text" id="add_last_name" name="add_last_name" required />
+  
+            <!-- Restricted or Unrestricted Dropdown -->
+            <label for="employeeStatus">Employee Status:</label>
+            <select id="employeeStatus" name="employeeStatus" required>
+              <option value="restricted">Restricted</option>
+              <option value="unrestricted">Unrestricted</option>
+            </select>
+  
+            <button type="submit">Add Employee</button>
+          </form>
+        </div>
       </div>
-    </div>
-
-    <!-- Dropdown for deleting an employee -->
-    <div class="dropdown">
-      <button class="dropbtn">Delete Employee</button>
-      <div class="dropdown-content">
-        <form id="deleteEmployeeForm">
-          <h4>Delete Employee</h4>
-          <label for="deleteLastName">Last Name:</label>
-          <select id="deleteLastName" name="delete_last_name" required>
-            <option value="">Select Last Name</option>
-            <!-- Last Name options will be inserted here dynamically -->
-          </select>
-
-          <label for="deleteFirstName">First Name:</label>
-          <select id="deleteFirstName" name="delete_first_name" disabled required>
-            <option value="">Select First Name</option>
-            <!-- First Name options will be inserted here dynamically -->
-          </select>
-
-          <button type="submit">Delete Employee</button>
-        </form>
+  
+      <!-- Dropdown for deleting an employee -->
+      <div class="dropdown" id="deleteEmployeeContainer">
+        <button class="dropbtn">Delete Employee</button>
+        <div class="dropdown-content">
+          <form id="deleteEmployeeForm">
+            <h4>Delete Employee</h4>
+            <label for="deleteLastName">Last Name:</label>
+            <select id="deleteLastName" name="delete_last_name" required>
+              <option value="">Select Last Name</option>
+              <!-- Last Name options will be inserted here dynamically -->
+            </select>
+  
+            <label for="deleteFirstName">First Name:</label>
+            <select id="deleteFirstName" name="delete_first_name" disabled required>
+              <option value="">Select First Name</option>
+              <!-- First Name options will be inserted here dynamically -->
+            </select>
+  
+            <button type="submit">Delete Employee</button>
+          </form>
+        </div>
       </div>
     </div>
   </div>
-</div>
-</main>
-
-
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-  <script type="module" src="script.js"></script>
-</body>
-</html>
+  </main>
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script type="module" src="script.js"></script>
+  </body>
+  </html>
