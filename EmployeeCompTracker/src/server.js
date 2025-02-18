@@ -45,19 +45,22 @@ app.post('/verify-passphrase', async (req, res) => {
   if (passphrase === validPassphrase) {
     role = 'manager';
     employeesQuery = 'SELECT first_name, last_name FROM employee_salary WHERE access_status != $1';
-    
   } else if (passphrase === validPassphraseAdmin) {
     role = 'admin';
-    employeesQuery = 'SELECT first_name, last_name FROM employee_salary';
-    
+    employeesQuery = 'SELECT first_name, last_name FROM employee_salary';  // No parameters needed
   } else {
     return res.status(403).json({ success: false, message: 'Incorrect passphrase. Access denied.' });
   }
 
   // Once role is assigned, fetch employee data based on the passphrase (role)
   try {
-    const client = await createConnection();  // Assuming you have a function for DB connection
-    const result = await client.query(employeesQuery, ['restricted']); // Query the appropriate employee data
+    const client = await createConnection();
+
+    // If the query requires parameters (for 'manager' role), pass them
+    const result = role === 'admin'
+      ? await client.query(employeesQuery) // No parameters for admin
+      : await client.query(employeesQuery, ['restricted']); // 'restricted' for manager
+
     res.status(200).json({
       success: true,
       role: role,
