@@ -235,7 +235,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 if (managerRole !== 'admin') {
   // Show only restricted titles for non-admin users
-  const restrictedTitles = ["Junior Graphic Designer", "Communications Assistant", "Associate"];
+  const restrictedTitles = ["Senior Vice President", "Vice President", "Design Director", "Senior Writer", "Associate Vice President", "Senior Digital Strategist", "Senior Associate", "Senior Graphic Designer", "Digital Strategist", "Developer", "Associate", "Senior Digital Coordinator", "Graphic Designer", "Sr. Communications Coordinator", "Digital Coordinator", "Junior Graphic Designer", "Communications Coordinator", "Communications Assistant"];
   const titleSelect = document.getElementById('primaryTitle');
   titleSelect.innerHTML = "<option value=''>Select Primary Title</option>";
   restrictedTitles.forEach(title => {
@@ -248,4 +248,20 @@ if (managerRole !== 'admin') {
   // Hide the Add/Delete employee sections for non-admin users
   document.getElementById('addEmployeeContainer').style.display = 'none';
   document.getElementById('deleteEmployeeContainer').style.display = 'none';
+  
+} else {
+  // Show all titles for admin users
+  const allTitles = ["Accountant","Senior Vice President", "Vice President", "Design Director", "Senior Writer", "Associate Vice President", "Senior Digital Strategist", "Senior Associate", "Senior Graphic Designer", "Digital Strategist", "Developer", "Associate", "Senior Digital Coordinator", "Graphic Designer", "Sr. Communications Coordinator", "Digital Coordinator", "Junior Graphic Designer", "Communications Coordinator", "Communications Assistant"];
+  const titleSelect = document.getElementById('primaryTitle');
+  titleSelect.innerHTML = "<option value=''>Select Primary Title</option>";
+  allTitles.forEach(title => {
+    const option = document.createElement("option");
+    option.value = title;
+    option.textContent = title;
+    titleSelect.appendChild(option);
+  });
+
+  // Show the Add/Delete employee sections for admin users
+  document.getElementById('addEmployeeContainer').style.display = 'block';
+  document.getElementById('deleteEmployeeContainer').style.display = 'block';
 }
