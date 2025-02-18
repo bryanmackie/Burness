@@ -1,7 +1,9 @@
 const API_BASE_URL = "https://burness.onrender.com";
 // const API_BASE_URL = process.env.API_BASE_URL || "http://localhost:3000";
 
-
+// Variables to store employee data after successful passphrase verification
+let employeesData = [];
+let managerRole = null;
 
 // Helper function to fetch data from the API
 async function fetchData(url) {
@@ -18,14 +20,10 @@ async function fetchData(url) {
     throw error;
   }
 }
-// Helper function to fetch employee data
+
+// Helper function to fetch employee data after verifying passphrase
 async function fetchEmployees() {
-  try {
-    return await fetchData(`${API_BASE_URL}/api/employees`);
-  } catch (error) {
-    console.error('Error fetching employees:', error);
-    return [];
-  }
+  return employeesData;  // Use the stored employee data
 }
 
 // Helper function to populate a dropdown with unique values
@@ -69,7 +67,6 @@ async function populateFirstNames(lastName, selectId) {
   }
 }
 
-
 // Populate the Delete Employee dropdowns
 async function populateDeleteEmployeeDropdowns() {
   const employees = await fetchEmployees();
@@ -77,13 +74,11 @@ async function populateDeleteEmployeeDropdowns() {
   const deleteLastNameSelect = document.getElementById('deleteLastName');
   populateDropdown(deleteLastNameSelect, deleteLastNames);
 }
-document.addEventListener('DOMContentLoaded', () => {
-  // Populate dropdowns when the page loads
-  populateLastNames(); // For the Update Compensation form
-  populateDeleteEmployeeDropdowns(); // For the Delete Employee form
 
+document.addEventListener('DOMContentLoaded', () => {
   // Pop-up passphrase logic
   const validPassphrase = 'your_secret_passphrase'; // Replace with your passphrase or fetch it from a secure source
+  const validPassphraseAdmin = 'admin_secret_passphrase'; // Replace with your admin passphrase
 
   const overlay = document.getElementById('overlay');
   const content = document.getElementById('content');
@@ -108,8 +103,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (data.success) {
         alert('Passphrase correct. You have access.');
+        employeesData = data.employees;  // Store employee data after successful passphrase verification
+        managerRole = data.role;  // Store the role (admin or manager)
         overlay.style.display = 'none';  // Hide the overlay
         content.classList.remove('blur');  // Remove the blur effect
+
+        // Populate dropdowns only after successful passphrase entry
+        populateLastNames(); // For the Update Compensation form
+        populateDeleteEmployeeDropdowns(); // For the Delete Employee form
       } else {
         alert('Incorrect passphrase. Access denied.');
       }
@@ -118,50 +119,15 @@ document.addEventListener('DOMContentLoaded', () => {
       alert('Failed to verify passphrase. Please try again.');
     }
   });
-// Event listeners for handling changes in the dropdowns
-document.getElementById('lastName').addEventListener('change', (e) => {
-  populateFirstNames(e.target.value, 'firstName'); // Populate first name for Update form
-});
 
-document.getElementById('deleteLastName').addEventListener('change', (e) => {
-  const deleteLastName = e.target.value;
-  populateFirstNames(deleteLastName, 'deleteFirstName'); // Populate first name for Delete form
-});
+  // Event listeners for handling changes in the dropdowns
+  document.getElementById('lastName').addEventListener('change', (e) => {
+    populateFirstNames(e.target.value, 'firstName'); // Populate first name for Update form
+  });
 
-  // Handle Update Compensation form submission
-  document.getElementById('updateForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-
-    const formData = new FormData(e.target);
-    const data = Object.fromEntries(formData.entries());
-    const primaryTitle = document.getElementById('primaryTitle');
-    primaryTitle.removeAttribute('required');
-    console.log('Data being sent to API:', data);
-
-    try {
-      const response = await fetch(`${API_BASE_URL}/update`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      });
-    
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
-    
-      const result = await response.json();
-    
-      if (result.success) {
-        alert(result.message || 'Compensation updated successfully!');
-        document.getElementById('updateForm').reset();
-      } else {
-        alert(result.message || 'Error updating compensation.');
-      }
-    
-    } catch (error) {
-      console.error('Request failed:', error);
-      alert(`Failed to update compensation. Please try again. ${error.message}`);
-    }
+  document.getElementById('deleteLastName').addEventListener('change', (e) => {
+    const deleteLastName = e.target.value;
+    populateFirstNames(deleteLastName, 'deleteFirstName'); // Populate first name for Delete form
   });
 
   // Handle Add Employee form submission
@@ -171,8 +137,8 @@ document.getElementById('deleteLastName').addEventListener('change', (e) => {
     const formData = new FormData(e.target);
     const data = Object.fromEntries(formData.entries());
 
-    if (!add_first_name || !add_last_name) {
-      alert('Please select an employee to delete.');
+    if (!data.add_first_name || !data.add_last_name) {
+      alert('Please select an employee to add.');
       return;
     }
 
@@ -187,7 +153,7 @@ document.getElementById('deleteLastName').addEventListener('change', (e) => {
       if (response.ok) {
         alert(result.message || 'Employee added successfully!');
         document.getElementById('addEmployeeForm').reset();
-        await populateLastNames(); // Refresh the dropdowns
+        await populateLastNames(); // Refresh the dropdowns after adding employee
       } else {
         alert(result.message || 'Error adding employee.');
       }
@@ -198,75 +164,71 @@ document.getElementById('deleteLastName').addEventListener('change', (e) => {
   });
 
   // Handle Delete Employee form submission
-  // Handle Delete Employee form submission
-document.getElementById('deleteEmployeeForm').addEventListener('submit', async (e) => {
-  e.preventDefault(); // Prevent form submission so we can handle it with confirmation
+  document.getElementById('deleteEmployeeForm').addEventListener('submit', async (e) => {
+    e.preventDefault(); // Prevent form submission so we can handle it with confirmation
 
-  const deleteLastName = document.getElementById('deleteLastName').value;
-  const deleteFirstName = document.getElementById('deleteFirstName').value;
+    const deleteLastName = document.getElementById('deleteLastName').value;
+    const deleteFirstName = document.getElementById('deleteFirstName').value;
 
-  if (!deleteFirstName || !deleteLastName) {
-    alert('Please select an employee to delete.');
-    return;
-  }
-
-  // Confirmation prompt before proceeding with deletion
-  const confirmation = window.confirm(`Are you sure you want to delete ${deleteFirstName} ${deleteLastName}? This action cannot be undone.`);
-  
-  if (confirmation) {
-    try {
-      const response = await fetch(`${API_BASE_URL}/delete-employee`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          delete_first_name: deleteFirstName,
-          delete_last_name: deleteLastName,
-        }),
-      });
-
-      const result = await response.json();
-      if (response.ok) {
-        alert(result.message || 'Employee deleted successfully!');
-        document.getElementById('deleteEmployeeForm').reset();
-        await populateDeleteEmployeeDropdowns(); // Refresh the dropdowns
-      } else {
-        alert(result.message || 'Error deleting employee.');
-      }
-    } catch (error) {
-      console.error('Request failed:', error);
-      alert('Failed to delete employee. Please try again.');
+    if (!deleteFirstName || !deleteLastName) {
+      alert('Please select an employee to delete.');
+      return;
     }
-  } else {
-    console.log("Employee deletion canceled.");
-  }
-});
 
+    // Confirmation prompt before proceeding with deletion
+    const confirmation = window.confirm(`Are you sure you want to delete ${deleteFirstName} ${deleteLastName}? This action cannot be undone.`);
+  
+    if (confirmation) {
+      try {
+        const response = await fetch(`${API_BASE_URL}/delete-employee`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            delete_first_name: deleteFirstName,
+            delete_last_name: deleteLastName,
+          }),
+        });
 
-
-
-// JavaScript to toggle the dropdown visibility on button click
-document.querySelectorAll('.dropbtn').forEach(function(button) {
-  button.addEventListener('click', function(event) {
-    // Toggle display of the respective dropdown content
-    var dropdownContent = button.nextElementSibling;
-    
-    // Toggle the display state of dropdown content
-    dropdownContent.style.display = (dropdownContent.style.display === 'block') ? 'none' : 'block';
-    
-    // Optional: Close the dropdown if clicking anywhere outside of it
-    window.addEventListener('click', function(e) {
-      if (!e.target.matches('.dropbtn') && !e.target.closest('.dropdown')) {
-        dropdownContent.style.display = 'none';
+        const result = await response.json();
+        if (response.ok) {
+          alert(result.message || 'Employee deleted successfully!');
+          document.getElementById('deleteEmployeeForm').reset();
+          await populateDeleteEmployeeDropdowns(); // Refresh the dropdowns after deletion
+        } else {
+          alert(result.message || 'Error deleting employee.');
+        }
+      } catch (error) {
+        console.error('Request failed:', error);
+        alert('Failed to delete employee. Please try again.');
       }
+    } else {
+      console.log("Employee deletion canceled.");
+    }
+  });
+
+  // JavaScript to toggle the dropdown visibility on button click
+  document.querySelectorAll('.dropbtn').forEach(function(button) {
+    button.addEventListener('click', function(event) {
+      // Toggle display of the respective dropdown content
+      var dropdownContent = button.nextElementSibling;
+      
+      // Toggle the display state of dropdown content
+      dropdownContent.style.display = (dropdownContent.style.display === 'block') ? 'none' : 'block';
+      
+      // Optional: Close the dropdown if clicking anywhere outside of it
+      window.addEventListener('click', function(e) {
+        if (!e.target.matches('.dropbtn') && !e.target.closest('.dropdown')) {
+          dropdownContent.style.display = 'none';
+        }
+      });
     });
   });
- });
-});
 
-flatpickr("#salary_effective_date", {
-  // Options for flatpickr to restrict to the 1st and 16th of each month
-  dateFormat: "Y-m-d",
-  disable: [
-    (date) => date.getDate() !== 1 && date.getDate() !== 16
-  ]
+  flatpickr("#salary_effective_date", {
+    // Options for flatpickr to restrict to the 1st and 16th of each month
+    dateFormat: "Y-m-d",
+    disable: [
+      (date) => date.getDate() !== 1 && date.getDate() !== 16
+    ]
+  });
 });
