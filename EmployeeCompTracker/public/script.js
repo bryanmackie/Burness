@@ -265,5 +265,5 @@ document.addEventListener('DOMContentLoaded', () => {
       (date) => date.getDate() !== 1 && date.getDate() !== 16
     ]
   });
-});
+
 
