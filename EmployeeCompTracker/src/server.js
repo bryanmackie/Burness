@@ -154,26 +154,46 @@ const startServer = async () => {
         }
 
         // Insert into historical_salary_changes (including m_first before first_name)
-        if (sanitizedSalary){
-        await client.query(
-          'INSERT INTO historical_salary_changes (m_first, first_name, last_name, primaryTitle, secondaryTitle, salary, salary_effective_date, salarychangereason) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)',
-          [m_first, first_name, last_name, primaryTitle, secondaryTitle, sanitizedSalary, sanitizedSalaryEffectiveDate, salarychangereason]
-        );
-      }
-      if (comment_logged) {
-        // Insert into historical_salary_comments (including m_first before first_name)
-        await client.query(
-          'INSERT INTO historical_salary_comments (m_first, first_name, last_name, primaryTitle, secondaryTitle, comment_logged, comment_date) VALUES ($1, $2, $3, $4, $5, $6, $7)',
-          [m_first, first_name, last_name, primaryTitle, secondaryTitle, comment_logged, sanitizedCommentDate]
-        );
-      }
-      if (sanitizedBonus) {
-        // Insert into historical_bonuses (including m_first before first_name)
-        await client.query(
-          'INSERT INTO historical_bonuses (m_first, first_name, last_name, primaryTitle, secondaryTitle, bonus, bonus_year) VALUES ($1, $2, $3, $4, $5, $6, $7)',
-          [m_first, first_name, last_name, primaryTitle, secondaryTitle, sanitizedBonus, sanitizedBonusYear]
-        );
-      }
+        if (sanitizedSalary) {
+          // Check if salary_effective_date and salarychangereason are also provided
+          if (!sanitizedSalaryEffectiveDate || !salarychangereason) {
+            // If either salary_effective_date or salarychangereason is missing, throw an error
+            throw new Error('Salary effective date and salary change reason must be provided when a salary is entered.');
+          }
+        
+          // Proceed with inserting into the historical_salary_changes table
+          await client.query(
+            'INSERT INTO historical_salary_changes (m_first, first_name, last_name, primaryTitle, secondaryTitle, salary, salary_effective_date, salarychangereason) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)',
+            [m_first, first_name, last_name, primaryTitle, secondaryTitle, sanitizedSalary, sanitizedSalaryEffectiveDate, salarychangereason]
+          );
+        }
+        if (comment_logged) {
+          // Check if sanitizedCommentDate is also provided
+          if (!sanitizedCommentDate) {
+            // If sanitizedCommentDate is missing, throw an error
+            throw new Error('Comment date must be provided when a comment is logged.');
+          }
+        
+          // Proceed with inserting into the historical_salary_comments table
+          await client.query(
+            'INSERT INTO historical_salary_comments (m_first, first_name, last_name, primaryTitle, secondaryTitle, comment_logged, comment_date) VALUES ($1, $2, $3, $4, $5, $6, $7)',
+            [m_first, first_name, last_name, primaryTitle, secondaryTitle, comment_logged, sanitizedCommentDate]
+          );
+        }
+        if (sanitizedBonus) {
+          // Check if sanitizedBonusYear is also provided
+          if (!sanitizedBonusYear) {
+            // If sanitizedBonusYear is missing, throw an error
+            throw new Error('Bonus year must be provided when a bonus is entered.');
+          }
+        
+          // Proceed with inserting into the historical_bonuses table
+          await client.query(
+            'INSERT INTO historical_bonuses (m_first, first_name, last_name, primaryTitle, secondaryTitle, bonus, bonus_year) VALUES ($1, $2, $3, $4, $5, $6, $7)',
+            [m_first, first_name, last_name, primaryTitle, secondaryTitle, sanitizedBonus, sanitizedBonusYear]
+          );
+        }
+        
 
         // Trigger pushInc to update latest_employee_data
         await client.query('INSERT INTO pushInc (first_name, last_name) VALUES ($1, $2)', [first_name, last_name]);
