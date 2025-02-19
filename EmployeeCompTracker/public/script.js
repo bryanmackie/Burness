@@ -49,6 +49,7 @@ async function populateLastNames() {
   populateDropdown(lastNameSelect, lastNames);
 }
 
+
 // Fetch and populate First Name dropdown (for either form)
 async function populateFirstNames(lastName, selectId) {
   const firstNameSelect = document.getElementById(selectId);
@@ -56,14 +57,13 @@ async function populateFirstNames(lastName, selectId) {
   firstNameSelect.disabled = true;
 
   if (lastName) {
-    try {
-      const employees = await fetchData(`${API_BASE_URL}/api/first-names/${lastName}`);
-      const firstNames = employees.map(emp => emp.first_name);
-      populateDropdown(firstNameSelect, firstNames);
-      firstNameSelect.disabled = false;
-    } catch (error) {
-      console.error('Error populating first names:', error);
-    }
+    // Filter employeesData to get matching first names based on last name
+    const firstNames = employeesData
+      .filter(emp => emp.last_name.toLowerCase() === lastName.toLowerCase()) // Case-insensitive comparison
+      .map(emp => emp.first_name);
+
+    populateDropdown(firstNameSelect, firstNames);
+    firstNameSelect.disabled = false;
   }
 }
 
