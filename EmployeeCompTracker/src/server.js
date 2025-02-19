@@ -44,10 +44,10 @@ app.post('/verify-passphrase', async (req, res) => {
   // Validate the passphrase and assign role
   if (passphrase === validPassphrase) {
     role = 'manager';
-    employeesQuery = 'SELECT first_name, last_name FROM employee_salary WHERE access_status != $1';
+    employeesQuery = 'SELECT first_name, last_name FROM employee_salary WHERE access_status != $1 ORDER BY last_name ASC';
   } else if (passphrase === validPassphraseAdmin) {
     role = 'admin';
-    employeesQuery = 'SELECT first_name, last_name FROM employee_salary';  // No parameters needed
+    employeesQuery = 'SELECT first_name, last_name FROM employee_salary ORDER BY last_name ASC';  // No parameters needed
   } else {
     return res.status(403).json({ success: false, message: 'Incorrect passphrase. Access denied.' });
   }
