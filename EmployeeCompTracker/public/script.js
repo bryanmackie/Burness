@@ -164,6 +164,43 @@ document.addEventListener('DOMContentLoaded', () => {
     populateFirstNames(deleteLastName, 'deleteFirstName'); // Populate first name for Delete form
   });
 
+ // Handle Update Compensation form submission
+ document.getElementById('updateForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  const formData = new FormData(e.target);
+  const data = Object.fromEntries(formData.entries());
+  const primaryTitle = document.getElementById('primaryTitle');
+  primaryTitle.removeAttribute('required');
+  console.log('Data being sent to API:', data);
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/update`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+  
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+  
+    const result = await response.json();
+  
+    if (result.success) {
+      alert(result.message || 'Compensation updated successfully!');
+      document.getElementById('updateForm').reset();
+    } else {
+      alert(result.message || 'Error updating compensation.');
+    }
+  
+  } catch (error) {
+    console.error('Request failed:', error);
+    alert(`Failed to update compensation. Please try again. ${error.message}`);
+  }
+});
+
+
   // Handle Add Employee form submission
   document.getElementById('addEmployeeForm').addEventListener('submit', async (e) => {
     e.preventDefault();
