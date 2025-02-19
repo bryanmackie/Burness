@@ -153,79 +153,56 @@ const startServer = async () => {
           return res.status(404).json({ success: false, message: 'Employee not found.' });
         }
 
-        // Insert into historical_salary_changes (including m_first before first_name)
+
         if (sanitizedSalary) {
           // Check if salary_effective_date and salarychangereason are also provided
           if (!sanitizedSalaryEffectiveDate || !salarychangereason) {
             // If either salary_effective_date or salarychangereason is missing, throw an error
-            return res.status(400).json({
-              success: false,
-              message: 'Salary effective date and salary change reason must be provided when a salary is entered.'
-            });
+            throw new Error('Salary effective date and salary change reason must be provided when a salary is entered.');
           }
         
           // Proceed with inserting into the historical_salary_changes table
-          try {
-            await client.query(
-              'INSERT INTO historical_salary_changes (m_first, first_name, last_name, primaryTitle, secondaryTitle, salary, salary_effective_date, salarychangereason) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)',
-              [m_first, first_name, last_name, primaryTitle, secondaryTitle, sanitizedSalary, sanitizedSalaryEffectiveDate, salarychangereason]
-            );
-          } catch (error) {
-            return handleDatabaseError(res, error);
-          }
+          await client.query(
+            'INSERT INTO historical_salary_changes (m_first, first_name, last_name, primaryTitle, secondaryTitle, salary, salary_effective_date, salarychangereason) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)',
+            [m_first, first_name, last_name, primaryTitle, secondaryTitle, sanitizedSalary, sanitizedSalaryEffectiveDate, salarychangereason]
+          );
         }
-        
         if (comment_logged) {
           // Check if sanitizedCommentDate is also provided
           if (!sanitizedCommentDate) {
             // If sanitizedCommentDate is missing, throw an error
-            return res.status(400).json({
-              success: false,
-              message: 'Comment date must be provided when a comment is logged.'
-            });
+            throw new Error('Comment date must be provided when a comment is logged.');
           }
         
           // Proceed with inserting into the historical_salary_comments table
-          try {
-            await client.query(
-              'INSERT INTO historical_salary_comments (m_first, first_name, last_name, primaryTitle, secondaryTitle, comment_logged, comment_date) VALUES ($1, $2, $3, $4, $5, $6, $7)',
-              [m_first, first_name, last_name, primaryTitle, secondaryTitle, comment_logged, sanitizedCommentDate]
-            );
-          } catch (error) {
-            return handleDatabaseError(res, error);
-          }
+          await client.query(
+            'INSERT INTO historical_salary_comments (m_first, first_name, last_name, primaryTitle, secondaryTitle, comment_logged, comment_date) VALUES ($1, $2, $3, $4, $5, $6, $7)',
+            [m_first, first_name, last_name, primaryTitle, secondaryTitle, comment_logged, sanitizedCommentDate]
+          );
         }
-        
         if (sanitizedBonus) {
           // Check if sanitizedBonusYear is also provided
           if (!sanitizedBonusYear) {
             // If sanitizedBonusYear is missing, throw an error
-            return res.status(400).json({
-              success: false,
-              message: 'Bonus year must be provided when a bonus is entered.'
-            });
+            throw new Error('Bonus year must be provided when a bonus is entered.');
           }
         
           // Proceed with inserting into the historical_bonuses table
-          try {
-            await client.query(
-              'INSERT INTO historical_bonuses (m_first, first_name, last_name, primaryTitle, secondaryTitle, bonus, bonus_year) VALUES ($1, $2, $3, $4, $5, $6, $7)',
-              [m_first, first_name, last_name, primaryTitle, secondaryTitle, sanitizedBonus, sanitizedBonusYear]
-            );
-          } catch (error) {
-            return handleDatabaseError(res, error);
-          }
+          await client.query(
+            'INSERT INTO historical_bonuses (m_first, first_name, last_name, primaryTitle, secondaryTitle, bonus, bonus_year) VALUES ($1, $2, $3, $4, $5, $6, $7)',
+            [m_first, first_name, last_name, primaryTitle, secondaryTitle, sanitizedBonus, sanitizedBonusYear]
+          );
         }
         
-         // Trigger pushInc to update latest_employee_data
-         await client.query('INSERT INTO pushInc (first_name, last_name) VALUES ($1, $2)', [first_name, last_name]);
 
-         res.status(200).json({ success: true, message: 'Record updated and historical data inserted successfully.' });
-       } catch (error) {
-         handleDatabaseError(res, error);
-       }
-     });
+        // Trigger pushInc to update latest_employee_data
+        await client.query('INSERT INTO pushInc (first_name, last_name) VALUES ($1, $2)', [first_name, last_name]);
 
+        res.status(200).json({ success: true, message: 'Record updated and historical data inserted successfully.' });
+      } catch (error) {
+        handleDatabaseError(res, error);
+      }
+    });
     // Add a new employee
     app.post('/add-employee', async (req, res) => {
       const {add_first_name, add_last_name, employeeStatus } = req.body;
