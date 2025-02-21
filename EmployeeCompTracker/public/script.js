@@ -76,10 +76,7 @@ async function populateDeleteEmployeeDropdowns() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  // Pop-up passphrase logic
-  const validPassphrase = 'your_secret_passphrase'; // Replace with your passphrase or fetch it from a secure source
-  const validPassphraseAdmin = 'admin_secret_passphrase'; // Replace with your admin passphrase
-
+ 
   const overlay = document.getElementById('overlay');
   const content = document.getElementById('content');
   const passphraseInput = document.getElementById('passphrase');
@@ -88,8 +85,9 @@ document.addEventListener('DOMContentLoaded', () => {
   // Show the passphrase overlay when the page loads
   overlay.style.display = 'flex';
   content.classList.add('blur'); // Apply blur effect to the content
-
-  submitButton.addEventListener('click', async function () {
+passphraseInput.focus();
+  //submitButton.addEventListener('click', async function () {
+    async function handleSubmit() {
     const enteredPassphrase = passphraseInput.value.trim();
 
     try {
@@ -149,6 +147,12 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch (error) {
       console.error('Error verifying passphrase:', error);
       alert('Failed to verify passphrase. Please try again.');
+    }
+  }
+  passphraseInput.addEventListener('keydown', function (event) {
+    if (event.key === 'Enter') {
+      event.preventDefault(); // Prevent default Enter key behavior (optional)
+      handleSubmit();
     }
   });
 });
