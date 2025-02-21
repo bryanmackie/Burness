@@ -158,7 +158,7 @@ const startServer = async () => {
           // Check if salary_effective_date and salarychangereason are also provided
           if (!sanitizedSalaryEffectiveDate || !salarychangereason) {
             // If either salary_effective_date or salarychangereason is missing, throw an error
-            throw new Error('Salary effective date and salary change reason must be provided when a salary is entered.');
+            return res.status(400).json({ success: false, message: 'Manager first name, First name, and Last name are required.' });
           }
         
           // Proceed with inserting into the historical_salary_changes table
