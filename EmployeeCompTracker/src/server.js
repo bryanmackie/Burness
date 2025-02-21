@@ -157,9 +157,12 @@ const startServer = async () => {
         if (sanitizedSalary) {
           // Check if salary_effective_date and salarychangereason are also provided
           if (!sanitizedSalaryEffectiveDate || !salarychangereason) {
-            // If either salary_effective_date or salarychangereason is missing, throw an error
-            throw new Error(JSON.stringify({ success: false, message: 'Salary change reason & salary effective date must be entered with salary' }));
-            }
+            // If either salary_effective_date or salarychangereason is missing, return a structured error response
+            return res.status(400).json({
+              success: false,
+              message: 'Salary change reason & salary effective date must be entered with salary'
+            });
+          }
         
           // Proceed with inserting into the historical_salary_changes table
           await client.query(
@@ -167,11 +170,15 @@ const startServer = async () => {
             [m_first, first_name, last_name, primaryTitle, secondaryTitle, sanitizedSalary, sanitizedSalaryEffectiveDate, salarychangereason]
           );
         }
+        
         if (comment_logged) {
           // Check if sanitizedCommentDate is also provided
           if (!sanitizedCommentDate) {
-            // If sanitizedCommentDate is missing, throw an error
-            throw new Error('Comment date must be provided when a comment is logged.');
+            // If sanitizedCommentDate is missing, return a structured error response
+            return res.status(400).json({
+              success: false,
+              message: 'Comment date must be provided when a comment is logged.'
+            });
           }
         
           // Proceed with inserting into the historical_salary_comments table
@@ -180,11 +187,15 @@ const startServer = async () => {
             [m_first, first_name, last_name, primaryTitle, secondaryTitle, comment_logged, sanitizedCommentDate]
           );
         }
+        
         if (sanitizedBonus) {
           // Check if sanitizedBonusYear is also provided
           if (!sanitizedBonusYear) {
-            // If sanitizedBonusYear is missing, throw an error
-            throw new Error('Bonus year must be provided when a bonus is entered.');
+            // If sanitizedBonusYear is missing, return a structured error response
+            return res.status(400).json({
+              success: false,
+              message: 'Bonus year must be provided when a bonus is entered.'
+            });
           }
         
           // Proceed with inserting into the historical_bonuses table
