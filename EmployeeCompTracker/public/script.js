@@ -155,6 +155,9 @@ passphraseInput.focus();
       handleSubmit();
     }
   });
+  document.getElementById('submitPassphrase').addEventListener('click', function () {
+    handleSubmit(); // Call the handleSubmit function when the button is clicked
+});
 });
 
 
