@@ -5,6 +5,8 @@ const API_BASE_URL = "https://burness.onrender.com";
 let employeesData = [];
 let managerRole = null;
 
+
+
 // Helper function to fetch data from the API
 async function fetchData(url) {
   try {
@@ -158,6 +160,13 @@ passphraseInput.focus();
   document.getElementById('submitPassphrase').addEventListener('click', function () {
     handleSubmit(); // Call the handleSubmit function when the button is clicked
 });
+// Wait until the DOM is ready and initialize jsTree
+const treeElement = document.getElementById('employee-tree');
+// Use jsTree directly, it will work even without jQuery
+if (treeElement) {
+  // Initialize jsTree (can use jsTree's options as usual)
+  $(treeElement).jstree();
+}
 });
 
 
