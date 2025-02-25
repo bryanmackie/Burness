@@ -35,6 +35,37 @@ const sanitizeNumber = (value) => {
   return !Number.isNaN(parsedValue) ? parsedValue : null;  // If it's a valid number, return it, else NULL
 };
 // Endpoint to verify the passphrase
+
+app.get('/get-hierarchy', async (req, res) => {
+  try {
+    const result = await client.query('SELECT * FROM supervisors ORDER BY sup_id, emp_id');
+    
+    const employees = result.rows;
+    const hierarchy = buildHierarchy(employees); // Convert flat data to hierarchical format
+
+    res.json(hierarchy); // Send the hierarchy as a JSON response
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Error fetching data');
+  }
+});
+
+// Helper function to convert flat data into a hierarchical format
+function buildHierarchy(data) {
+  const map = {};
+  const roots = [];
+
+  data.forEach(item => {
+    map[item.id] = { ...item, children: [] };
+    if (item.manager_id === null) {
+      roots.push(map[item.id]);
+    } else {
+      map[item.manager_id].children.push(map[item.id]);
+    }
+  });
+
+  return roots;
+}
 app.post('/verify-passphrase', async (req, res) => {
   const { passphrase } = req.body;
 
