@@ -1,12 +1,12 @@
 import { defineConfig } from 'vite';
 
 export default defineConfig({
-  root: './',  // Serve from the root directory
+  root: __dirname,  // Set to the current working directory explicitly
   build: {
-    outDir: 'dist',  // Build files into the 'dist' folder
+    outDir: 'dist',
     rollupOptions: {
       input: {
-        main: 'src/index.html',  // Entry HTML file in the 'src' folder
+        main: 'src/index.html',  // Point to the index.html file in the 'src' folder
       },
     },
   },
