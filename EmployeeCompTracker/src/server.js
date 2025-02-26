@@ -45,7 +45,7 @@ app.get('/get-hierarchy', async (req, res) => {
     const hierarchy = buildHierarchy(employees); // Convert flat data to hierarchical format
     res.json(hierarchy); // Send the hierarchy as a JSON response
   } catch (err) {
-    console.error(err);
+    console.error('Error details:', err);
     res.status(500).send('Error fetching data');
   }
 });
