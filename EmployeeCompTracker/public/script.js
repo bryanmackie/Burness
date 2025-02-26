@@ -348,7 +348,7 @@ passphraseInput.focus();
       const childrenHtml = item.children && item.children.length > 0
         ? '<ul>' + renderHierarchy(item.children) + '</ul>'
         : '';
-      return `<li>${item.emp_first} ${item.emp_last}${childrenHtml}</li>`;
+      return `<li>${item.emp_first_name} ${item.emp_last_name}${childrenHtml}</li>`;
     }).join('');
   }
   
