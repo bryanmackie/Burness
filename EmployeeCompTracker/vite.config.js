@@ -4,7 +4,7 @@ export default defineConfig({
   build: {
     outDir: 'dist', // Build files into the 'dist' folder
     rollupOptions: {
-      input: 'src/index.html', // Entry point
+      input: 'index.html', // Entry point
     },
   },
 });
