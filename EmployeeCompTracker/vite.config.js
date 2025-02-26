@@ -1,12 +1,12 @@
 import { defineConfig } from 'vite';
 
 export default defineConfig({
-  root: 'public',  // Point to the 'public' folder for your frontend files
+  root: 'src',  // Point to the 'src' folder for your frontend files
   build: {
     outDir: '../dist',  // Output the build files into the 'dist' folder at the root
     rollupOptions: {
       input: {
-        main: 'public/index.html',  // Entry HTML file in the 'public' folder
+        main: 'src/index.html',  // Entry HTML file in the 'src' folder
       },
     },
   },
