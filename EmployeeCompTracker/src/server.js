@@ -45,7 +45,7 @@ function buildHierarchy(data) {
   data.forEach(item => {
     const employeeId = item.emp_id; // Use the concatenated emp_id from the database
     const supervisorId = item.sup_id; // Use the concatenated sup_id from the database
-    
+
     const employee = {
       emp_first_name: item.emp_first_name,
       emp_last_name: item.emp_last_name,
@@ -85,6 +85,7 @@ function buildHierarchy(data) {
 app.get('/get-hierarchy', async (req, res) => {
   try {
     const result = await client.query('SELECT emp_first_name, emp_last_name, emp_id, sup_id, sup_first_name, sup_last_name FROM supervisors ORDER BY sup_id, emp_id;');
+    console.log('Raw Data from Database:', result.rows);  // Log to check if data is correct
     const employees = result.rows;
     const hierarchy = buildHierarchy(employees); // Build the hierarchy from the employees data
     res.json(hierarchy); // Send the hierarchy as a JSON response
