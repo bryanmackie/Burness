@@ -314,15 +314,40 @@ passphraseInput.focus();
     ]
   });
 
+  async function fetchHierarchy() {
+    try {
+      const response = await fetch('/get-hierarchy');
+      if (!response.ok) {
+        throw new Error('Failed to fetch hierarchy');
+      }
 
-  const treeData = [
-    { text: 'CEO', children: [
-      { text: 'VP1', children: [{ text: 'Manager1' }, { text: 'Manager2' }] },
-      { text: 'VP2', children: [{ text: 'Manager3' }] }
-    ]}
-  ];
-  
-  const tree = new VanillaTree({
-    selector: '#tree-container',
-    data: treeData
-  });
+      const data = await response.json();
+      displayHierarchy(data);
+    } catch (error) {
+      console.error("Error fetching hierarchy:", error);
+      document.getElementById("hierarchyContainer").innerText = 'Error fetching data.';
+    }
+  }
+
+  // Display the hierarchy in a readable format
+  function displayHierarchy(hierarchy) {
+    const container = document.getElementById('hierarchyContainer');
+    if (hierarchy && hierarchy.length > 0) {
+      container.innerHTML = '<ul>' + renderHierarchy(hierarchy) + '</ul>';
+    } else {
+      container.innerText = 'No hierarchy data available.';
+    }
+  }
+
+  // Recursively render the hierarchy in a nested list format
+  function renderHierarchy(data) {
+    return data.map(item => {
+      const childrenHtml = item.children && item.children.length > 0
+        ? '<ul>' + renderHierarchy(item.children) + '</ul>'
+        : '';
+      return `<li>${item.emp_first} ${item.emp_last}${childrenHtml}</li>`;
+    }).join('');
+  }
+
+  // Call the function to fetch and display the hierarchy when the page loads
+  window.onload = fetchHierarchy;
