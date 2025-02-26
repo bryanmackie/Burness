@@ -102,6 +102,7 @@ passphraseInput.focus();
       const data = await response.json();
 
       if (data.success) {
+
         alert('Passphrase correct. You have access.');
         employeesData = data.employees;  // Store employee data after successful passphrase verification
         managerRole = data.role;  // Store the role (admin or manager)
@@ -314,6 +315,8 @@ passphraseInput.focus();
     ]
   });
 
+  document.querySelector('.hierarchybutton').addEventListener('click', fetchHierarchy);
+
   async function fetchHierarchy() {
     try {
       const response = await fetch('/get-hierarchy');
@@ -348,6 +351,7 @@ passphraseInput.focus();
       return `<li>${item.emp_first} ${item.emp_last}${childrenHtml}</li>`;
     }).join('');
   }
+  
 
   // Call the function to fetch and display the hierarchy when the page loads
   window.onload = fetchHierarchy;
