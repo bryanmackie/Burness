@@ -43,6 +43,9 @@ function buildHierarchy(data) {
   const roots = [];
 
   data.forEach(item => {
+    console.log(`Employee: ${item.emp_first_name} ${item.emp_last_name}`);
+console.log(`Supervisor: ${item.sup_first_name} ${item.sup_last_name}`);
+
     const employeeId = item.emp_id; // Use the concatenated emp_id from the database
     const supervisorId = item.sup_id; // Use the concatenated sup_id from the database
 
@@ -67,8 +70,6 @@ function buildHierarchy(data) {
 
   // Step 2: Link subordinates to their supervisors
   data.forEach(item => {
-    const employeeId = `${item.emp_first} ${item.emp_last}`; // Get the employee's full name
-    const supervisorId = `${item.sup_first} ${item.sup_last}`; // Get the supervisor's full name
     const employee = map[employeeId]; // Get the employee object
     const supervisor = map[supervisorId]; // Get the supervisor object
 
