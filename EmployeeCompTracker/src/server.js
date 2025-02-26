@@ -43,30 +43,53 @@ function buildHierarchy(data) {
   const roots = [];
 
   data.forEach(item => {
-    map[item.id] = { ...item, children: [] };
-    if (item.manager_id === null) {
-      roots.push(map[item.id]);
-    } else {
-      map[item.manager_id].children.push(map[item.id]);
+    const employeeId = `${item.emp_first} ${item.emp_last}`; // Combine first and last name as unique identifier for the employee
+    const supervisorId = `${item.sup_first} ${item.sup_last}`; // Combine supervisor's first and last name as unique identifier
+
+    const employee = {
+      emp_first: item.emp_first,
+      emp_last: item.emp_last,
+      emp_id: employeeId, // Store combined name as the employee's id
+      sup_id: supervisorId, // Store combined name as the supervisor's id
+      sup_first: item.sup_first,
+      sup_last: item.sup_last,
+      children: [] // Initialize an empty array for children (subordinates)
+    };
+
+    // Add employee to the map by their full name (emp_first + emp_last)
+    map[employeeId] = employee;
+
+    // If the employee has no supervisor (sup_id is null), they are a top-level employee
+    if (item.sup_id === null) {
+      roots.push(employee);
     }
   });
 
-  return roots;
+  // Step 2: Link subordinates to their supervisors
+  data.forEach(item => {
+    const employeeId = `${item.emp_first} ${item.emp_last}`; // Get the employee's full name
+    const supervisorId = `${item.sup_first} ${item.sup_last}`; // Get the supervisor's full name
+    const employee = map[employeeId]; // Get the employee object
+    const supervisor = map[supervisorId]; // Get the supervisor object
+
+    // If supervisor exists, add this employee as a child of the supervisor
+    if (supervisor) {
+      supervisor.children.push(employee); // Add employee as a child of their supervisor
+    }
+  });
+
+  return roots; // Return the hierarchical structure (top-level employees)
 }
 
 // Endpoint to fetch hierarchy data after password verification
 app.get('/get-hierarchy', async (req, res) => {
-  if (!client) {
-    return res.status(500).send('Database connection not established.');
-  }
-
   try {
-    const result = await client.query('SELECT * FROM supervisors ORDER BY sup_id, emp_id');
+    const result = await client.query('SELECT emp_first, emp_last, emp_id, sup_id, sup_first, sup_last FROM supervisors ORDER BY sup_id, emp_id;');
     const employees = result.rows;
-    const hierarchy = buildHierarchy(employees);  // Convert flat data to hierarchical format
-    res.json(hierarchy);  // Send the hierarchy as a JSON response
+    const hierarchy = buildHierarchy(employees); // Build the hierarchy from the employees data
+    res.json(hierarchy); // Send the hierarchy as a JSON response
   } catch (err) {
-    console.error('Error details:', err);
+    console.error('Error fetching hierarchy:', err);
     res.status(500).send('Error fetching data');
   }
 });
@@ -89,8 +112,8 @@ app.post('/verify-passphrase', async (req, res) => {
 
   // Once role is assigned, fetch employee data based on the passphrase (role)
   try {
-    const client = await createConnection();
-
+    client = await createConnection();
+    console.log('Database connected successfully.');
     // If the query requires parameters (for 'manager' role), pass them
     const result = role === 'admin'
       ? await client.query(employeesQuery) // No parameters for admin
