@@ -21,6 +21,8 @@ app.use(bodyParser.json());
 const validPassphrase = process.env.validPassphrase;
 const validPassphraseAdmin = process.env.validPassphraseAdmin;
 
+let client;
+
 // Helper function to handle database errors
 const handleDatabaseError = (res, error) => {
   console.error('Database error:', error);
@@ -36,21 +38,6 @@ const sanitizeNumber = (value) => {
 };
 // Endpoint to verify the passphrase
 
-app.get('/get-hierarchy', async (req, res) => {
-  try {
-    const result = await client.query('SELECT * FROM supervisors ORDER BY sup_id, emp_id');
-    console.log(result.rows); // Log the fetched data to check
-    const employees = result.rows;
-    console.log(employees); // Log the employee data to check
-    const hierarchy = buildHierarchy(employees); // Convert flat data to hierarchical format
-    res.json(hierarchy); // Send the hierarchy as a JSON response
-  } catch (err) {
-    console.error('Error details:', err);
-    res.status(500).send('Error fetching data');
-  }
-});
-
-// Helper function to convert flat data into a hierarchical format
 function buildHierarchy(data) {
   const map = {};
   const roots = [];
@@ -66,6 +53,23 @@ function buildHierarchy(data) {
 
   return roots;
 }
+
+// Endpoint to fetch hierarchy data after password verification
+app.get('/get-hierarchy', async (req, res) => {
+  if (!client) {
+    return res.status(500).send('Database connection not established.');
+  }
+
+  try {
+    const result = await client.query('SELECT * FROM supervisors ORDER BY sup_id, emp_id');
+    const employees = result.rows;
+    const hierarchy = buildHierarchy(employees);  // Convert flat data to hierarchical format
+    res.json(hierarchy);  // Send the hierarchy as a JSON response
+  } catch (err) {
+    console.error('Error details:', err);
+    res.status(500).send('Error fetching data');
+  }
+});
 app.post('/verify-passphrase', async (req, res) => {
   const { passphrase } = req.body;
 
@@ -105,7 +109,7 @@ app.post('/verify-passphrase', async (req, res) => {
 // Initialize the database connection and start the server
 const startServer = async () => {
   try {
-    const client = await createConnection();  // Create the database connection
+    client = await createConnection();  // Create the database connection
     console.log('Database connected successfully.');
 
     // Routes
