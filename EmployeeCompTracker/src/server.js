@@ -39,7 +39,7 @@ const sanitizeNumber = (value) => {
 app.get('/get-hierarchy', async (req, res) => {
   try {
     const result = await client.query('SELECT * FROM supervisors ORDER BY sup_id, emp_id');
-    
+    console.log(result.rows); // Log the fetched data to check
     const employees = result.rows;
     const hierarchy = buildHierarchy(employees); // Convert flat data to hierarchical format
 
