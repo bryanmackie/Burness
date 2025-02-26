@@ -12,8 +12,8 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
-// Serve static files from the "public" folder
-app.use(express.static(path.join(__dirname, '../public')));
+// Serve static files from the "dist" folder after build
+app.use(express.static(path.join(__dirname, '../dist')));
 
 // Parse JSON request bodies
 app.use(bodyParser.json());
