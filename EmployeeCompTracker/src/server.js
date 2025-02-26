@@ -70,8 +70,8 @@ console.log(`Supervisor: ${item.sup_first_name} ${item.sup_last_name}`);
 
   // Step 2: Link subordinates to their supervisors
   data.forEach(item => {
-    const employeeId = item.emp_id; // Use the concatenated emp_id from the database
-    const supervisorId = item.sup_id; // Use the concatenated sup_id from the database
+    const employeeId = `${item.emp_first_name} ${item.emp_last_name}`; // Generate employee ID
+    const supervisorId = `${item.sup_first_name} ${item.sup_last_name}`; // Generate supervisor ID
     const employee = map[employeeId]; // Get the employee object
     const supervisor = map[supervisorId]; // Get the supervisor object
 
