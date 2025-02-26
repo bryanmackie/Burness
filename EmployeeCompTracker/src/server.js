@@ -43,16 +43,16 @@ function buildHierarchy(data) {
   const roots = [];
 
   data.forEach(item => {
-    const employeeId = `${item.emp_first} ${item.emp_last}`; // Combine first and last name as unique identifier for the employee
-    const supervisorId = `${item.sup_first} ${item.sup_last}`; // Combine supervisor's first and last name as unique identifier
-
+    const employeeId = item.emp_id; // Use the concatenated emp_id from the database
+    const supervisorId = item.sup_id; // Use the concatenated sup_id from the database
+    
     const employee = {
-      emp_first: item.emp_first,
-      emp_last: item.emp_last,
+      emp_first_name: item.emp_first_name,
+      emp_last_name: item.emp_last_name,
       emp_id: employeeId, // Store combined name as the employee's id
       sup_id: supervisorId, // Store combined name as the supervisor's id
-      sup_first: item.sup_first,
-      sup_last: item.sup_last,
+      sup_first_name: item.sup_first_name,
+      sup_last_name: item.sup_last_name,
       children: [] // Initialize an empty array for children (subordinates)
     };
 
@@ -84,7 +84,7 @@ function buildHierarchy(data) {
 // Endpoint to fetch hierarchy data after password verification
 app.get('/get-hierarchy', async (req, res) => {
   try {
-    const result = await client.query('SELECT emp_first, emp_last, emp_id, sup_id, sup_first, sup_last FROM supervisors ORDER BY sup_id, emp_id;');
+    const result = await client.query('SELECT emp_first_name, emp_last_name, emp_id, sup_id, sup_first_name, sup_last_name FROM supervisors ORDER BY sup_id, emp_id;');
     const employees = result.rows;
     const hierarchy = buildHierarchy(employees); // Build the hierarchy from the employees data
     res.json(hierarchy); // Send the hierarchy as a JSON response
