@@ -41,8 +41,8 @@ app.get('/get-hierarchy', async (req, res) => {
     const result = await client.query('SELECT * FROM supervisors ORDER BY sup_id, emp_id');
     console.log(result.rows); // Log the fetched data to check
     const employees = result.rows;
+    console.log(employees); // Log the employee data to check
     const hierarchy = buildHierarchy(employees); // Convert flat data to hierarchical format
-
     res.json(hierarchy); // Send the hierarchy as a JSON response
   } catch (err) {
     console.error(err);
