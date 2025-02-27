@@ -3,19 +3,23 @@ import * as d3 from 'd3';
 export function createChart() {
     // Your D3 code here
     console.log('Creating D3 chart...');
-    // Example: create a simple bar chart
-    d3.select('body')
-        .append('svg')
-        .attr('width', 400)
-        .attr('height', 200)
-        .selectAll('rect')
-        .data([50, 100, 150, 200])
-        .enter()
-        .append('rect')
-        .attr('width', 50)
-        .attr('height', d => d)
-        .attr('x', (d, i) => i * 60)
-        .attr('y', d => 200 - d)
-        .attr('fill', 'blue');
+    const data = [1, 2, 3, 4, 5];  // Example data
+    const width = 400, height = 200;
+    
+    const svg = d3.select("#chartContainer")
+                  .append("svg")
+                  .attr("width", width)
+                  .attr("height", height);
+    
+    // Example of creating bars for a bar chart
+    svg.selectAll("rect")
+       .data(data)
+       .enter()
+       .append("rect")
+       .attr("x", (d, i) => i * 80)
+       .attr("y", d => height - d * 30)
+       .attr("width", 50)
+       .attr("height", d => d * 30)
+       .attr("fill", "blue");
 }
 console.log('App.js loaded');
