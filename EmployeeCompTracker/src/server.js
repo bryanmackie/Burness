@@ -12,14 +12,15 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
-// Serve static files from the "dist" folder after build
-app.use(express.static(path.resolve(__dirname, 'dist')));
 
-// Serve the index.html from the absolute path in the "dist" folder
+// Serve static files from the "dist" folder after build
+app.use(express.static(path.join(__dirname, 'dist', 'src'))); // Adjusted path to 'dist/src'
+
+// Serve the index.html from 'dist/src/index.html'
 app.get('/', (req, res) => {
-  const indexPath = path.resolve(__dirname, 'dist', 'index.html');
-  res.sendFile(indexPath);
+  res.sendFile(path.join(__dirname, 'dist', 'src', 'index.html')); // Adjusted path
 });
+
 
 // Parse JSON request bodies
 app.use(bodyParser.json());
