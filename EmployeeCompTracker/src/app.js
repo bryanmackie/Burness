@@ -18,3 +18,4 @@ export function createChart() {
         .attr('y', d => 200 - d)
         .attr('fill', 'blue');
 }
+console.log('App.js loaded');
