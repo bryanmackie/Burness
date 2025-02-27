@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Employee Compensation Tracker</title>
+  <link rel="stylesheet" href="/src/Organize.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+</head>
+<body>
+  <header>
+    <img class="logo" src="/logo.png">
+  </header>
+
+  <main>
+    <div id="overlay" class="overlay">
+      <div class="popup">
+        <h2>Enter Passphrase</h2>
+        <input type="password" id="passphrase" placeholder="Enter passphrase" required>
+        <button type="button" id="submitPassphrase">Submit</button>
+      </div>
+    </div>
+    <div id="content">
+    <!-- Form for updating employee compensation -->
+    <form id="updateForm" method="POST">
+
+      <h2>Employee Compensation Tracker</h2>
+
+      <label class="m_first" for="m_first">Your Name:</label>
+      <input type="text" id="m_first" name="m_first" required/>
+
+      <label class="lastName" for="lastName">Last Name:</label>
+      <select id="lastName" name="last_name" required>
+        <option value="">Select Last Name</option>
+        <!-- Dynamically populated -->
+      </select>
+
+      
+      <label class="firstName" for="firstName">First Name:</label>
+      <select id="firstName" name="first_name" disabled required>
+        <option value="">Select First Name</option>
+        <!-- Dynamically populated -->
+      </select>
+
+      <label for="primaryTitle">Primary Title:</label>
+  <select id="primaryTitle" name="primaryTitle">
+    <option value="">Select Primary Title</option>
+    <option value="Senior Vice President">Senior Vice President</option>
+    <option value="Vice President">Vice President</option>
+    <option value="Design Director">Design Director</option>
+    <option value="Senior Writer">Senior Writer</option>
+    <option value="Associate Vice President">Associate Vice President</option>
+    <option value="Senior Digital Strategist">Senior Digital Strategist</option>
+    <option value="Senior Associate">Senior Associate</option>
+    <option value="Senior Graphic Designer">Senior Graphic Designer</option>
+    <option value="Digital Strategist">Digital Strategist</option>
+    <option value="Developer">Developer</option>
+    <option value="Associate">Associate</option>
+    <option value="Senior Digital Coordinator">Senior Digital Coordinator</option>
+    <option value="Graphic Designer">Graphic Designer</option>
+    <option value="Sr. Communications Coordinator">Sr. Communications Coordinator</option>
+    <option value="Digital Coordinator">Digital Coordinator</option>
+    <option value="Junior Graphic Designer">Junior Graphic Designer</option>
+    <option value="Communications Coordinator">Communications Coordinator</option>
+    <option value="Communications Assistant">Communications Assistant</option>
+ 
+  </select>
+
+  <label for="secondaryTitle">Secondary Title:</label>
+  <input type="text" id="secondaryTitle" name="secondaryTitle" />
+
+
+      <label for="salary">Salary:</label>
+      <input type="number" id="salary" name="salary"/>
+
+      <label for="salary_effective_date">Salary Effective Date:</label>
+      <input type="date" id="salary_effective_date" name="salary_effective_date"/>
+
+      <label for="salarychangereason">Salary Change Reason:</label>
+      <select id="salarychangereason" name="salarychangereason">
+        <option value="">Select Reason</option>
+        <option value="Promotion">Promotion</option>
+        <option value="Annual Raise">Annual Raise</option>
+        <option value="Off-Cycle Adjustment">Off-Cycle Adjustment</option>
+      </select>
+
+      <label for="comment_logged">Comment:</label>
+      <textarea type="text" id="comment_logged" name="comment_logged" rows="4"></textarea>
+
+      <label for="comment_date">Comment Date:</label>
+      <input type="date" id="comment_date" name="comment_date"/>
+
+      <label for="bonus">Bonus:</label>
+      <input type="number" id="bonus" name="bonus"/>
+
+      <label for="bonus_year">Bonus Year:</label>
+      <input type="number" id="bonus_year" name="bonus_year"/>
+
+      <button type="submit">Submit</button>
+    </form>
+
+     <!-- Container for Add and Delete Employee dropdowns -->
+     <div class="dropdown-container">
+      <!-- Dropdown for adding a new employee -->
+      <div class="dropdown" id="addEmployeeContainer">
+        <button class="dropbtn">Add Employee</button>
+        <div class="dropdown-content">
+          <form id="addEmployeeForm">
+            <h2>Add Employee</h2>
+            <label for="add_first_name">First Name:</label>
+            <input type="text" id="add_first_name" name="add_first_name" required />
+  
+            <label for="add_last_name">Last Name:</label>
+            <input type="text" id="add_last_name" name="add_last_name" required />
+  
+            <!-- Restricted or Unrestricted Dropdown -->
+            <label for="employeeStatus">Employee Status:</label>
+            <select id="employeeStatus" name="employeeStatus" required>
+              <option value="restricted">Restricted</option>
+              <option value="unrestricted">Unrestricted</option>
+            </select>
+  
+            <button type="submit">Add Employee</button>
+          </form>
+        </div>
+      </div>
+  
+      <!-- Dropdown for deleting an employee -->
+      <div class="dropdown" id="deleteEmployeeContainer">
+        <button class="dropbtn">Delete Employee</button>
+        <div class="dropdown-content">
+          <form id="deleteEmployeeForm">
+            <h4>Delete Employee</h4>
+            <label for="deleteLastName">Last Name:</label>
+            <select id="deleteLastName" name="delete_last_name" required>
+              <option value="">Select Last Name</option>
+              <!-- Last Name options will be inserted here dynamically -->
+            </select>
+  
+            <label for="deleteFirstName">First Name:</label>
+            <select id="deleteFirstName" name="delete_first_name" disabled required>
+              <option value="">Select First Name</option>
+              <!-- First Name options will be inserted here dynamically -->
+            </select>
+  
+            <button type="submit">Delete Employee</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  <h1>Employee Hierarchy</h1>
+  <div id="hierarchyContainer"></div>
+  <button class="hierarchybutton"></button>
+  </main>
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script type="module" src="/src/script.js"></script>
+    <script type="module" src="/src/app.js"></script>
+  </body>
+  </html>
