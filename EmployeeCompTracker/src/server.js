@@ -13,11 +13,12 @@ const __dirname = path.dirname(__filename);
 const app = express();
 
 // Serve static files from the "dist" folder after build
-app.use(express.static(path.join(__dirname, 'dist')));
+app.use(express.static(path.resolve(__dirname, 'dist')));
 
-// Serve the index.html from 'dist/src/index.html'
+// Serve the index.html from the absolute path in the "dist" folder
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'dist'));
+  const indexPath = path.resolve(__dirname, 'dist', 'index.html');
+  res.sendFile(indexPath);
 });
 
 // Parse JSON request bodies
