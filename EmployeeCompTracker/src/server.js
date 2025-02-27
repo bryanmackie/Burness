@@ -16,6 +16,8 @@ const app = express();
 
 // Serve static files from the "dist" folder after build
 app.use(express.static(path.join(projectRoot, 'dist', 'src')));
+// Serve static files from the "dist/assets" folder after build
+app.use(express.static(path.join(projectRoot, 'dist', 'assets')));
 
 // Serve the index.html from 'dist/src/index.html'
 app.get('/', (req, res) => {
