@@ -9,18 +9,18 @@ dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+const projectRoot = path.resolve(__dirname, '..'); // Goes up one level to the root
 
 const app = express();
 
 
 // Serve static files from the "dist" folder after build
-app.use(express.static(path.join(__dirname, 'dist', 'src'))); // Adjusted path to 'dist/src'
+app.use(express.static(path.join(projectRoot, 'dist', 'src')));
 
 // Serve the index.html from 'dist/src/index.html'
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'dist', 'src', 'index.html')); // Adjusted path
+  res.sendFile(path.join(projectRoot, 'dist', 'src', 'index.html'));
 });
-
 
 // Parse JSON request bodies
 app.use(bodyParser.json());
