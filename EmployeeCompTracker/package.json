@@ -2,6 +2,7 @@
   "name": "employee-compensation-tracker",
   "version": "1.0.0",
   "main": "src/server.js",
+  "module": "src/app.js",
   "scripts": {
     "start": "node src/server.js",
     "dev": "vite",                  
