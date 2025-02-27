@@ -23,6 +23,9 @@ export default defineConfig({
       input: 'src/index.html', // Entry point for the app
     },
   },
+  optimizeDeps: {
+    include: ['d3'], // Ensure d3 is bundled
+  },
   plugins: [
     {
       name: 'log-output-dir',
