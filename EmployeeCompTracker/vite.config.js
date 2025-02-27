@@ -20,9 +20,8 @@ export default defineConfig({
   build: {
     outDir: 'dist', // Output directory for Vite build
     rollupOptions: {
-        assetsInlineLimit: 0, // Forcing Vite to handle assets like JS properly
+      input: 'src/index.html', // Entry point for the app
     },
-    assetsInclude: ['**/*.js', 'src/app.js'],
   },
   optimizeDeps: {
     include: ['d3'], // Ensure d3 is bundled
