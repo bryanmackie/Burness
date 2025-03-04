@@ -318,7 +318,7 @@ passphraseInput.focus();
     ]
   });
 
-  document.querySelector('.hierarchybutton').addEventListener('click', fetchHierarchy);
+
 
   
   
