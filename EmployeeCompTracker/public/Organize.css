@@ -237,3 +237,8 @@ button {
 button:hover {
   background-color: #45a049;
 }
+
+.hierarchyContainer {
+  width: 100%;   /* Make it responsive */
+  height: 800px; /* Increase the height to give more space for the tree */
+}
