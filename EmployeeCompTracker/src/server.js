@@ -74,7 +74,7 @@ function buildHierarchy(data) {
       }
     }
   });
-
+  console.log("Final Hierarchy:", JSON.stringify(roots, null, 2));  // Debugging output
   return roots; // Return the hierarchical structure (top-level employees)
 }
 
