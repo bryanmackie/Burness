@@ -2,6 +2,23 @@
 
 import * as d3 from 'https://unpkg.com/d3?module';
 import { fetchHierarchy } from './script.js';
+
+
+export async function fetchHierarchy() {
+    try {
+      const response = await fetch('/get-hierarchy'); // This is your API call to fetch the data
+      if (!response.ok) {
+        throw new Error('Failed to fetch hierarchy');
+      }
+  
+      const data = await response.json();  // Parse the response as JSON
+      return data;  // Return the fetched hierarchy data
+    } catch (error) {
+      console.error("Error fetching hierarchy:", error);
+      document.getElementById("hierarchyContainer").innerText = 'Error fetching data.';  // Display an error message if fetching fails
+    }
+  }
+
 export function renderInteractiveTree(hierarchyData) {
   // Set dimensions for the tree
   const width = 800, height = 600;

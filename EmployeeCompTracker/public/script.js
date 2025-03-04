@@ -2,6 +2,7 @@ const API_BASE_URL = "https://burness.onrender.com";
 
 
 // const API_BASE_URL = process.env.API_BASE_URL || "http://localhost:3000";
+import { initInteractiveTree } from './app.js';  
 
 // Variables to store employee data after successful passphrase verification
 let employeesData = [];
@@ -78,23 +79,9 @@ async function populateDeleteEmployeeDropdowns() {
   const deleteLastNameSelect = document.getElementById('deleteLastName');
   populateDropdown(deleteLastNameSelect, deleteLastNames);
 }
-async function fetchHierarchy() {
-  try {
-    const response = await fetch('/get-hierarchy'); // This is your API call to fetch the data
-    if (!response.ok) {
-      throw new Error('Failed to fetch hierarchy');
-    }
 
-    const data = await response.json();  // Parse the response as JSON
-    return data;  // Return the fetched hierarchy data
-  } catch (error) {
-    console.error("Error fetching hierarchy:", error);
-    document.getElementById("hierarchyContainer").innerText = 'Error fetching data.';  // Display an error message if fetching fails
-  }
-}
-export { fetchHierarchy };
 
-import { initInteractiveTree } from './app.js';  
+
 
 document.addEventListener('DOMContentLoaded', () => {
   console.log("DOM fully loaded");
