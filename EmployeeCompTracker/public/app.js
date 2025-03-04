@@ -149,7 +149,7 @@ export async function initInteractiveTree() {
     try {
       // Fetch hierarchy data using the correct function
       const data = await fetchHierarchy(); // fetchHierarchy instead of fetchHierarchyData
-      const hierarchy = buildHierarchy(data);
+      //const hierarchy = buildHierarchy(data);
       renderInteractiveTree(hierarchy);
     } catch (error) {
       console.error("Error initializing interactive tree:", error);
