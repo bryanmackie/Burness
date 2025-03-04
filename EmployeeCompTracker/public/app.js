@@ -1,29 +1,7 @@
 // app.js
 
-// Import D3 as an ES module from a module-compatible CDN URL
 import * as d3 from 'https://unpkg.com/d3?module';
 
-/**
- * Fetch hierarchy data from the Express endpoint.
- * Returns a Promise that resolves to the JSON data.
- */
-export async function fetchHierarchyData() {
-  try {
-    const response = await fetch('/get-hierarchy');
-    if (!response.ok) {
-      throw new Error('Failed to fetch hierarchy');
-    }
-    return await response.json();
-  } catch (error) {
-    console.error("Error fetching hierarchy:", error);
-    throw error;
-  }
-}
-
-/**
- * Render an interactive tree from the provided hierarchy data.
- * Builds an SVG tree inside #chartContainer.
- */
 export function renderInteractiveTree(hierarchyData) {
   // Set dimensions for the tree
   const width = 800, height = 600;
@@ -34,7 +12,7 @@ export function renderInteractiveTree(hierarchyData) {
     .attr("width", width)
     .attr("height", height);
 
-  // Assume hierarchyData is an array with one root element.
+  // Create a D3 hierarchy
   const root = d3.hierarchy(hierarchyData[0]);
   const treeLayout = d3.tree().size([height, width - 160]);
   treeLayout(root);
@@ -51,7 +29,7 @@ export function renderInteractiveTree(hierarchyData) {
       .x(d => d.y)
       .y(d => d.x));
 
-  // Render nodes
+  // Render nodes with rounded square borders
   const node = svg.selectAll('g.node')
     .data(root.descendants())
     .enter()
@@ -64,22 +42,28 @@ export function renderInteractiveTree(hierarchyData) {
       .on("end", dragEnded)
     );
 
-  // Append circles for nodes
-  node.append('circle')
-    .attr('r', 10)
+  // Create the rounded square borders for nodes
+  node.append('rect')
+    .attr('width', 120)
+    .attr('height', 40)
+    .attr('rx', 10)  // Rounded corners
+    .attr('ry', 10)
     .style('fill', '#fff')
-    .style('stroke', 'steelblue');
+    .style('stroke', 'steelblue')
+    .style('stroke-width', 2);
 
-  // Append text labels for nodes
+  // Append text labels inside the rounded square
   node.append('text')
     .attr('dy', 3)
-    .attr('x', d => d.children ? -12 : 12)
-    .style('text-anchor', d => d.children ? 'end' : 'start')
+    .attr('x', 0)
+    .attr('y', 0)
+    .attr('text-anchor', 'middle')
+    .style('font-size', '12px')
     .text(d => `${d.data.emp_first_name} ${d.data.emp_last_name}`);
 
-  // Drag event handlers
+  // Define drag event handlers
   function dragStarted(event, d) {
-    d3.select(this).raise().select('circle').attr('stroke', 'black');
+    d3.select(this).raise().select('rect').attr('stroke', 'black');
   }
 
   function dragged(event, d) {
@@ -87,16 +71,15 @@ export function renderInteractiveTree(hierarchyData) {
   }
 
   async function dragEnded(event, d) {
-    d3.select(this).select('circle').attr('stroke', 'steelblue');
-    // Prompt for new supervisor details
+    d3.select(this).select('rect').attr('stroke', 'steelblue');
     const newSupervisorData = determineNewSupervisor(d);
     if (newSupervisorData && newSupervisorData.new_sup_id !== d.data.sup_id) {
-      // Update the database and refresh the tree
       await updateSupervisorInDatabase(d.data.emp_id, newSupervisorData);
       initInteractiveTree(); // Reinitialize the tree to reflect the update
     }
   }
 }
+
 
 /**
  * Prompt the user for a new supervisor.
