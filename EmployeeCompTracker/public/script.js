@@ -1,6 +1,6 @@
 const API_BASE_URL = "https://burness.onrender.com";
 
-import { initInteractiveTree } from './app.js';
+
 // const API_BASE_URL = process.env.API_BASE_URL || "http://localhost:3000";
 
 // Variables to store employee data after successful passphrase verification
@@ -93,7 +93,8 @@ async function fetchHierarchy() {
   }
 }
 
-  
+import { initInteractiveTree } from './app.js';  
+
 document.addEventListener('DOMContentLoaded', () => {
   console.log("DOM fully loaded");
   initInteractiveTree();
