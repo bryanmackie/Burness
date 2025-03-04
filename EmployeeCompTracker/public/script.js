@@ -319,5 +319,21 @@ passphraseInput.focus();
   });
 
 
+// script.js
+
+async function fetchHierarchy() {
+  try {
+    const response = await fetch('/get-hierarchy'); // This is your API call to fetch the data
+    if (!response.ok) {
+      throw new Error('Failed to fetch hierarchy');
+    }
+
+    const data = await response.json();  // Parse the response as JSON
+    return data;  // Return the fetched hierarchy data
+  } catch (error) {
+    console.error("Error fetching hierarchy:", error);
+    document.getElementById("hierarchyContainer").innerText = 'Error fetching data.';  // Display an error message if fetching fails
+  }
+}
 
   
