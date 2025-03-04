@@ -321,7 +321,3 @@ passphraseInput.focus();
 
 
   
-  
-
-  // Call the function to fetch and display the hierarchy when the page loads
-  window.onload = fetchHierarchy;
