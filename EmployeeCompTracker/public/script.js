@@ -1,8 +1,22 @@
 const API_BASE_URL = "https://burness.onrender.com";
+import * as d3 from 'https://cdn.jsdelivr.net/npm/d3@7.8.0/dist/d3.min.js';
 
-import { createChart } from './app.js';
 // const API_BASE_URL = process.env.API_BASE_URL || "http://localhost:3000";
+export function createChart() {
+  const chartContainer = document.getElementById("chartContainer");
+  console.log("Chart Container:", chartContainer);
 
+  const svg = d3.select(chartContainer)
+    .append('svg')
+    .attr('width', 500)
+    .attr('height', 500);
+
+  svg.append('circle')
+    .attr('cx', 250)
+    .attr('cy', 250)
+    .attr('r', 100)
+    .style('fill', 'steelblue');
+}
 // Variables to store employee data after successful passphrase verification
 let employeesData = [];
 let managerRole = null;
