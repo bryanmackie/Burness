@@ -1,4 +1,6 @@
 const API_BASE_URL = "https://burness.onrender.com";
+
+import { createChart } from './app.js';
 // const API_BASE_URL = process.env.API_BASE_URL || "http://localhost:3000";
 
 // Variables to store employee data after successful passphrase verification
@@ -78,7 +80,8 @@ async function populateDeleteEmployeeDropdowns() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
- 
+  console.log("DOM fully loaded");
+  createChart();  // Calling the function from app.js
   const overlay = document.getElementById('overlay');
   const content = document.getElementById('content');
   const passphraseInput = document.getElementById('passphrase');
