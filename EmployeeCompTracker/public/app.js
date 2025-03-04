@@ -30,7 +30,7 @@ const height = container.node().getBoundingClientRect().height;
   // Create a D3 hierarchy for the first root node (since we can have multiple root nodes)
   hierarchyData.forEach(rootData => {
     const root = d3.hierarchy(rootData); // Create the hierarchical structure for each root
-    const treeLayout = d3.tree().size([height, width - 160])
+    const treeLayout = d3.tree().size([height, width])
     .separation((a, b) => {
         return a.parent === b.parent ? 1 : 2;  // Increase separation if needed
       });
