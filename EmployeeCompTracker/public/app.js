@@ -1,7 +1,7 @@
 // app.js
 
 // Import D3 from a module-compatible CDN URL
-import * as d3 from 'https://cdn.jsdelivr.net/npm/d3@7.9.0?module';
+import * as d3 from 'https://unpkg.com/d3?module';
 
 export function createChart() {
   const chartContainer = document.getElementById("chartContainer");
