@@ -1,6 +1,6 @@
 const API_BASE_URL = "https://burness.onrender.com";
 
-import { createChart } from './app.js';
+import { initInteractiveTree } from './app.js';
 // const API_BASE_URL = process.env.API_BASE_URL || "http://localhost:3000";
 
 // Variables to store employee data after successful passphrase verification
@@ -81,7 +81,7 @@ async function populateDeleteEmployeeDropdowns() {
 
 document.addEventListener('DOMContentLoaded', () => {
   console.log("DOM fully loaded");
-  createChart();  // Calling the function from app.js
+  initInteractiveTree();
   const overlay = document.getElementById('overlay');
   const content = document.getElementById('content');
   const passphraseInput = document.getElementById('passphrase');
@@ -320,40 +320,7 @@ passphraseInput.focus();
 
   document.querySelector('.hierarchybutton').addEventListener('click', fetchHierarchy);
 
-  async function fetchHierarchy() {
-    try {
-      const response = await fetch('/get-hierarchy');
-      if (!response.ok) {
-        throw new Error('Failed to fetch hierarchy');
-      }
-
-      const data = await response.json();
-      displayHierarchy(data);
-    } catch (error) {
-      console.error("Error fetching hierarchy:", error);
-      document.getElementById("hierarchyContainer").innerText = 'Error fetching data.';
-    }
-  }
-
-  // Display the hierarchy in a readable format
-  function displayHierarchy(hierarchy) {
-    const container = document.getElementById('hierarchyContainer');
-    if (hierarchy && hierarchy.length > 0) {
-      container.innerHTML = '<ul>' + renderHierarchy(hierarchy) + '</ul>';
-    } else {
-      container.innerText = 'No hierarchy data available.';
-    }
-  }
-
-  // Recursively render the hierarchy in a nested list format
-  function renderHierarchy(data) {
-    return data.map(item => {
-      const childrenHtml = item.children && item.children.length > 0
-        ? '<ul>' + renderHierarchy(item.children) + '</ul>'
-        : '';
-      return `<li>${item.emp_first_name} ${item.emp_last_name}${childrenHtml}</li>`;
-    }).join('');
-  }
+  
   
 
   // Call the function to fetch and display the hierarchy when the page loads

@@ -336,6 +336,45 @@ const startServer = async () => {
         handleDatabaseError(res, error);
       }
     });
+// In server.js, within the startServer function, add:
+
+// Endpoint to update an employee's supervisor
+app.post('/update-supervisor', async (req, res) => {
+  const { emp_id, sup_id, sup_first_name, sup_last_name } = req.body;
+
+  // Basic validation
+  if (!emp_id || !sup_id || !sup_first_name || !sup_last_name) {
+    return res.status(400).json({ success: false, message: 'Missing required fields.' });
+  }
+
+  try {
+    // Update the supervisor information in your supervisors table
+    const updateQuery = `
+      UPDATE supervisors 
+      SET sup_id = $1, sup_first_name = $2, sup_last_name = $3 
+      WHERE emp_id = $4
+    `;
+    const updateValues = [sup_id, sup_first_name, sup_last_name, emp_id];
+    const updateResult = await client.query(updateQuery, updateValues);
+
+    if (updateResult.rowCount === 0) {
+      return res.status(404).json({ success: false, message: 'Employee not found.' });
+    }
+
+    // Optionally, re-fetch the updated hierarchy data:
+    const result = await client.query(`
+      SELECT emp_first_name, emp_last_name, emp_id, sup_id, sup_first_name, sup_last_name 
+      FROM supervisors
+      ORDER BY sup_id, emp_id;
+    `);
+    const updatedHierarchy = buildHierarchy(result.rows);
+
+    res.json({ success: true, updatedHierarchy });
+  } catch (error) {
+    console.error('Error updating supervisor:', error);
+    res.status(500).json({ success: false, message: 'Update failed.' });
+  }
+});
 
     // Start the server
     const port = process.env.PORT || 4000;
