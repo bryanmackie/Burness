@@ -30,7 +30,11 @@ const height = container.node().getBoundingClientRect().height;
   // Create a D3 hierarchy for the first root node (since we can have multiple root nodes)
   hierarchyData.forEach(rootData => {
     const root = d3.hierarchy(rootData); // Create the hierarchical structure for each root
-    const treeLayout = d3.tree().size([height, width - 160]);
+    const treeLayout = d3.tree().size([height, width - 160])
+    .separation((a, b) => {
+        return a.parent === b.parent ? 1 : 2;  // Increase separation if needed
+      });
+    
     treeLayout(root);
 
     // Render links between nodes
@@ -71,8 +75,8 @@ const height = container.node().getBoundingClientRect().height;
     // Append text labels inside the rounded square
     node.append('text')
       .attr('dy', 3)
-      .attr('x', 0)
-      .attr('y', 0)
+      .attr('x', 60)
+      .attr('y', 20)
       .attr('text-anchor', 'middle')
       .style('font-size', '12px')
       .text(d => `${d.data.emp_first_name} ${d.data.emp_last_name}`);
