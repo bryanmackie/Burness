@@ -17,9 +17,10 @@ export async function fetchHierarchy() {
 
 export function renderInteractiveTree(hierarchyData) {
   // Set dimensions for the tree
+  const container = d3.select("#hierarchyContainer");
   const width = container.node().getBoundingClientRect().width;
 const height = container.node().getBoundingClientRect().height;
-  const container = d3.select("#hierarchyContainer");
+
   container.html(''); // Clear any existing tree
 
   const svg = container.append("svg")
