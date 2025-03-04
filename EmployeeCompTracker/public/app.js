@@ -1,6 +1,8 @@
 // app.js
 
-import * as d3 from 'https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js';
+// Import D3 from a module-compatible CDN URL
+import * as d3 from 'https://cdn.jsdelivr.net/npm/d3@7.9.0?module';
+
 export function createChart() {
   const chartContainer = document.getElementById("chartContainer");
   console.log("Chart Container:", chartContainer);
