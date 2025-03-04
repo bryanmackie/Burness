@@ -127,16 +127,14 @@ export async function updateSupervisorInDatabase(empId, newSupervisorData) {
   }
 }
 
-/**
- * Initialize the interactive tree:
- * Fetch hierarchy data and render the tree.
- */
+// Corrected function name for initializing the tree
 export async function initInteractiveTree() {
-  try {
-    const hierarchyData = await fetchHierarchy();
-    renderInteractiveTree(hierarchyData);
-  } catch (error) {
-    console.error("Error initializing interactive tree:", error);
-    d3.select("#chartContainer").html("<p>Error loading tree.</p>");
+    try {
+      // Fetch hierarchy data using the correct function
+      const data = await fetchHierarchy(); // fetchHierarchy instead of fetchHierarchyData
+      const hierarchy = buildHierarchy(data);
+      renderInteractiveTree(hierarchy);
+    } catch (error) {
+      console.error("Error initializing interactive tree:", error);
+    }
   }
-}
