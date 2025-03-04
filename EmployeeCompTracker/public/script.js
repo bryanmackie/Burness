@@ -99,6 +99,9 @@ async function populateDeleteEmployeeDropdowns() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+  const chartContainer = document.getElementById("chartContainer");
+console.log("Chart Container:", chartContainer);
+console.log("DOM fully loaded");
   createChart();  // Example function from app.js
   const overlay = document.getElementById('overlay');
   const content = document.getElementById('content');
