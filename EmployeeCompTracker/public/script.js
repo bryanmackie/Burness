@@ -1,5 +1,3 @@
-import * as d3 from 'd3';
-
 const API_BASE_URL = "https://burness.onrender.com";
 // const API_BASE_URL = process.env.API_BASE_URL || "http://localhost:3000";
 
@@ -24,26 +22,7 @@ async function fetchData(url) {
     throw error;
   }
 }
-function createChart() {
-  const data = [1, 2, 3, 4, 5];  // Example data
-  const width = 400, height = 200;
-  
-  const svg = d3.select("#chartContainer")
-                .append("svg")
-                .attr("width", width)
-                .attr("height", height);
-  
-  // Example of creating bars for a bar chart
-  svg.selectAll("rect")
-     .data(data)
-     .enter()
-     .append("rect")
-     .attr("x", (d, i) => i * 80)
-     .attr("y", d => height - d * 30)
-     .attr("width", 50)
-     .attr("height", d => d * 30)
-     .attr("fill", "blue");
-}
+
 // Helper function to fetch employee data after verifying passphrase
 async function fetchEmployees() {
   return employeesData;  // Use the stored employee data
@@ -99,10 +78,7 @@ async function populateDeleteEmployeeDropdowns() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  const chartContainer = document.getElementById("chartContainer");
-console.log("Chart Container:", chartContainer);
-console.log("DOM fully loaded");
-  createChart();  // Example function from app.js
+ 
   const overlay = document.getElementById('overlay');
   const content = document.getElementById('content');
   const passphraseInput = document.getElementById('passphrase');

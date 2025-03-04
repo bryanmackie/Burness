@@ -2,12 +2,8 @@
   "name": "employee-compensation-tracker",
   "version": "1.0.0",
   "main": "src/server.js",
-  "module": "src/app.js",
   "scripts": {
     "start": "node src/server.js",
-    "dev": "vite",                  
-    "build": "vite build",          
-    "preview": "vite preview",      
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "type": "module",
@@ -18,11 +14,7 @@
     "mysql2": "^3.12.0",
     "path": "^0.12.7",
     "url": "^0.11.4",
-    "pg": "^8.13.1",
-    "d3": "^7.9.0"
-  },
-  "devDependencies": {
-    "vite": "^6.2.0"  
+    "pg": "^8.13.1"
   },
   "engines": {
     "node": "23.6.0",
