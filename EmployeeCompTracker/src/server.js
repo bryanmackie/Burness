@@ -82,7 +82,7 @@ function buildHierarchy(data) {
 app.get('/get-hierarchy', async (req, res) => {
   try {
     const result = await client.query('SELECT emp_first_name, emp_last_name, emp_id, sup_id, sup_first_name, sup_last_name FROM supervisors ORDER BY sup_id, emp_id;');
-    console.log('Raw Data from Database:', result.rows);  // Log to check if data is correct
+    //console.log('Raw Data from Database:', result.rows);  // Log to check if data is correct
     const employees = result.rows;
     const hierarchy = buildHierarchy(employees); // Build the hierarchy from the employees data
     res.json(hierarchy); // Send the hierarchy as a JSON response
