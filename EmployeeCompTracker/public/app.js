@@ -1,7 +1,7 @@
 // app.js
 
 import * as d3 from 'https://unpkg.com/d3?module';
-import { fetchHierarchy } from './script.js';
+
 
 
 export async function fetchHierarchy() {
