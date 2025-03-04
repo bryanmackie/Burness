@@ -22,7 +22,7 @@ export async function fetchHierarchy() {
 export function renderInteractiveTree(hierarchyData) {
   // Set dimensions for the tree
   const width = 800, height = 600;
-  const container = d3.select("#chartContainer");
+  const container = d3.select("#hierarchyContainer");
   container.html(''); // Clear any existing tree
 
   const svg = container.append("svg")
@@ -147,9 +147,11 @@ export async function updateSupervisorInDatabase(empId, newSupervisorData) {
 // Corrected function name for initializing the tree
 export async function initInteractiveTree() {
     try {
-        const hierarchy = await fetchHierarchy(); // Fetch processed hierarchy from server
-        renderInteractiveTree(hierarchy); // Use the processed hierarchy
-      } catch (error) {
-        console.error("Error initializing interactive tree:", error);
-      }
+      // Fetch hierarchy data using the correct function
+      const data = await fetchHierarchy(); // fetchHierarchy instead of fetchHierarchyData
+      const hierarchy = buildHierarchy(data);
+      renderInteractiveTree(hierarchy);
+    } catch (error) {
+      console.error("Error initializing interactive tree:", error);
     }
+  }
