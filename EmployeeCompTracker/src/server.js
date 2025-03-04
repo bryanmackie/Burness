@@ -42,16 +42,16 @@ function buildHierarchy(data) {
   const map = {};
   const roots = [];
 
-  // Create a map of employees and their subordinates (children)
+  // Step 1: Create a map of employees and their subordinates (children)
   data.forEach(item => {
     const employee = {
       emp_first_name: item.emp_first_name,
       emp_last_name: item.emp_last_name,
-      emp_id: item.emp_id, // Use emp_id directly
-      sup_id: item.sup_id, // Use sup_id directly
+      emp_id: item.emp_id,  // Use emp_id directly
+      sup_id: item.sup_id,  // Use sup_id directly
       sup_first_name: item.sup_first_name,
       sup_last_name: item.sup_last_name,
-      children: [] // Initialize an empty array for children (subordinates)
+      children: []  // Initialize an empty array for children (subordinates)
     };
 
     // Add employee to the map by their emp_id
@@ -59,23 +59,25 @@ function buildHierarchy(data) {
 
     // If the employee has no supervisor (sup_id is null), they are a top-level employee
     if (item.sup_id === null) {
-      roots.push(employee);
+      roots.push(employee);  // Add to roots (top-level employees with no supervisor)
     }
   });
 
-  // Link employees to their supervisors (adding children)
+  // Step 2: Link employees to their supervisors (adding children)
   data.forEach(item => {
     if (item.sup_id !== null) {
       const employee = map[item.emp_id];
       const supervisor = map[item.sup_id];
 
       if (supervisor) {
-        supervisor.children.push(employee); // Add employee as a child of their supervisor
+        supervisor.children.push(employee);  // Add employee as a child of their supervisor
       }
     }
   });
-  console.log("Final Hierarchy:", JSON.stringify(roots, null, 2));  // Debugging output
-  return roots; // Return the hierarchical structure (top-level employees)
+
+  // Debugging output to log the hierarchy structure
+  console.log("Final Hierarchy:", JSON.stringify(roots, null, 2));
+  return roots;  // Return the hierarchical structure (top-level employees)
 }
 
 // Endpoint to fetch hierarchy data after password verification
@@ -84,13 +86,14 @@ app.get('/get-hierarchy', async (req, res) => {
     const result = await client.query('SELECT emp_first_name, emp_last_name, emp_id, sup_id, sup_first_name, sup_last_name FROM supervisors ORDER BY sup_id, emp_id;');
     //console.log('Raw Data from Database:', result.rows);  // Log to check if data is correct
     const employees = result.rows;
-    const hierarchy = buildHierarchy(employees); // Build the hierarchy from the employees data
-    res.json(hierarchy); // Send the hierarchy as a JSON response
+    const hierarchy = buildHierarchy(employees);  // Build the hierarchy from the employees data
+    res.json(hierarchy);  // Send the hierarchy as a JSON response
   } catch (err) {
     console.error('Error fetching hierarchy:', err);
     res.status(500).send('Error fetching data');
   }
 });
+
 app.post('/verify-passphrase', async (req, res) => {
   const { passphrase } = req.body;
 
