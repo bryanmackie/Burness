@@ -133,7 +133,7 @@ export async function updateSupervisorInDatabase(empId, newSupervisorData) {
  */
 export async function initInteractiveTree() {
   try {
-    const hierarchyData = await fetchHierarchyData();
+    const hierarchyData = await fetchHierarchy();
     renderInteractiveTree(hierarchyData);
   } catch (error) {
     console.error("Error initializing interactive tree:", error);
