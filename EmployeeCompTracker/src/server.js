@@ -42,25 +42,20 @@ function buildHierarchy(data) {
   const map = {};
   const roots = [];
 
+  // Create a map of employees and their subordinates (children)
   data.forEach(item => {
-    console.log(`Employee: ${item.emp_first_name} ${item.emp_last_name}`);
-console.log(`Supervisor: ${item.sup_first_name} ${item.sup_last_name}`);
-
-    const employeeId = item.emp_id; // Use the concatenated emp_id from the database
-    const supervisorId = item.sup_id; // Use the concatenated sup_id from the database
-
     const employee = {
       emp_first_name: item.emp_first_name,
       emp_last_name: item.emp_last_name,
-      emp_id: employeeId, // Store combined name as the employee's id
-      sup_id: supervisorId, // Store combined name as the supervisor's id
+      emp_id: item.emp_id, // Use emp_id directly
+      sup_id: item.sup_id, // Use sup_id directly
       sup_first_name: item.sup_first_name,
       sup_last_name: item.sup_last_name,
       children: [] // Initialize an empty array for children (subordinates)
     };
 
-    // Add employee to the map by their full name (emp_first + emp_last)
-    map[employeeId] = employee;
+    // Add employee to the map by their emp_id
+    map[item.emp_id] = employee;
 
     // If the employee has no supervisor (sup_id is null), they are a top-level employee
     if (item.sup_id === null) {
@@ -68,16 +63,15 @@ console.log(`Supervisor: ${item.sup_first_name} ${item.sup_last_name}`);
     }
   });
 
-  // Step 2: Link subordinates to their supervisors
+  // Link employees to their supervisors (adding children)
   data.forEach(item => {
-    const employeeId = `${item.emp_first_name} ${item.emp_last_name}`; // Generate employee ID
-    const supervisorId = `${item.sup_first_name} ${item.sup_last_name}`; // Generate supervisor ID
-    const employee = map[employeeId]; // Get the employee object
-    const supervisor = map[supervisorId]; // Get the supervisor object
+    if (item.sup_id !== null) {
+      const employee = map[item.emp_id];
+      const supervisor = map[item.sup_id];
 
-    // If supervisor exists, add this employee as a child of the supervisor
-    if (supervisor) {
-      supervisor.children.push(employee); // Add employee as a child of their supervisor
+      if (supervisor) {
+        supervisor.children.push(employee); // Add employee as a child of their supervisor
+      }
     }
   });
 
