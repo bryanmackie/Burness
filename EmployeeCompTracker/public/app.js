@@ -1,7 +1,7 @@
 // app.js
 
 import * as d3 from 'https://unpkg.com/d3?module';
-
+import { fetchHierarchy } from './script.js';
 export function renderInteractiveTree(hierarchyData) {
   // Set dimensions for the tree
   const width = 800, height = 600;

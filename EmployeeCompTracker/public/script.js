@@ -92,6 +92,7 @@ async function fetchHierarchy() {
     document.getElementById("hierarchyContainer").innerText = 'Error fetching data.';  // Display an error message if fetching fails
   }
 }
+export { fetchHierarchy };
 
 import { initInteractiveTree } from './app.js';  
 
