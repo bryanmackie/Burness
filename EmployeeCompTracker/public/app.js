@@ -26,19 +26,23 @@ const height = container.node().getBoundingClientRect().height;
   const svg = container.append("svg")
     .attr("width", width)
     .attr("height", height);
-    const treeSpacingX = 400;
-    const treeSpacingY = 100;
+    const treeSpacingX = 0;  // Adjust the horizontal spacing between trees
+  const treeSpacingY = 300;  // Vertical spacing for trees
   
-    hierarchyData.forEach((rootData, index) => {
-      const treeOffsetX = index * treeSpacingX;
-      const treeOffsetY = index * treeSpacingY;
-  
-      const group = svg.append("g")
-        .attr("transform", `translate(${treeOffsetX}, ${treeOffsetY})`);
-    
-      const root = d3.hierarchy(rootData);
-      const treeLayout = d3.tree().size([height, width / hierarchyData.length]);
-      treeLayout(root);
+  const totalHeight = hierarchyData.length * treeSpacingY; // Total height to fit all trees in a column
+
+  hierarchyData.forEach((rootData, index) => {
+    // Position trees in rows with fixed horizontal spacing
+    const treeOffsetX = treeSpacingX; // Adjust to place all trees in the middle of the SVG horizontally
+    const treeOffsetY = index * treeSpacingY;
+
+    const group = svg.append("g")
+      .attr("transform", `translate(${treeOffsetX}, ${treeOffsetY})`);
+
+    const root = d3.hierarchy(rootData);
+    const treeLayout = d3.tree().size([height, width / hierarchyData.length]);
+    treeLayout(root);
+
   
   
     // Render links
