@@ -29,12 +29,12 @@ const height = container.node().getBoundingClientRect().height;
 
   // Create a D3 hierarchy for the first root node (since we can have multiple root nodes)
   hierarchyData.forEach((rootData, i) => {
-    const groupOffsetX = i * 200; // Adjust spacing based on your layout
+    const groupOffsetX = i * 300; // Adjust spacing based on your layout
     const group = svg.append("g")
-      .attr("transform", `translate(${groupOffsetX},0)`);
+      .attr("transform", `translate(${groupOffsetX}, 50)`);
   
     const root = d3.hierarchy(rootData);
-    const treeLayout = d3.tree().size([height, width - 160])
+    const treeLayout = d3.tree().size([height, width - 200])
       .separation((a, b) => a.parent === b.parent ? 1 : 2);
     treeLayout(root);
   
@@ -84,13 +84,24 @@ const height = container.node().getBoundingClientRect().height;
   
   // Define drag event handlers
   function dragStarted(event, d) {
-    d3.select(this).raise().select('rect').attr('stroke', 'black');
+    d3.select(this).raise().classed("active", true);
+  
+    // Store the original positions to calculate the relative movement
+    d.startX = event.x;
+    d.startY = event.y;
+    d.transformX = d3.select(this).attr("transform") ? 
+                   parseFloat(d3.select(this).attr("transform").split("(")[1].split(",")[0]) : 0;
+    d.transformY = d3.select(this).attr("transform") ? 
+                   parseFloat(d3.select(this).attr("transform").split("(")[1].split(",")[1]) : 0;
   }
-
+  
   function dragged(event, d) {
-    d3.select(this).attr('transform', `translate(${event.x},${event.y})`);
+    // Update node position based on the delta movement
+    const dx = event.x - d.startX;
+    const dy = event.y - d.startY;
+    
+    d3.select(this).attr("transform", `translate(${d.transformX + dx}, ${d.transformY + dy})`);
   }
-
   async function dragEnded(event, d) {
     // Restore original styling
     d3.select(this).select('rect').attr('stroke', 'steelblue');
