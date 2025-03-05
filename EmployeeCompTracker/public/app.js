@@ -117,24 +117,31 @@ const height = container.node().getBoundingClientRect().height;
 
     // Loop over all nodes to detect the drop target
     d3.selectAll('.node').each(function(nodeData) {
-        const bbox = this.getBBox(); // Bounding box of the node
-        const matrix = this.getCTM(); // Transformation matrix
-        const nodeX = matrix.e; // Adjusted X position in SVG space
-        const nodeY = matrix.f; // Adjusted Y position in SVG space
+        const bbox = this.getBBox();
+        const matrix = this.getCTM();
+        const nodeX = matrix.e;
+        const nodeY = matrix.f;
 
-        // Check if the drop position falls within this node's bounding box
         if (
             dropPosition.x >= nodeX &&
             dropPosition.x <= nodeX + bbox.width &&
             dropPosition.y >= nodeY &&
             dropPosition.y <= nodeY + bbox.height &&
-            nodeData.data.emp_id !== d.data.emp_id  // Avoid self-drop
+            nodeData.data.emp_id !== d.data.emp_id
         ) {
             targetSupervisor = nodeData;
         }
     });
 
     if (targetSupervisor) {
+        // Confirmation prompt
+        const confirmChange = confirm(`Are you sure you want to change ${d.data.emp_first_name} ${d.data.emp_last_name}'s supervisor to ${targetSupervisor.data.emp_first_name} ${targetSupervisor.data.emp_last_name}?`);
+        
+        if (!confirmChange) {
+            console.log("Supervisor change canceled.");
+            return;
+        }
+
         console.log(`Dropped on: ${targetSupervisor.data.emp_first_name} ${targetSupervisor.data.emp_last_name}`);
 
         // Automatically update the supervisor using the target's data
@@ -150,6 +157,7 @@ const height = container.node().getBoundingClientRect().height;
         console.warn("No valid drop target found. Supervisor not updated.");
     }
 }
+
 
 }
 
