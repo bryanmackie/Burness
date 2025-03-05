@@ -29,16 +29,16 @@ const height = container.node().getBoundingClientRect().height;
 
   // Create a D3 hierarchy for the first root node (since we can have multiple root nodes)
   hierarchyData.forEach((rootData, i) => {
-    const groupOffsetX = i * 300; // Adjust spacing based on your layout
+    const groupOffsetX = i * 400; // Adjust spacing between trees
     const group = svg.append("g")
-      .attr("transform", `translate(${groupOffsetX}, 50)`);
+      .attr("transform", `translate(${groupOffsetX}, 50)`); // Shift each tree
   
     const root = d3.hierarchy(rootData);
-    const treeLayout = d3.tree().size([height, width - 200])
-      .separation((a, b) => a.parent === b.parent ? 1 : 2);
+    const treeLayout = d3.tree().size([height, width / hierarchyData.length]); // Divide width equally
+  
     treeLayout(root);
   
-    // Render links inside the group
+    // Render links
     group.selectAll('path.link')
       .data(root.links())
       .enter()
@@ -50,7 +50,7 @@ const height = container.node().getBoundingClientRect().height;
         .x(d => d.y)
         .y(d => d.x));
   
-    // Render nodes inside the group
+    // Render nodes
     const node = group.selectAll('g.node')
       .data(root.descendants())
       .enter()
@@ -63,7 +63,6 @@ const height = container.node().getBoundingClientRect().height;
         .on("end", dragEnded)
       );
   
-    // Append a rounded rectangle and text for each node
     node.append('rect')
       .attr('width', 120)
       .attr('height', 40)
@@ -81,7 +80,6 @@ const height = container.node().getBoundingClientRect().height;
       .style('font-size', '12px')
       .text(d => `${d.data.emp_first_name} ${d.data.emp_last_name}`);
   });
-  
   // Define drag event handlers
   function dragStarted(event, d) {
     d3.select(this).raise().classed("active", true);
