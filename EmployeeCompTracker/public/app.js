@@ -28,17 +28,18 @@ const height = container.node().getBoundingClientRect().height;
     .attr("height", height);
 
   // Create a D3 hierarchy for the first root node (since we can have multiple root nodes)
-  hierarchyData.forEach(rootData => {
-    const root = d3.hierarchy(rootData); // Create the hierarchical structure for each root
+  hierarchyData.forEach((rootData, i) => {
+    const groupOffsetX = i * 200; // Adjust spacing based on your layout
+    const group = svg.append("g")
+      .attr("transform", `translate(${groupOffsetX},0)`);
+  
+    const root = d3.hierarchy(rootData);
     const treeLayout = d3.tree().size([height, width - 160])
-    .separation((a, b) => {
-        return a.parent === b.parent ? 1 : 2;  // Increase separation if needed
-      });
-    
+      .separation((a, b) => a.parent === b.parent ? 1 : 2);
     treeLayout(root);
-
-    // Render links between nodes
-    svg.selectAll('path.link')
+  
+    // Render links inside the group
+    group.selectAll('path.link')
       .data(root.links())
       .enter()
       .append('path')
@@ -48,9 +49,9 @@ const height = container.node().getBoundingClientRect().height;
       .attr('d', d3.linkHorizontal()
         .x(d => d.y)
         .y(d => d.x));
-
-    // Render nodes with rounded square borders
-    const node = svg.selectAll('g.node')
+  
+    // Render nodes inside the group
+    const node = group.selectAll('g.node')
       .data(root.descendants())
       .enter()
       .append('g')
@@ -61,18 +62,17 @@ const height = container.node().getBoundingClientRect().height;
         .on("drag", dragged)
         .on("end", dragEnded)
       );
-
-    // Create the rounded square borders for nodes
+  
+    // Append a rounded rectangle and text for each node
     node.append('rect')
       .attr('width', 120)
       .attr('height', 40)
-      .attr('rx', 10)  // Rounded corners
+      .attr('rx', 10)
       .attr('ry', 10)
       .style('fill', '#fff')
       .style('stroke', 'steelblue')
       .style('stroke-width', 2);
-
-    // Append text labels inside the rounded square
+  
     node.append('text')
       .attr('dy', 3)
       .attr('x', 60)
@@ -81,7 +81,7 @@ const height = container.node().getBoundingClientRect().height;
       .style('font-size', '12px')
       .text(d => `${d.data.emp_first_name} ${d.data.emp_last_name}`);
   });
-
+  
   // Define drag event handlers
   function dragStarted(event, d) {
     d3.select(this).raise().select('rect').attr('stroke', 'black');
