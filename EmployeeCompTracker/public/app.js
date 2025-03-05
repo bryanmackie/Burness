@@ -114,10 +114,10 @@ const height = container.node().getBoundingClientRect().height;
     // Get the drop position relative to the SVG container
     const svg = d3.select("svg").node();
     const point = svg.createSVGPoint();
-    point.x = event.x;
-    point.y = event.y;
+    point.x = event.sourceEvent.clientX;
+    point.y = event.sourceEvent.clientY;
     const dropPosition = point.matrixTransform(svg.getScreenCTM().inverse());
-
+    console.log("Drop Position:", dropPosition); // Debugging log
     let targetSupervisor = null;
 
     // Loop over all nodes to detect the drop target
@@ -135,10 +135,12 @@ const height = container.node().getBoundingClientRect().height;
             nodeData.data.emp_id !== d.data.emp_id
         ) {
             targetSupervisor = nodeData;
+            console.log("Found target supervisor:", targetSupervisor.data.emp_first_name);
         }
     });
 
     if (targetSupervisor) {
+      console.log(`Updating supervisor for ${d.data.emp_first_name}`);
         const confirmChange = confirm(`Are you sure you want to change ${d.data.emp_first_name} ${d.data.emp_last_name}'s supervisor to ${targetSupervisor.data.emp_first_name} ${targetSupervisor.data.emp_last_name}?`);
         
         if (!confirmChange) {
