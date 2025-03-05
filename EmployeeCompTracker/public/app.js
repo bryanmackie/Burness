@@ -92,28 +92,52 @@ const height = container.node().getBoundingClientRect().height;
   }
 
   async function dragEnded(event, d) {
+    // Restore original styling
     d3.select(this).select('rect').attr('stroke', 'steelblue');
-    const newSupervisorData = determineNewSupervisor(d);
-    if (newSupervisorData && newSupervisorData.new_sup_id !== d.data.sup_id) {
-      await updateSupervisorInDatabase(d.data.emp_id, newSupervisorData);
-      initInteractiveTree(); // Reinitialize the tree to reflect the update
+    
+    // Get the drop position (relative to the SVG container)
+    const dropX = event.x;
+    const dropY = event.y;
+    let targetSupervisor = null;
+  
+    // Loop over all nodes to detect the drop target
+    d3.selectAll('.node').each(function(nodeData) {
+      // Get the bounding box of this node's group element
+      const bbox = this.getBBox();
+      // Convert the node's coordinates relative to the SVG container if necessary
+      const matrix = this.getCTM();
+      const nodeX = matrix.e + bbox.x;
+      const nodeY = matrix.f + bbox.y;
+      // Check if the drop position falls within this node's bounding box
+      if (
+        dropX >= nodeX &&
+        dropX <= nodeX + bbox.width &&
+        dropY >= nodeY &&
+        dropY <= nodeY + bbox.height &&
+        nodeData.data.emp_id !== d.data.emp_id  // avoid self-drop
+      ) {
+        targetSupervisor = nodeData;
+      }
+    });
+  
+    if (targetSupervisor) {
+      // Automatically update the supervisor using the target's data
+      await updateSupervisorInDatabase(d.data.emp_id, {
+        new_sup_id: targetSupervisor.data.emp_id,
+        new_sup_first_name: targetSupervisor.data.emp_first_name,
+        new_sup_last_name: targetSupervisor.data.emp_last_name
+      });
+      // Re-render the tree to reflect the updated hierarchy
+      initInteractiveTree();
+    } else {
+      // Optionally, if no target is found, you can revert to the original position or show a message.
+      console.warn("No valid drop target found. Supervisor not updated.");
     }
   }
+  
 }
 
-export function determineNewSupervisor(d) {
-  const currentSup = d.data.sup_id || 'None';
-  // For this example, we use prompt. In production, replace with a better UI.
-  const new_sup_id = prompt(`Enter new supervisor ID for ${d.data.emp_first_name} ${d.data.emp_last_name} (current: ${currentSup}):`, currentSup);
-  if (!new_sup_id) return null;
-  const new_sup_first_name = prompt("Enter new supervisor's first name:", "");
-  const new_sup_last_name = prompt("Enter new supervisor's last name:", "");
-  return {
-    new_sup_id,
-    new_sup_first_name,
-    new_sup_last_name
-  };
-}
+
 
 export async function updateSupervisorInDatabase(empId, newSupervisorData) {
   try {
