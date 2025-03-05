@@ -26,17 +26,20 @@ const height = container.node().getBoundingClientRect().height;
   const svg = container.append("svg")
     .attr("width", width)
     .attr("height", height);
-
-  // Create a D3 hierarchy for the first root node (since we can have multiple root nodes)
-  hierarchyData.forEach((rootData, i) => {
-    const groupOffsetX = i * 400; // Adjust spacing between trees
-    const group = svg.append("g")
-      .attr("transform", `translate(${groupOffsetX}, 50)`); // Shift each tree
+    const treeSpacingX = 400;
+    const treeSpacingY = 100;
   
-    const root = d3.hierarchy(rootData);
-    const treeLayout = d3.tree().size([height, width / hierarchyData.length]); // Divide width equally
+    hierarchyData.forEach((rootData, index) => {
+      const treeOffsetX = index * treeSpacingX;
+      const treeOffsetY = index * treeSpacingY;
   
-    treeLayout(root);
+      const group = svg.append("g")
+        .attr("transform", `translate(${treeOffsetX}, ${treeOffsetY})`);
+    
+      const root = d3.hierarchy(rootData);
+      const treeLayout = d3.tree().size([height, width / hierarchyData.length]);
+      treeLayout(root);
+  
   
     // Render links
     group.selectAll('path.link')
