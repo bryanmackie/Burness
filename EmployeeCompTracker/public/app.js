@@ -106,46 +106,51 @@ const height = container.node().getBoundingClientRect().height;
     // Restore original styling
     d3.select(this).select('rect').attr('stroke', 'steelblue');
     
-    // Get the drop position (relative to the SVG container)
-    const dropX = event.x;
-    const dropY = event.y;
+    // Get the drop position relative to the SVG container
+    const svg = d3.select("svg").node();
+    const point = svg.createSVGPoint();
+    point.x = event.x;
+    point.y = event.y;
+    const dropPosition = point.matrixTransform(svg.getScreenCTM().inverse());
+
     let targetSupervisor = null;
-  
+
     // Loop over all nodes to detect the drop target
     d3.selectAll('.node').each(function(nodeData) {
-      // Get the bounding box of this node's group element
-      const bbox = this.getBBox();
-      // Convert the node's coordinates relative to the SVG container if necessary
-      const matrix = this.getCTM();
-      const nodeX = matrix.e + bbox.x;
-      const nodeY = matrix.f + bbox.y;
-      // Check if the drop position falls within this node's bounding box
-      if (
-        dropX >= nodeX &&
-        dropX <= nodeX + bbox.width &&
-        dropY >= nodeY &&
-        dropY <= nodeY + bbox.height &&
-        nodeData.data.emp_id !== d.data.emp_id  // avoid self-drop
-      ) {
-        targetSupervisor = nodeData;
-      }
+        const bbox = this.getBBox(); // Bounding box of the node
+        const matrix = this.getCTM(); // Transformation matrix
+        const nodeX = matrix.e; // Adjusted X position in SVG space
+        const nodeY = matrix.f; // Adjusted Y position in SVG space
+
+        // Check if the drop position falls within this node's bounding box
+        if (
+            dropPosition.x >= nodeX &&
+            dropPosition.x <= nodeX + bbox.width &&
+            dropPosition.y >= nodeY &&
+            dropPosition.y <= nodeY + bbox.height &&
+            nodeData.data.emp_id !== d.data.emp_id  // Avoid self-drop
+        ) {
+            targetSupervisor = nodeData;
+        }
     });
-  
+
     if (targetSupervisor) {
-      // Automatically update the supervisor using the target's data
-      await updateSupervisorInDatabase(d.data.emp_id, {
-        new_sup_id: targetSupervisor.data.emp_id,
-        new_sup_first_name: targetSupervisor.data.emp_first_name,
-        new_sup_last_name: targetSupervisor.data.emp_last_name
-      });
-      // Re-render the tree to reflect the updated hierarchy
-      initInteractiveTree();
+        console.log(`Dropped on: ${targetSupervisor.data.emp_first_name} ${targetSupervisor.data.emp_last_name}`);
+
+        // Automatically update the supervisor using the target's data
+        await updateSupervisorInDatabase(d.data.emp_id, {
+            new_sup_id: targetSupervisor.data.emp_id,
+            new_sup_first_name: targetSupervisor.data.emp_first_name,
+            new_sup_last_name: targetSupervisor.data.emp_last_name
+        });
+
+        // Re-render the tree to reflect the updated hierarchy
+        initInteractiveTree();
     } else {
-      // Optionally, if no target is found, you can revert to the original position or show a message.
-      console.warn("No valid drop target found. Supervisor not updated.");
+        console.warn("No valid drop target found. Supervisor not updated.");
     }
-  }
-  
+}
+
 }
 
 
