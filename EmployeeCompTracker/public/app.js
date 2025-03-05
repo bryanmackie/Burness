@@ -26,8 +26,8 @@ const height = container.node().getBoundingClientRect().height;
   const svg = container.append("svg")
     .attr("width", width)
     .attr("height", height);
-    const treeSpacingX = 0;  // Adjust the horizontal spacing between trees
-  const treeSpacingY = 400;  // Vertical spacing for trees
+    const treeSpacingX = 20;  // Adjust the horizontal spacing between trees
+  const treeSpacingY = 500;  // Vertical spacing for trees
   
   const totalHeight = hierarchyData.length * treeSpacingY; // Total height to fit all trees in a column
 
@@ -40,7 +40,7 @@ const height = container.node().getBoundingClientRect().height;
       .attr("transform", `translate(${treeOffsetX}, ${treeOffsetY})`);
 
     const root = d3.hierarchy(rootData);
-    const treeLayout = d3.tree().size([height / hierarchyData.length, width * .8]);
+    const treeLayout = d3.tree().size([height / hierarchyData.length, width * .9]);
     treeLayout(root);
 
   
