@@ -103,7 +103,7 @@ const height = container.node().getBoundingClientRect().height;
   async function dragEnded(event, d) {
     // Restore original styling
     d3.select(this).select('rect').attr('stroke', 'steelblue');
-    
+
     // Get the drop position relative to the SVG container
     const svg = d3.select("svg").node();
     const point = svg.createSVGPoint();
@@ -115,16 +115,16 @@ const height = container.node().getBoundingClientRect().height;
 
     // Loop over all nodes to detect the drop target
     d3.selectAll('.node').each(function(nodeData) {
-        const bbox = this.getBBox();
-        const matrix = this.getCTM();
-        const nodeX = matrix.e;
-        const nodeY = matrix.f;
+        const rect = this.getBoundingClientRect(); // More reliable than getBBox()
+        const svgRect = svg.getBoundingClientRect(); // Get SVG position on screen
+        const nodeX = rect.x - svgRect.x; // Adjust for SVG position
+        const nodeY = rect.y - svgRect.y;
 
         if (
             dropPosition.x >= nodeX &&
-            dropPosition.x <= nodeX + bbox.width &&
+            dropPosition.x <= nodeX + rect.width &&
             dropPosition.y >= nodeY &&
-            dropPosition.y <= nodeY + bbox.height &&
+            dropPosition.y <= nodeY + rect.height &&
             nodeData.data.emp_id !== d.data.emp_id
         ) {
             targetSupervisor = nodeData;
@@ -132,7 +132,6 @@ const height = container.node().getBoundingClientRect().height;
     });
 
     if (targetSupervisor) {
-        // Confirmation prompt
         const confirmChange = confirm(`Are you sure you want to change ${d.data.emp_first_name} ${d.data.emp_last_name}'s supervisor to ${targetSupervisor.data.emp_first_name} ${targetSupervisor.data.emp_last_name}?`);
         
         if (!confirmChange) {
@@ -142,19 +141,18 @@ const height = container.node().getBoundingClientRect().height;
 
         console.log(`Dropped on: ${targetSupervisor.data.emp_first_name} ${targetSupervisor.data.emp_last_name}`);
 
-        // Automatically update the supervisor using the target's data
         await updateSupervisorInDatabase(d.data.emp_id, {
             new_sup_id: targetSupervisor.data.emp_id,
             new_sup_first_name: targetSupervisor.data.emp_first_name,
             new_sup_last_name: targetSupervisor.data.emp_last_name
         });
 
-        // Re-render the tree to reflect the updated hierarchy
         initInteractiveTree();
     } else {
         console.warn("No valid drop target found. Supervisor not updated.");
     }
 }
+
 
 
 }
