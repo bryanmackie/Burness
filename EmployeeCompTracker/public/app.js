@@ -34,13 +34,13 @@ const height = container.node().getBoundingClientRect().height;
   hierarchyData.forEach((rootData, index) => {
     // Position trees in rows with fixed horizontal spacing
     const treeOffsetX = treeSpacingX; // Adjust to place all trees in the middle of the SVG horizontally
-    const treeOffsetY = treeSpacingY;
+    const treeOffsetY = index * treeSpacingY;
 
     const group = svg.append("g")
       .attr("transform", `translate(${treeOffsetX}, ${treeOffsetY})`);
 
     const root = d3.hierarchy(rootData);
-    const treeLayout = d3.tree().size([height, width / hierarchyData.length]);
+    const treeLayout = d3.tree().size([height / hierarchyData.length, width]);
     treeLayout(root);
 
   
