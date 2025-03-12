@@ -1,7 +1,5 @@
-import * as d3Selection from './node_modules/d3-selection/dist/d3-selection.min.js';
-import * as d3Hierarchy from '/node_modules/d3-hierarchy/dist/d3-hierarchy.min.js';
-import * as d3Drag from '/node_modules/d3-drag/dist/d3-drag.min.js';
-import * as d3Link from './node_modules/d3-shape/dist/d3-shape.min.js';
+import * as d3 from './node_modules/d3/dist/d3.min.js';
+
 
 export async function fetchHierarchy() {
   try {
@@ -20,7 +18,7 @@ export async function fetchHierarchy() {
 
 export function renderInteractiveTree(hierarchyData) {
   // Set dimensions for the tree
-  const container = d3Selection.select("#hierarchyContainer");
+  const container = d3.select("#hierarchyContainer");
   const width = container.node().getBoundingClientRect().width;
 const height = container.node().getBoundingClientRect().height;
 
@@ -42,8 +40,8 @@ const height = container.node().getBoundingClientRect().height;
     const group = svg.append("g")
       .attr("transform", `translate(${treeOffsetX}, ${treeOffsetY})`);
 
-    const root = d3Hierarchy.hierarchy(rootData);
-    const treeLayout = d3Hierarchy.tree().size([height / hierarchyData.length, width * .9]);
+    const root = d3.hierarchy(rootData);
+    const treeLayout = d3.tree().size([height / hierarchyData.length, width * .9]);
     treeLayout(root);
 
   
@@ -56,7 +54,7 @@ const height = container.node().getBoundingClientRect().height;
       .attr('class', 'link')
       .attr('fill', 'none')
       .attr('stroke', '#ccc')
-      .attr('d', d3Link.linkHorizontal()
+      .attr('d', d3.linkHorizontal()
         .x(d => d.y)
         .y(d => d.x));
   
@@ -67,7 +65,7 @@ const height = container.node().getBoundingClientRect().height;
       .append('g')
       .attr('class', 'node')
       .attr('transform', d => `translate(${d.y},${d.x})`)
-      .call(d3Drag.drag()
+      .call(d3.drag()
         .on("start", dragStarted)
         .on("drag", dragged)
         .on("end", dragEnded)
@@ -92,15 +90,15 @@ const height = container.node().getBoundingClientRect().height;
   });
   // Define drag event handlers
   function dragStarted(event, d) {
-    d3Selection.select(this).raise().classed("active", true);
+    d3.select(this).raise().classed("active", true);
   
     // Store the original positions to calculate the relative movement
     d.startX = event.x;
     d.startY = event.y;
-    d.transformX = d3Selection.select(this).attr("transform") ? 
-                   parseFloat(d3Selection.select(this).attr("transform").split("(")[1].split(",")[0]) : 0;
-    d.transformY = d3Selection.select(this).attr("transform") ? 
-                   parseFloat(d3Selection.select(this).attr("transform").split("(")[1].split(",")[1]) : 0;
+    d.transformX = d3.select(this).attr("transform") ? 
+                   parseFloat(d3.select(this).attr("transform").split("(")[1].split(",")[0]) : 0;
+    d.transformY = d3.select(this).attr("transform") ? 
+                   parseFloat(d3.select(this).attr("transform").split("(")[1].split(",")[1]) : 0;
   }
   
   function dragged(event, d) {
@@ -108,14 +106,14 @@ const height = container.node().getBoundingClientRect().height;
     const dx = event.x - d.startX;
     const dy = event.y - d.startY;
     
-    d3Selection.select(this).attr("transform", `translate(${d.transformX + dx}, ${d.transformY + dy})`);
+    d3.select(this).attr("transform", `translate(${d.transformX + dx}, ${d.transformY + dy})`);
   }
   async function dragEnded(event, d) {
     // Restore original styling
-    d3Selection.select(this).select('rect').attr('stroke', 'steelblue');
+    d3.select(this).select('rect').attr('stroke', 'steelblue');
 
     // Get the drop position relative to the SVG container
-    const svg = d3Selection.select("svg").node();
+    const svg = d3.select("svg").node();
     const point = svg.createSVGPoint();
     point.x = event.sourceEvent.clientX;
     point.y = event.sourceEvent.clientY;
@@ -124,7 +122,7 @@ const height = container.node().getBoundingClientRect().height;
     let targetSupervisor = null;
 
     // Loop over all nodes to detect the drop target
-    d3Selection.selectAll('.node').each(function(nodeData) {
+    d3.selectAll('.node').each(function(nodeData) {
         const rect = this.getBoundingClientRect(); // More reliable than getBBox()
         const svgRect = svg.getBoundingClientRect(); // Get SVG position on screen
         const nodeX = rect.x - svgRect.x; // Adjust for SVG position
