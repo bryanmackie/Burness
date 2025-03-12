@@ -1,6 +1,5 @@
 import cron from 'node-cron';
-import pkg from 'pg';
-const { Pool } = pkg; // Correctly import Pool from pg
+
 import nodemailer from 'nodemailer';
 import dotenv from 'dotenv';
 dotenv.config();
@@ -174,12 +173,14 @@ async function checkAndNotify() {
 }
 
 // Schedule the cron job to run weekly (every Monday at 8 AM)
-cron.schedule("0 8 * * MON", () => {
-  console.log("Cron job triggered: Running weekly salary check and notification job...");
-  checkAndNotify();
-}, {
-  timezone: "America/New_York" // Set your desired time zone
-});
+export function startCronJob(client) {
+  cron.schedule("0 8 * * MON", () => {
+    console.log("Cron job triggered: Running weekly salary check and notification job...");
+    checkAndNotify(client);
+  }, {
+    timezone: "America/New_York" // Set your desired time zone
+  });
 
-// For testing purposes, run the function immediately.
-checkAndNotify();
+  // For testing purposes, run the function immediately.
+  checkAndNotify(client);
+}

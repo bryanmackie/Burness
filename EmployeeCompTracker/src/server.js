@@ -6,7 +6,8 @@ import createConnection from './config/db.js'; // Import the database connection
 import dotenv from 'dotenv';
 dotenv.config();
 
-import './cronJob.js';
+import { startCronJob } from './cronJob.js';
+
 
 
 const __filename = fileURLToPath(import.meta.url);
@@ -120,6 +121,8 @@ app.post('/verify-passphrase', async (req, res) => {
   try {
     client = await createConnection();
     console.log('Database connected successfully.');
+
+    startCronJob(client);
     // If the query requires parameters (for 'manager' role), pass them
     const result = role === 'admin'
       ? await client.query(employeesQuery) // No parameters for admin
