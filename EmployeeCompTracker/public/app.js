@@ -2,7 +2,7 @@ import * as d3Selection from './node_modules/d3-selection/dist/d3-selection.min.
 import * as d3Hierarchy from '/node_modules/d3-hierarchy/dist/d3-hierarchy.min.js';
 import * as d3Drag from '/node_modules/d3-drag/dist/d3-drag.min.js';
 import * as d3Link from './node_modules/d3-shape/dist/d3-shape.min.js';
-
+import { select } from "d3Selection";
 export async function fetchHierarchy() {
   try {
     const response = await fetch('/get-hierarchy'); // This is your API call to fetch the data
