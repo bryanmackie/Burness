@@ -16,7 +16,7 @@ const app = express();
 app.use(express.static(path.join(__dirname, '../public')));
 
 
-//app.use('/node_modules', express.static(path.join(__dirname, '../node_modules')));
+app.use('/node_modules', express.static(path.join(__dirname, '../node_modules')));
 
 // Parse JSON request bodies
 app.use(bodyParser.json());
