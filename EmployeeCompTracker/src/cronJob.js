@@ -1,14 +1,16 @@
 import cron from 'node-cron';
-import { Pool } from 'pg';
+import pkg from 'pg';
+const { Pool } = pkg; // Correctly import Pool from pg
 import nodemailer from 'nodemailer';
-//import dotenv from 'dotenv';
-//dotenv.config();
+import dotenv from 'dotenv';
+dotenv.config();
+
 console.log('Cron job script initialized.');
+
 // Set up PostgreSQL connection
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
 });
-
 // Set up NodeMailer transporter using Gmail
 const transporter = nodemailer.createTransport({
   service: "gmail",
@@ -173,10 +175,11 @@ async function checkAndNotify() {
 
 // Schedule the cron job to run weekly (every Monday at 8 AM)
 cron.schedule("0 8 * * MON", () => {
-  console.log("Running weekly salary check and notification job...");
+  console.log("Cron job triggered: Running weekly salary check and notification job...");
   checkAndNotify();
+}, {
+  timezone: "America/New_York" // Set your desired time zone
 });
 
 // For testing purposes, run the function immediately.
-// In production, you might comment out the following line.
 checkAndNotify();
