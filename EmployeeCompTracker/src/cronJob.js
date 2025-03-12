@@ -171,13 +171,15 @@ async function checkAndNotify() {
 
 // Schedule the cron job to run weekly (every Monday at 8 AM)
 export function startCronJob() {
-  // For testing purposes, run the function immediately.
+  console.log("Starting cron job...");
+
+  // Run immediately for quick testing
   checkAndNotify();
 
-  cron.schedule("0 8 * * MON", () => {
-    console.log("Cron job triggered: Running weekly salary check and notification job...");
+  cron.schedule("* * * * *", () => {
+    console.log("Cron job triggered: Running salary check and notification...");
     checkAndNotify();
   }, {
-    timezone: "America/New_York" // Set your desired time zone
+    timezone: "America/New_York"
   });
 }
