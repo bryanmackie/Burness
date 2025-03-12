@@ -122,7 +122,7 @@ app.post('/verify-passphrase', async (req, res) => {
     client = await createConnection();
     console.log('Database connected successfully.');
 
-    startCronJob(client);
+    
     // If the query requires parameters (for 'manager' role), pass them
     const result = role === 'admin'
       ? await client.query(employeesQuery) // No parameters for admin
@@ -146,7 +146,7 @@ const startServer = async () => {
 
     // Routes
 
-
+    startCronJob(client);
 
     // Update employee compensation
     app.post('/update', async (req, res) => {

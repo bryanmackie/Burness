@@ -156,11 +156,11 @@ async function checkAndNotify() {
 }
 
 // Schedule the cron job to run every minute for testing
-export function startCronJob() {
+export function startCronJob(client) {
   console.log("Starting cron job...");
 
   // Run immediately for quick testing
-  checkAndNotify();
+  checkAndNotify(client);
 
   cron.schedule("* * * * *", () => {
     console.log("Cron job triggered: Running salary check and notification...");
