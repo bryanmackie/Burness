@@ -1,4 +1,4 @@
-import { select } from "d3-selection";
+import { select, selectAll } from "d3-selection";
 import { hierarchy, tree } from "d3-hierarchy";
 import { drag } from "d3-drag";
 import { linkHorizontal } from "d3-shape";
