@@ -1,4 +1,4 @@
-import * as d3 from './node_modules/d3/dist/d3.min.js';
+import * as d3 from "d3";
 
 
 export async function fetchHierarchy() {
