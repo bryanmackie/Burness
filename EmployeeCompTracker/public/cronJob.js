@@ -26,28 +26,40 @@ async function getEmailTemplate(templateType) {
       `SELECT subject, body FROM email_templates WHERE template_type = $1 LIMIT 1`,
       [templateType]
     );
-    if (result.rows.length > 0) {
-      return result.rows[0];
-    } else {
-      console.error(`No email template found for type: ${templateType}`);
-      return null;
-    }
+    return result.rows.length > 0 ? result.rows[0] : null;
   } catch (error) {
     console.error("Error fetching email template:", error);
     return null;
   }
 }
 
+// Function to calculate the next payroll date (1st or 16th of the next month)
+function getNextPayrollDate(latestSalaryDate) {
+  let salaryDate = new Date(latestSalaryDate);
+  let year = salaryDate.getFullYear();
+  let month = salaryDate.getMonth() + 1; // Start with the same month
+  let nextPayrollDate;
+
+  if (salaryDate.getDate() < 16) {
+    nextPayrollDate = new Date(year, month - 1, 16);
+  } else {
+    nextPayrollDate = new Date(year, month, 1);
+  }
+
+  return nextPayrollDate.toISOString().split('T')[0]; // Format as YYYY-MM-DD
+}
+
 // Function to send an email
-async function sendEmail(to, subject, text) {
+async function sendEmail(to, cc, subject, text) {
   try {
     let info = await transporter.sendMail({
       from: `"HR Notification" <${process.env.EMAIL_USER}>`,
       to,
+      cc,
       subject,
       text,
     });
-    console.log(`Email sent to ${to}. Message ID: ${info.messageId}`);
+    console.log(`Email sent to ${to} (cc: ${cc || "N/A"}). Message ID: ${info.messageId}`);
   } catch (error) {
     console.error(`Error sending email to ${to}:`, error);
   }
@@ -65,8 +77,7 @@ async function checkAndNotify() {
 
     // Query employees who are eligible for a raise
     const employeeQuery = `
-      SELECT led.first_name, led.last_name, led.latest_salary_effective_date,
-             (CURRENT_DATE - led.latest_salary_effective_date) AS days_since_salary_change
+      SELECT led.first_name, led.last_name, led.latest_salary_effective_date
       FROM latest_employee_data led
       JOIN salary_review_data sr ON led.first_name = sr.first_name AND led.last_name = sr.last_name
       WHERE led.latest_salary_effective_date < (CURRENT_DATE - INTERVAL '10 months')
@@ -78,7 +89,8 @@ async function checkAndNotify() {
 
     // Process each employee
     for (const emp of employees) {
-      const { first_name, last_name, latest_salary_effective_date, days_since_salary_change } = emp;
+      const { first_name, last_name, latest_salary_effective_date } = emp;
+      const payrollIncreaseDate = getNextPayrollDate(latest_salary_effective_date);
 
       // Get immediate supervisor details
       const immediateSupervisorQuery = `
@@ -101,7 +113,6 @@ async function checkAndNotify() {
       `;
       const ultimateNameResult = await pool.query(ultimateNameQuery, [first_name, last_name]);
       if (ultimateNameResult.rows.length === 0) continue;
-
       const { ultimate_supervisor_first_name, ultimate_supervisor_last_name } = ultimateNameResult.rows[0];
 
       // Get ultimate supervisor email
@@ -115,23 +126,20 @@ async function checkAndNotify() {
       if (ultimateEmailResult.rows.length === 0) continue;
       const ultimateSupervisor = ultimateEmailResult.rows[0];
 
+      // Determine email recipients
+      let to = immediateSupervisor.immediate_supervisor_email;
+      let cc = immediateSupervisor.immediate_supervisor_email === ultimateSupervisor.ultimate_supervisor_email ? null : ultimateSupervisor.ultimate_supervisor_email;
+
       // Replace placeholders in the email template
       const subject = emailTemplate.subject.replace("{first_name}", first_name).replace("{last_name}", last_name);
 
       const emailBody = emailTemplate.body
         .replace("{first_name}", first_name)
-        .replace("{last_name}", last_name)
-        .replace("{latest_salary_effective_date}", latest_salary_effective_date.toISOString().split('T')[0])
-        .replace("{days_since_salary_change}", days_since_salary_change)
-        .replace("{immediate_supervisor_name}", `${immediateSupervisor.sup_first_name} ${immediateSupervisor.sup_last_name}`)
-        .replace("{immediate_supervisor_email}", immediateSupervisor.immediate_supervisor_email)
-        .replace("{ultimate_supervisor_name}", `${ultimate_supervisor_first_name} ${ultimate_supervisor_last_name}`)
-        .replace("{ultimate_supervisor_email}", ultimateSupervisor.ultimate_supervisor_email);
+        .replace("{payroll_increase_date}", payrollIncreaseDate)
+        .replace("{ultimate_supervisor_name}", `${ultimate_supervisor_first_name} ${ultimate_supervisor_last_name}`);
 
-      // Send emails to both supervisors
-      await sendEmail(immediateSupervisor.immediate_supervisor_email, subject, emailBody);
-      await sendEmail(ultimateSupervisor.ultimate_supervisor_email, subject, emailBody);
-
+      // Send email
+      await sendEmail(to, cc, subject, emailBody);
       console.log(`Notified supervisors for ${first_name} ${last_name}`);
     }
   } catch (error) {
@@ -146,4 +154,4 @@ cron.schedule("0 8 * * MON", () => {
 });
 
 // Optionally, invoke the function immediately for testing
-// checkAndNotify();
+checkAndNotify();
