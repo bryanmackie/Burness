@@ -17,10 +17,7 @@
     "pg": "^8.13.1",
     "node-cron": "^3.0.3",
     "nodemailer": "^6.10.0",
-    "d3-selection": "^7.0.0",      
-    "d3-hierarchy": "^7.0.0",     
-    "d3-drag": "^7.0.0",           
-    "d3-shape": "^7.0.0"           
+    "d3": "^7.9.0"          
   },
   "engines": {
     "node": "23.6.0",
