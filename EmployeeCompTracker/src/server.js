@@ -15,6 +15,9 @@ const app = express();
 // Serve static files from the "public" folder
 app.use(express.static(path.join(__dirname, '../public')));
 
+
+app.use('/node_modules', express.static(path.join(__dirname, '../node_modules')));
+
 // Parse JSON request bodies
 app.use(bodyParser.json());
 
