@@ -1,10 +1,9 @@
-// cronJob.js
-
-require('dotenv').config();
-const cron = require("node-cron");
-const { Pool } = require("pg");
-const nodemailer = require("nodemailer");
-
+import cron from 'node-cron';
+import { Pool } from 'pg';
+import nodemailer from 'nodemailer';
+//import dotenv from 'dotenv';
+//dotenv.config();
+console.log('Cron job script initialized.');
 // Set up PostgreSQL connection
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,

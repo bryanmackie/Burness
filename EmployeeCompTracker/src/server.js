@@ -4,8 +4,10 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import createConnection from './config/db.js'; // Import the database connection
 import dotenv from 'dotenv';
-
 dotenv.config();
+
+import './cronJob.js';
+
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
