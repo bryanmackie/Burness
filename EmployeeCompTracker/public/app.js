@@ -1,7 +1,7 @@
 import { select, selectAll } from './node_modules/d3-selection/dist/d3-selection.min.js';
 import * as d3Hierarchy from '/node_modules/d3-hierarchy/dist/d3-hierarchy.min.js';
 import * as d3Drag from '/node_modules/d3-drag/dist/d3-drag.min.js';
-import { linkHorizontal } from './node_modules/d3-shape/dist/d3-shape.min.js';
+import * as d3Link from './node_modules/d3-shape/dist/d3-shape.min.js';
 
 export async function fetchHierarchy() {
   try {
@@ -56,7 +56,7 @@ const height = container.node().getBoundingClientRect().height;
       .attr('class', 'link')
       .attr('fill', 'none')
       .attr('stroke', '#ccc')
-      .attr('d', linkHorizontal()
+      .attr('d', d3Link.linkHorizontal()
         .x(d => d.y)
         .y(d => d.x));
   
