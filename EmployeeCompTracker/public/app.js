@@ -1,7 +1,7 @@
-import { select, selectAll } from "d3-selection";
-import { hierarchy, tree } from "d3-hierarchy";
-import { drag } from "d3-drag";
-import { linkHorizontal } from "d3-shape";
+import { select, selectAll } from './node_modules/d3-selection/dist/d3-selection.min.js';
+import { hierarchy, tree } from './node_modules/d3-hierarchy/dist/d3-hierarchy.min.js';
+import { drag } from './node_modules/d3-drag/dist/d3-drag.min.js';
+import { linkHorizontal } from './node_modules/d3-shape/dist/d3-shape.min.js';
 
 export async function fetchHierarchy() {
   try {
