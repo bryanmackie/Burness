@@ -6,10 +6,7 @@ dotenv.config();
 
 console.log('Cron job script initialized.');
 
-// Set up PostgreSQL connection
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-});
+
 // Set up NodeMailer transporter using Gmail
 const transporter = nodemailer.createTransport({
   service: "gmail",
