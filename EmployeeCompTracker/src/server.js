@@ -170,7 +170,7 @@ const startServer = async () => {
         const setClause = [];
         const setValues = [];
         const currentSalaryQuery = `
-      SELECT salary
+      SELECT latest_salary
       FROM latest_employee_data
       WHERE first_name = $1 AND last_name = $2;
     `;
