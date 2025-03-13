@@ -165,7 +165,7 @@ async function checkAndNotify(client) {
         .replace("{payroll_increase_date}", payrollIncreaseDate)
         .replace("{ultimate_supervisor_name}", `${ultimate_supervisor_first_name} ${ultimate_supervisor_last_name}`)
         .replace("{immediate_supervisor_name}", `${immediateSupervisor.sup_first_name} ${immediateSupervisor.sup_last_name}`)
-        
+
       // Send the email (immediate supervisor in "to", ultimate supervisor in "cc" if different)
       await sendEmail(to, cc, subject, emailBody);
       console.log(`Notified supervisors for ${first_name} ${last_name}`);
@@ -179,7 +179,7 @@ async function checkAndNotify(client) {
 export function startCronJob(client) {
   try {
     // For testing purposes, run the function immediately.
-    checkAndNotify(client);
+    //checkAndNotify(client);
 
     cron.schedule("0 8 * * MON", () => {
       console.log("Cron job triggered: Running weekly salary check and notification job...");
