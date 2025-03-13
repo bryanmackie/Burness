@@ -160,7 +160,7 @@ const startServer = async () => {
         return res.status(400).json({ success: false, message: 'Manager first name, First name, and Last name are required.' });
       }
       const sanitizedSalary = sanitizeNumber(salary);
-      const sanitizedRaise = santizeNumber(raisePercentage);
+      const sanitizedRaise = sanitizeNumber(raisePercentage);
       const sanitizedBonus = sanitizeNumber(bonus);
       const sanitizedBonusYear = sanitizeNumber(bonus_year);
       const sanitizedSalaryEffectiveDate = salary_effective_date === "" ? null : salary_effective_date;
