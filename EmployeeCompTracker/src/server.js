@@ -222,10 +222,14 @@ const startServer = async () => {
     if (sanitizedRaise !== null) {
       const raiseDecimal = parseFloat(sanitizedRaise) / 100;
       newSalary = currentSalary * (1 + raiseDecimal);
+      // Round to the nearest 10
+      newSalary = Math.round(newSalary / 10) * 10;
     } else if (sanitizedSalary !== null) {
       // Use the provided salary if raisePercentage is not provided
       newSalary = sanitizedSalary;
-    }
+      // Round to the nearest 10
+      newSalary = Math.round(newSalary / 10) * 10;
+      
         if (sanitizedSalary !== null || sanitizedRaise !== null) {
           setClause.push(`salary = $${setValues.length + 1}`);
           setValues.push(newSalary);
