@@ -152,7 +152,7 @@ const startServer = async () => {
     app.post('/update', async (req, res) => {
       const {
         m_first, first_name, last_name, primaryTitle, secondaryTitle, salary,
-        salary_effective_date, salarychangereason, comment_logged, comment_date, bonus, bonus_year
+        salary_effective_date, salarychangereason, comment_logged, comment_date, bonus, bonus_year, raisePercentage
       } = req.body;
 
       // Validate required fields
@@ -160,6 +160,7 @@ const startServer = async () => {
         return res.status(400).json({ success: false, message: 'Manager first name, First name, and Last name are required.' });
       }
       const sanitizedSalary = sanitizeNumber(salary);
+      const sanitizedRaise = santizeNumber(raisePercentage);
       const sanitizedBonus = sanitizeNumber(bonus);
       const sanitizedBonusYear = sanitizeNumber(bonus_year);
       const sanitizedSalaryEffectiveDate = salary_effective_date === "" ? null : salary_effective_date;
@@ -168,9 +169,27 @@ const startServer = async () => {
         // Construct the SET clause dynamically, only including non-null fields
         const setClause = [];
         const setValues = [];
+        const currentSalaryQuery = `
+      SELECT salary
+      FROM latest_employee_data
+      WHERE first_name = $1 AND last_name = $2;
+    `;
+    const currentSalaryResult = await client.query(currentSalaryQuery, [first_name, last_name]);
 
-       
-        if (sanitizedSalary !== null) {
+    if (currentSalaryResult.rows.length === 0) {
+      return res.status(404).json({ success: false, message: 'Employee not found in latest_employee_data.' });
+    }
+
+    const currentSalary = currentSalaryResult.rows[0].salary;
+    let newSalary = currentSalary;
+    if (sanitizedRaise !== null) {
+      const raiseDecimal = parseFloat(sanitizedRaise) / 100;
+      newSalary = currentSalary * (1 + raiseDecimal);
+    } else if (sanitizedSalary !== null) {
+      // Use the provided salary if raisePercentage is not provided
+      newSalary = sanitizedSalary;
+    }
+        if (sanitizedSalary !== null || sanitizedRaise !== null) {
           setClause.push(`salary = $${setValues.length + 1}`);
           setValues.push(sanitizedSalary);
         }
