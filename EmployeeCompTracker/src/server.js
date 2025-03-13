@@ -170,19 +170,33 @@ const startServer = async () => {
         const setClause = [];
         const setValues = [];
         const currentSalaryQuery = `
-      SELECT latest_salary
-      FROM latest_employee_data
-      WHERE first_name = $1 AND last_name = $2;
-    `;
-    const currentSalaryResult = await client.query(currentSalaryQuery, [first_name, last_name]);
-
-    if (currentSalaryResult.rows.length === 0) {
-      return res.status(404).json({ success: false, message: 'Employee not found in latest_employee_data.' });
-    }
-
-    const currentSalary = currentSalaryResult.rows[0].latest_salary;
+        SELECT latest_salary
+        FROM latest_employee_data
+        WHERE first_name = $1 AND last_name = $2;
+      `;
+      
+      // Trim input values
+      const trimmedFirstName = first_name.trim();
+      const trimmedLastName = last_name.trim();
+      
+      // Log the query and parameters
+      console.log("Executing query:", currentSalaryQuery);
+      console.log("Query parameters:", [trimmedFirstName, trimmedLastName]);
+      
+      const currentSalaryResult = await client.query(currentSalaryQuery, [trimmedFirstName, trimmedLastName]);
+      
+      // Log the query result
+      console.log("Query result:", currentSalaryResult.rows);
+      
+      if (currentSalaryResult.rows.length === 0) {
+        console.warn("No rows found for employee:", trimmedFirstName, trimmedLastName);
+        return res.status(404).json({ success: false, message: 'Employee not found in latest_employee_data.' });
+      }
+      
+      const currentSalary = currentSalaryResult.rows[0].latest_salary; // Ensure this matches the column name
+      console.log("Current Salary:", currentSalary); // Log the fetched salary
     let newSalary = currentSalary;
-    console.log("Current Salary:", currentSalary);
+
     console.log("m_first:", m_first);
     console.log("first_name:", first_name);
     console.log("last_name:", last_name);
