@@ -162,7 +162,7 @@ const startServer = async () => {
       const sanitizedSalary = sanitizeNumber(salary);
       const sanitizedRaise = sanitizeNumber(raisePercentage);
       const sanitizedBonus = sanitizeNumber(bonus);
-      const sanitizedBonusYear = sanitizeNumber(bonus_year);
+      const sanitizedBonusYear = bonus_year === "" ? null : bonus_year;
       const sanitizedSalaryEffectiveDate = salary_effective_date === "" ? null : salary_effective_date;
       const sanitizedCommentDate = comment_date === "" ? null : comment_date;
       try {
