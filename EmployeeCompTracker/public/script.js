@@ -86,6 +86,7 @@ async function populateDeleteEmployeeDropdowns() {
 document.addEventListener('DOMContentLoaded', () => {
   console.log("DOM fully loaded");
   initInteractiveTree();
+  document.getElementById("hierarchyContainer").style.display = "none";
   const overlay = document.getElementById('overlay');
   const content = document.getElementById('content');
   const passphraseInput = document.getElementById('passphrase');
@@ -322,6 +323,30 @@ passphraseInput.focus();
     ]
   });
 
+
+  // Toggle to reveal Hierarchy / Form
+
+document.getElementById("toggleTreeBtn").addEventListener("click", function() {
+  const form = document.querySelector("form");
+  const treeContainer = document.getElementById("hierarchyContainer");
+
+
+  if (treeContainer.style.display === "none" || treeContainer.style.display === "") {
+      form.style.display = "none";  // Hide form
+      treeContainer.style.display = "block";  // Show hierarchy
+      initInteractiveTree();  // Load the tree
+      this.textContent = "Back to Employee Form";
+  } else {
+      form.style.display = "block";  // Show form
+      treeContainer.style.display = "none";  // Hide hierarchy
+      this.textContent = "Show Employee Hierarchy";
+  }
+});
+
+// Ensure elements are hidden by default
+document.addEventListener("DOMContentLoaded", function() {
+  document.getElementById("hierarchyContainer").style.display = "none";
+});
 
 // script.js
 

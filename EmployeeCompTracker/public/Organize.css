@@ -242,3 +242,31 @@ button:hover {
   width: 100%;   /* Make it responsive */
   height: 2500px; /* Increase the height to give more space for the tree */
 }
+
+/* Toggle Button for Form / Tree */
+
+.toggle-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+#toggleTreeBtn {
+    background-color: rgba(4, 78, 87);
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    margin-top: 12px;
+    border-radius: 4px;
+    font-size: 16px;
+    width: 100%;
+    max-width: 250px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+#toggleTreeBtn:hover {
+    background-color: rgba(4, 78, 87, 0.9);
+}
+
+/* End of Toggle Button */
