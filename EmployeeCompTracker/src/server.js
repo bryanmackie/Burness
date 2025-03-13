@@ -182,6 +182,16 @@ const startServer = async () => {
 
     const currentSalary = currentSalaryResult.rows[0].salary;
     let newSalary = currentSalary;
+
+    console.log("m_first:", m_first);
+    console.log("first_name:", first_name);
+    console.log("last_name:", last_name);
+    console.log("primaryTitle:", primaryTitle);
+    console.log("secondaryTitle:", secondaryTitle);
+    console.log("newSalary:", newSalary);
+    console.log("sanitizedSalaryEffectiveDate:", sanitizedSalaryEffectiveDate);
+    console.log("salarychangereason:", salarychangereason);
+    
     if (sanitizedRaise !== null) {
       const raiseDecimal = parseFloat(sanitizedRaise) / 100;
       newSalary = currentSalary * (1 + raiseDecimal);
