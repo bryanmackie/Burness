@@ -162,7 +162,20 @@ const startServer = async () => {
       const sanitizedSalary = sanitizeNumber(salary);
       const sanitizedRaise = sanitizeNumber(raisePercentage);
       const sanitizedBonus = sanitizeNumber(bonus);
-      const sanitizedBonusYear = bonus_year === "" ? null : bonus_year;
+
+      const sanitizedBonusDate = bonus_year === "" ? null : bonus_year;
+      const isValidDate = (dateString) => {
+        const regex = /^\d{4}-\d{2}-\d{2}$/;
+        return regex.test(dateString) && !isNaN(new Date(dateString).getTime());
+      };
+      if (sanitizedBonusDate && !isValidDate(sanitizedBonusDate)) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid bonus date format. Use YYYY-MM-DD.'
+        });
+      }
+    
+
       const sanitizedSalaryEffectiveDate = salary_effective_date === "" ? null : salary_effective_date;
       const sanitizedCommentDate = comment_date === "" ? null : comment_date;
       try {
@@ -308,19 +321,18 @@ console.log("salarychangereason:", salarychangereason);
         }
         
         if (sanitizedBonus) {
-          // Check if sanitizedBonusYear is also provided
-          if (!sanitizedBonusYear) {
-            // If sanitizedBonusYear is missing, return a structured error response
+          // Check if sanitizedBonusDate is provided
+          if (!sanitizedBonusDate) {
             return res.status(400).json({
               success: false,
-              message: 'Bonus year must be provided when a bonus is entered.'
+              message: 'Bonus date must be provided when a bonus is entered.'
             });
           }
-        
-          // Proceed with inserting into the historical_bonuses table
+    
+          // Insert into historical_bonuses with bonus_date
           await client.query(
-            'INSERT INTO historical_bonuses (m_first, first_name, last_name, primaryTitle, secondaryTitle, bonus, bonus_year) VALUES ($1, $2, $3, $4, $5, $6, $7)',
-            [m_first, first_name, last_name, primaryTitle, secondaryTitle, sanitizedBonus, sanitizedBonusYear]
+            'INSERT INTO historical_bonuses (m_first, first_name, last_name, primaryTitle, secondaryTitle, bonus, bonus_date) VALUES ($1, $2, $3, $4, $5, $6, $7)',
+            [m_first, first_name, last_name, primaryTitle, secondaryTitle, sanitizedBonus, sanitizedBonusDate]
           );
         }
         
