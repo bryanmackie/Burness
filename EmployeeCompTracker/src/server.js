@@ -251,7 +251,7 @@ const startServer = async () => {
           setValues.push(sanitizedBonus);
         }
         if (sanitizedBonusDate !== null) {
-          setClause.push(`bonus_year = $${setValues.length + 1}`);
+          setClause.push(`bonus_date = $${setValues.length + 1}`);
           setValues.push(sanitizedBonusDate);
         }
         if (primaryTitle !== null) {
