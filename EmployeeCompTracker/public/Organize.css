@@ -240,7 +240,7 @@ button:hover {
 
 #hierarchyContainer {
   width: 100%;   /* Make it responsive */
-  height: 3500px; /* Increase the height to give more space for the tree */
+  height: 4000px; /* Increase the height to give more space for the tree */
 }
 
 /* Toggle Button for Form / Tree */
