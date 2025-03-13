@@ -287,6 +287,7 @@ console.log("salarychangereason:", salarychangereason);
             'INSERT INTO historical_salary_changes (m_first, first_name, last_name, primaryTitle, secondaryTitle, salary, salary_effective_date, salarychangereason) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)',
             [m_first, first_name, last_name, primaryTitle, secondaryTitle, newSalary, sanitizedSalaryEffectiveDate, salarychangereason]
           );
+          await client.query('INSERT INTO pushInc (first_name, last_name) VALUES ($1, $2)', [first_name, last_name]);
         }
         
         if (comment_logged) {
