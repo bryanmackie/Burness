@@ -55,8 +55,8 @@ const height = container.node().getBoundingClientRect().height;
       .attr('fill', 'none')
       .attr('stroke', '#ccc')
       .attr('d', d3.linkHorizontal()
-        .x(d => d.y)
-        .y(d => d.x));
+        .x(d => d.y + 120 / 2)
+        .y(d => d.x + 40 / 2));
   
     // Render nodes
     const node = group.selectAll('g.node')
