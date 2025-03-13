@@ -34,33 +34,37 @@ async function getEmailTemplate(client, templateType) {
   }
 }
 
-// Function to calculate the next payroll date (1st or 16th of the appropriate month)
-// If latest salary effective date is before the 16th, the next payroll is the 16th of that month;
-// otherwise, it's the 1st of the next month.
-function getNextPayrollDate(latestSalaryDate) {
+// Function to calculate the last payroll date
+// - Any day between the 1st and 15th of the month becomes the 1st of the month.
+// - Any day from the 16th to the end of the month becomes the 16th of the month.
+// - Add 1 to the year.
+function getLastPayrollDate(latestSalaryDate) {
   const salaryDate = new Date(latestSalaryDate);
-  const year = salaryDate.getFullYear();
+  const year = salaryDate.getFullYear() + 1; // Add 1 to the year
   const month = salaryDate.getMonth(); // JavaScript Date months are 0-indexed
-  let nextPayrollDate;
-  
-  if (salaryDate.getDate() < 16) {
-    // Payroll on the 16th of the same month
-    nextPayrollDate = new Date(year, month, 16);
+  let lastPayrollDate;
+
+  if (salaryDate.getDate() <= 15) {
+    // Payroll on the 1st of the same month
+    lastPayrollDate = new Date(year, month, 1);
   } else {
-    // Payroll on the 1st of the next month
-    nextPayrollDate = new Date(year, month + 1, 1);
+    // Payroll on the 16th of the same month
+    lastPayrollDate = new Date(year, month, 16);
   }
-  return nextPayrollDate.toISOString().split('T')[0]; // Format as YYYY-MM-DD
+  return lastPayrollDate.toISOString().split('T')[0]; // Format as YYYY-MM-DD
 }
 
 // Function to send an email with optional CC
-async function sendEmail(to, cc, subject, text) {
+async function sendEmail(to, cc, subject, html) {
   try {
     let mailOptions = {
       from: `"HR Notification" <${process.env.EMAIL_USER}>`,
       to,
       subject,
-      text,
+      html, // Use 'html' instead of 'text'
+      headers: {
+        "Content-Type": "text/html; charset=utf-8", // Explicitly set the content type
+      },
     };
     if (cc) {
       mailOptions.cc = cc;
@@ -100,7 +104,7 @@ async function checkAndNotify(client) {
     // Process each employee
     for (const emp of employees) {
       const { first_name, last_name, latest_salary_effective_date } = emp;
-      const payrollIncreaseDate = getNextPayrollDate(latest_salary_effective_date);
+      const payrollIncreaseDate = getLastPayrollDate(latest_salary_effective_date);
       
       // Get immediate supervisor details
       const immediateSupervisorQuery = `
@@ -155,11 +159,13 @@ async function checkAndNotify(client) {
         .replace("{first_name}", first_name)
         .replace("{last_name}", last_name);
 
-      const emailBody = emailTemplate.body
+        const emailBody = emailTemplate.body
         .replace("{first_name}", first_name)
+        .replace("{last_name}", last_name)
         .replace("{payroll_increase_date}", payrollIncreaseDate)
-        .replace("{ultimate_supervisor_name}", `${ultimate_supervisor_first_name} ${ultimate_supervisor_last_name}`);
-
+        .replace("{ultimate_supervisor_name}", `${ultimate_supervisor_first_name} ${ultimate_supervisor_last_name}`)
+        .replace("{immediate_supervisor_name}", `${immediateSupervisor.sup_first_name} ${immediateSupervisor.sup_last_name}`)
+        
       // Send the email (immediate supervisor in "to", ultimate supervisor in "cc" if different)
       await sendEmail(to, cc, subject, emailBody);
       console.log(`Notified supervisors for ${first_name} ${last_name}`);
