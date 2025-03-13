@@ -180,7 +180,7 @@ const startServer = async () => {
       return res.status(404).json({ success: false, message: 'Employee not found in latest_employee_data.' });
     }
 
-    const currentSalary = currentSalaryResult.rows[0].salary;
+    const currentSalary = currentSalaryResult.rows[0].latest_salary;
     let newSalary = currentSalary;
     console.log("Current Salary:", currentSalary);
     console.log("m_first:", m_first);
