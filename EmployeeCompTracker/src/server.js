@@ -229,7 +229,7 @@ const startServer = async () => {
       newSalary = sanitizedSalary;
       // Round to the nearest 10
       newSalary = Math.round(newSalary / 10) * 10;
-      
+    }
         if (sanitizedSalary !== null || sanitizedRaise !== null) {
           setClause.push(`salary = $${setValues.length + 1}`);
           setValues.push(newSalary);
