@@ -240,7 +240,7 @@ const startServer = async () => {
         }
 
 
-        if (sanitizedSalary) {
+        if (sanitizedSalary || sanitizedRaise) {
           // Check if salary_effective_date and salarychangereason are also provided
           if (!sanitizedSalaryEffectiveDate || !salarychangereason) {
             // If either salary_effective_date or salarychangereason is missing, return a structured error response
