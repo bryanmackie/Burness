@@ -253,7 +253,7 @@ const startServer = async () => {
           // Proceed with inserting into the historical_salary_changes table
           await client.query(
             'INSERT INTO historical_salary_changes (m_first, first_name, last_name, primaryTitle, secondaryTitle, salary, salary_effective_date, salarychangereason) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)',
-            [m_first, first_name, last_name, primaryTitle, secondaryTitle, sanitizedSalary, sanitizedSalaryEffectiveDate, salarychangereason]
+            [m_first, first_name, last_name, primaryTitle, secondaryTitle, newSalary, sanitizedSalaryEffectiveDate, salarychangereason]
           );
         }
         
