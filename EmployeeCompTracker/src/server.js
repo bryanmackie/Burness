@@ -249,6 +249,14 @@ const startServer = async () => {
               message: 'Salary change reason & salary effective date must be entered with salary'
             });
           }
+          console.log("m_first:", m_first);
+console.log("first_name:", first_name);
+console.log("last_name:", last_name);
+console.log("primaryTitle:", primaryTitle);
+console.log("secondaryTitle:", secondaryTitle);
+console.log("newSalary:", newSalary);
+console.log("sanitizedSalaryEffectiveDate:", sanitizedSalaryEffectiveDate);
+console.log("salarychangereason:", salarychangereason);
         
           // Proceed with inserting into the historical_salary_changes table
           await client.query(
