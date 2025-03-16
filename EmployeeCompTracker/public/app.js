@@ -86,7 +86,7 @@ export function renderInteractiveTree(hierarchyData) {
       .attr('rx', 10)
       .attr('ry', 10)
       .style('fill', '#fff')
-      .style('stroke', rgba(176, 197, 54))
+      .style('stroke', 'steelblue')
       .style('stroke-width', 2);
 
     // Append text labels to the nodes
