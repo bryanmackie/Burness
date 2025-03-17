@@ -62,7 +62,7 @@ export function renderInteractiveTree(hierarchyData) {
       .attr('fill', 'none')
       .attr('stroke', '#ccc')
       .attr('d', d3.linkHorizontal()
-        .x(d => d.y + 60) // Center the link horizontally (half of 120px rect width)
+        .x(d => d.y + 70) // Center the link horizontally (half of 140px rect width)
         .y(d => d.x + 20) // Center the link vertically (half of 40px rect height)
       );
 
@@ -81,7 +81,7 @@ export function renderInteractiveTree(hierarchyData) {
 
     // Append the rectangle for each node
     node.append('rect')
-      .attr('width', 120)
+      .attr('width', 140)
       .attr('height', 40)
       .attr('rx', 10)
       .attr('ry', 10)
