@@ -125,6 +125,7 @@ passphraseInput.focus();
         function populateTitles(titles) {
           const titleSelect = document.getElementById('primaryTitle');
           titleSelect.innerHTML = "<option value=''>Select Primary Title</option>";
+          titles.sort((a, b) => a.localeCompare(b));
           titles.forEach(title => {
             const option = document.createElement("option");
             option.value = title;
