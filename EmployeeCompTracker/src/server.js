@@ -329,7 +329,7 @@ const startServer = async () => {
           [add_first_name, add_last_name, employeeStatus]
         );
         await client.query(
-          'INSERT INTO supervisors (first_name, last_name) VALUES ($1, $2)',
+          'INSERT INTO supervisors (emp_first_name, emp_last_name) VALUES ($1, $2)',
           [add_first_name, add_last_name]
         );
         await client.query(
@@ -369,7 +369,7 @@ const startServer = async () => {
           [delete_first_name, delete_last_name]
         );
         await client.query(
-          'DELETE FROM supervisors WHERE first_name = $1 AND last_name = $2',
+          'DELETE FROM supervisors WHERE emp_first_name = $1 AND emp_last_name = $2',
           [delete_first_name, delete_last_name]
         );
         await client.query(
