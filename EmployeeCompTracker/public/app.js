@@ -222,7 +222,7 @@ function assignVerticalPositions(node, verticalSpacing) {
   if (node.children) {
     node.children.forEach((child, i) => {
       // Place the child directly under the parent with additional offset per child.
-      child.x = node.x;
+      child.x = node.x + 30;
       child.y = node.y + verticalSpacing * (i + 1);
       // Recurse for deeper levels.
       assignVerticalPositions(child, verticalSpacing);
@@ -305,7 +305,7 @@ function renderTree(svg, rootData) {
     .enter()
     .append('g')
     .attr('class', 'node')
-    .attr('transform', d => translate(d.x + 30, d.y));
+    .attr('transform', d => translate(d.x, d.y));
 
   // Draw rectangles for each node.
   node.append('rect')
