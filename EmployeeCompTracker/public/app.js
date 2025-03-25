@@ -213,18 +213,30 @@ export async function initInteractiveTree() {
   }
 }
 
+export async function initInteractiveTree() {
+  try {
+    const data = await fetchHierarchy();
+    console.log("Hierarchy received from server:", data);
+    renderInteractiveTree(data); // Pass data directly to render
+  } catch (error) {
+    console.error("Error initializing interactive tree:", error);
+  }
+}
+
 export async function initSecondInteractiveTree() {
+  console.log("Initializing second interactive tree...");
   try {
     const response = await fetch('/get-second-hierarchy');
     if (!response.ok) throw new Error('Failed to fetch hierarchy');
     const data = await response.json();
+    console.log("Second hierarchy data received:", data);
     // data.global and data.domestic hold the tree structures for each division
 
     // Clear container and prepare two divs or SVG groups
     const container = d3.select("#secondHierarchyContainer");
     container.html('');
     
-    // Create two SVG containers side-by-side
+    // Retrieve container dimensions
     const containerWidth = container.node().getBoundingClientRect().width;
     const containerHeight = container.node().getBoundingClientRect().height;
     
@@ -240,12 +252,14 @@ export async function initSecondInteractiveTree() {
       .style("position", "absolute")
       .style("left", containerWidth / 2 + "px");
 
-    // Render each tree
+    // Render each tree with logging
+    console.log("Rendering Global tree...");
     renderTree(globalSVG, data.global);
+    console.log("Rendering Domestic tree...");
     renderTree(domesticSVG, data.domestic);
     
   } catch (error) {
-    console.error("Error initializing interactive tree:", error);
+    console.error("Error initializing second interactive tree:", error);
   }
 }
 
@@ -254,7 +268,9 @@ function renderTree(svg, rootData) {
   const root = d3.hierarchy(rootData, d => d.children);
   
   // Define a tree layout; adjust the size as needed.
-  const treeLayout = d3.tree().size([svg.attr("height"), svg.attr("width") - 100]);
+  const svgHeight = parseInt(svg.attr("height"), 10);
+  const svgWidth = parseInt(svg.attr("width"), 10);
+  const treeLayout = d3.tree().size([svgHeight, svgWidth - 100]);
   treeLayout(root);
 
   // Render links
@@ -276,7 +292,7 @@ function renderTree(svg, rootData) {
     .enter()
     .append('g')
     .attr('class', 'node')
-    .attr('transform', d => `translate(${d.y}, ${d.x})`);
+    .attr('transform', d => translate(d.y, d.x));
 
   // Draw rectangles for each node
   node.append('rect')
