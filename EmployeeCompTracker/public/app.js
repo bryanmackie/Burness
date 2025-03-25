@@ -248,15 +248,15 @@ export async function initSecondInteractiveTree() {
     
     // Global SVG (left half)
     const globalSVG = container.append("svg")
-      .attr("width", containerWidth / 2)
+      .attr("width", containerWidth / 3)
       .attr("height", containerHeight);
     
     // Domestic SVG (right half)
     const domesticSVG = container.append("svg")
-      .attr("width", containerWidth / 2)
+      .attr("width", containerWidth * 2 / 3)
       .attr("height", containerHeight)
       .style("position", "absolute")
-      .style("left", containerWidth / 2 + "px");
+      .style("left", containerWidth / 3 + "px");
 
     console.log("Rendering Global tree...");
     renderTree(globalSVG, data.global);
@@ -305,7 +305,7 @@ function renderTree(svg, rootData) {
     .enter()
     .append('g')
     .attr('class', 'node')
-    .attr('transform', d => translate(d.x, d.y));
+    .attr('transform', d => translate(d.x + 30 px, d.y));
 
   // Draw rectangles for each node.
   node.append('rect')
