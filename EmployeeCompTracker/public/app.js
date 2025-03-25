@@ -410,9 +410,9 @@ function renderTree(svg, rootData) {
     if (targetNode) {
       // If the target node's label is "Domestic" or "Global", update department and clear supervisor fields.
       if (targetNode.data.label === "Domestic" || targetNode.data.label === "Global") {
-        const confirmChange = confirm(`Update department to ${targetNode.data.label}?`);
+        const confirmChange = confirm(`Update division to ${targetNode.data.label}?`);
         if (!confirmChange) return;
-        console.log(`Updating department to ${targetNode.data.label} for ${d.data.first_name}`);
+        console.log(`Updating division to ${targetNode.data.label} for ${d.data.first_name}`);
         await updateEmailAidInDatabase(
           d.data.first_name,
           d.data.last_name,
@@ -422,13 +422,13 @@ function renderTree(svg, rootData) {
         );
       } else {
         // Otherwise, update using the target node's department and supervisor info.
-        const confirmChange = confirm(`Update department to ${targetNode.data.department} and direct supervisor to ${targetNode.data.first_name} ${targetNode.data.last_name}?`);
+        const confirmChange = confirm(`Update division to ${targetNode.data.division} and direct supervisor to ${targetNode.data.first_name} ${targetNode.data.last_name}?`);
         if (!confirmChange) return;
-        console.log(`Updating department to ${targetNode.data.department} for ${d.data.first_name}`);
+        console.log(`Updating division to ${targetNode.data.division} for ${d.data.first_name}`);
         await updateEmailAidInDatabase(
           d.data.first_name,
           d.data.last_name,
-          targetNode.data.department,
+          targetNode.data.division,
           targetNode.data.first_name,
           targetNode.data.last_name
         );
@@ -446,7 +446,7 @@ function renderTree(svg, rootData) {
  * - target_department (the new department value)
  * - target_first_name & target_last_name (the new direct supervisor; if null, those fields are cleared)
  */
-export async function updateEmailAidInDatabase(dragged_first_name, dragged_last_name, target_department, target_first_name, target_last_name) {
+export async function updateEmailAidInDatabase(dragged_first_name, dragged_last_name, target_division, target_first_name, target_last_name) {
   try {
     const response = await fetch('/update-email', {
       method: 'POST',
@@ -454,7 +454,7 @@ export async function updateEmailAidInDatabase(dragged_first_name, dragged_last_
       body: JSON.stringify({
         dragged_first_name,
         dragged_last_name,
-        target_department,
+        target_division,
         target_first_name,
         target_last_name
       })
