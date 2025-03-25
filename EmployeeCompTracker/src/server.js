@@ -75,10 +75,56 @@ function buildHierarchy(data) {
     }
   });
 
-  console.log("Final Hierarchy:", JSON.stringify(roots, null, 2));
+
   return roots;
 }
+function buildDivisionHierarchy(data, division) {
+  // Create the root box for the division.
+  const root = {
+    label: division,
+    children: []
+  };
 
+  // A map to hold nodes keyed by "first_name last_name" for quick lookup.
+  const map = {};
+
+  // First pass: Add top-level employees (those without a direct supervisor) as children of the division header.
+  data.forEach(item => {
+    if (item.division === division && !item.direct_first_name && !item.direct_last_name) {
+      const key = `${item.first_name} ${item.last_name}`;
+      const node = {
+        first_name: item.first_name,
+        last_name: item.last_name,
+        email: item.email,
+        children: []
+      };
+      map[key] = node;
+      root.children.push(node);
+    }
+  });
+
+  // Second pass: For employees with supervisor info, find their supervisor in the map and attach them.
+  data.forEach(item => {
+    if (item.division === division && item.direct_first_name && item.direct_last_name) {
+      const supervisorKey = `${item.direct_first_name} ${item.direct_last_name}`;
+      const key = `${item.first_name} ${item.last_name}`;
+      const node = {
+        first_name: item.first_name,
+        last_name: item.last_name,
+        email: item.email,
+        children: []
+      };
+      map[key] = node;
+      if (map[supervisorKey]) {
+        map[supervisorKey].children.push(node);
+      } else {
+        // Optionally: if the supervisor isn’t found, you might attach this node to the root or handle it as needed.
+        root.children.push(node);
+      }
+    }
+  });
+  return root;
+}
 // Endpoint to fetch hierarchy data after password verification
 app.get('/get-hierarchy', async (req, res) => {
   try {
@@ -93,7 +139,29 @@ app.get('/get-hierarchy', async (req, res) => {
     res.status(500).send('Error fetching data');
   }
 });
-
+app.get('/get-second-hierarchy', async (req, res) => {
+  try {
+    // Query all employees (modify if needed)
+    const result = await client.query(
+      `SELECT first_name, last_name, email, division, direct_first_name, direct_last_name 
+       FROM email 
+       ORDER BY division, first_name;`
+    );
+    const data = result.rows;
+    
+    // Build hierarchy for Global and Domestic divisions
+    const globalHierarchy = buildDivisionHierarchy(data, 'Global');
+    const domesticHierarchy = buildDivisionHierarchy(data, 'Domestic');
+    
+    res.json({
+      global: globalHierarchy,
+      domestic: domesticHierarchy
+    });
+  } catch (err) {
+    console.error('Error fetching hierarchy:', err);
+    res.status(500).send('Error fetching data');
+  }
+});
 // Endpoint to verify the passphrase and return employee data
 app.post('/verify-passphrase', async (req, res) => {
   const { passphrase } = req.body;
@@ -333,8 +401,8 @@ const startServer = async () => {
           [add_first_name, add_last_name]
         );
         await client.query(
-          'INSERT INTO salary_review_data (first_name, last_name) VALUES ($1, $2)',
-          [add_first_name, add_last_name]
+          'INSERT INTO salary_review_data (first_name, last_name, email) VALUES ($1, $2)',
+          [add_first_name, add_last_name, add_email]
         );
         await client.query('INSERT INTO pushInc (first_name, last_name) VALUES ($1, $2)', [add_first_name, add_last_name]);
         res.status(200).json({ success: true, message: 'Employee added successfully.' });

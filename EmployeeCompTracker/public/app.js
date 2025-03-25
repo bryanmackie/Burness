@@ -212,3 +212,95 @@ export async function initInteractiveTree() {
     console.error("Error initializing interactive tree:", error);
   }
 }
+
+export async function initSecondInteractiveTree() {
+  try {
+    const response = await fetch('/get-second-hierarchy');
+    if (!response.ok) throw new Error('Failed to fetch hierarchy');
+    const data = await response.json();
+    // data.global and data.domestic hold the tree structures for each division
+
+    // Clear container and prepare two divs or SVG groups
+    const container = d3.select("#secondHierarchyContainer");
+    container.html('');
+    
+    // Create two SVG containers side-by-side
+    const containerWidth = container.node().getBoundingClientRect().width;
+    const containerHeight = container.node().getBoundingClientRect().height;
+    
+    // Global SVG (left half)
+    const globalSVG = container.append("svg")
+      .attr("width", containerWidth / 2)
+      .attr("height", containerHeight);
+    
+    // Domestic SVG (right half)
+    const domesticSVG = container.append("svg")
+      .attr("width", containerWidth / 2)
+      .attr("height", containerHeight)
+      .style("position", "absolute")
+      .style("left", containerWidth / 2 + "px");
+
+    // Render each tree
+    renderTree(globalSVG, data.global);
+    renderTree(domesticSVG, data.domestic);
+    
+  } catch (error) {
+    console.error("Error initializing interactive tree:", error);
+  }
+}
+
+function renderTree(svg, rootData) {
+  // Create a hierarchy from the tree data.
+  const root = d3.hierarchy(rootData, d => d.children);
+  
+  // Define a tree layout; adjust the size as needed.
+  const treeLayout = d3.tree().size([svg.attr("height"), svg.attr("width") - 100]);
+  treeLayout(root);
+
+  // Render links
+  svg.selectAll('path.link')
+    .data(root.links())
+    .enter()
+    .append('path')
+    .attr('class', 'link')
+    .attr('fill', 'none')
+    .attr('stroke', '#ccc')
+    .attr('d', d3.linkHorizontal()
+      .x(d => d.y + 50)
+      .y(d => d.x)
+    );
+
+  // Render nodes
+  const node = svg.selectAll('g.node')
+    .data(root.descendants())
+    .enter()
+    .append('g')
+    .attr('class', 'node')
+    .attr('transform', d => `translate(${d.y}, ${d.x})`);
+
+  // Draw rectangles for each node
+  node.append('rect')
+    .attr('width', 100)
+    .attr('height', 30)
+    .attr('rx', 5)
+    .attr('ry', 5)
+    .style('fill', d => d.depth === 0 ? '#f0f0f0' : '#fff')
+    .style('stroke', 'steelblue')
+    .style('stroke-width', 2);
+
+  // Add text labels to nodes
+  node.append('text')
+    .attr('x', 50)
+    .attr('y', 20)
+    .attr('text-anchor', 'middle')
+    .style('font-size', '12px')
+    .text(d => {
+      if (d.depth === 0) {
+        // The root node displays the division (Global or Domestic)
+        return d.data.label;
+      } else {
+        // Other nodes display the employee’s name
+        return `${d.data.first_name} ${d.data.last_name}`;
+      }
+    });
+}

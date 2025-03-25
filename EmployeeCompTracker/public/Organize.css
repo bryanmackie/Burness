@@ -242,7 +242,10 @@ button:hover {
   width: 100%;   /* Make it responsive */
   height: 4000px; /* Increase the height to give more space for the tree */
 }
-
+#secondHierarchyContainer {
+  width: 100%;   /* Make it responsive */
+  height: 4000px; /* Increase the height to give more space for the tree */
+}
 /* Toggle Button for Form / Tree */
 
 .toggle-container {

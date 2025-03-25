@@ -3,7 +3,7 @@ const API_BASE_URL = "https://burness.onrender.com";
 
 // const API_BASE_URL = process.env.API_BASE_URL || "http://localhost:3000";
 import { initInteractiveTree } from './app.js';  
-
+import { initSecondInteractiveTree } from './app.js';  
 // Variables to store employee data after successful passphrase verification
 let employeesData = [];
 let managerRole = null;
@@ -86,6 +86,7 @@ async function populateDeleteEmployeeDropdowns() {
 document.addEventListener('DOMContentLoaded', () => {
   console.log("DOM fully loaded");
   initInteractiveTree();
+  initSecondInteractiveTree();
   document.getElementById("hierarchyContainer").style.display = "none";
   const overlay = document.getElementById('overlay');
   const content = document.getElementById('content');
@@ -336,6 +337,7 @@ document.getElementById("toggleTreeBtn").addEventListener("click", function() {
       form.style.display = "none";  // Hide form
       treeContainer.style.display = "block";  // Show hierarchy
       initInteractiveTree();  // Load the tree
+      initSecondInteractiveTree();
       this.textContent = "Back to Employee Form";
   } else {
       form.style.display = "block";  // Show form
