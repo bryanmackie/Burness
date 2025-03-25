@@ -446,7 +446,7 @@ function renderTree(svg, rootData) {
  * - target_department (the new department value)
  * - target_first_name & target_last_name (the new direct supervisor; if null, those fields are cleared)
  */
-export async function updateSupervisorInDatabase(dragged_first_name, dragged_last_name, target_department, target_first_name, target_last_name) {
+export async function updateEmailAidInDatabase(dragged_first_name, dragged_last_name, target_department, target_first_name, target_last_name) {
   try {
     const response = await fetch('/update-email', {
       method: 'POST',
