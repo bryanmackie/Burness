@@ -215,19 +215,37 @@ export async function initInteractiveTree() {
     console.error("Error initializing interactive tree:", error);
   }
 }
-
-// Recursively assign positions so that each child is placed directly below its parent.
-// Each child gets the same x as its parent and a y offset based on its index.
-function assignVerticalPositions(node, verticalSpacing) {
+/**
+ * Custom recursive function to assign positions.
+ * If all children of a node are leaves, they are stacked vertically.
+ * Otherwise, they are spaced horizontally.
+ */
+function assignPositions(node, hSpacing, vSpacing) {
   if (node.children) {
-    node.children.forEach((child, i) => {
-      // Place the child directly under the parent with additional offset per child.
-      child.x = node.x + 30;
-      child.y = node.y + verticalSpacing * (i + 1);
-      // Recurse for deeper levels.
-      assignVerticalPositions(child, verticalSpacing);
-    });
+    // Check if all children are leaves.
+    const allLeaves = node.children.every(child => !child.children);
+    
+    if (allLeaves) {
+      // Vertical stacking: maintain parent's x with a small horizontal offset.
+      node.children.forEach((child, i) => {
+        child.x = node.x + 30;  // slight horizontal offset
+        child.y = node.y + vSpacing * (i + 1);
+        assignPositions(child, hSpacing, vSpacing);
+      });
+    } else {
+      // Horizontal spacing: spread out children.
+      node.children.forEach((child, i) => {
+        child.x = node.x + hSpacing * (i + 1); // spread horizontally
+        child.y = node.y + vSpacing;           // common vertical offset
+        assignPositions(child, hSpacing, vSpacing);
+      });
+    }
   }
+}
+
+// Helper for SVG translation.
+function translate(x, y) {
+  return `translate(${x}, ${y})`;
 }
 
 export async function initSecondInteractiveTree() {
@@ -246,12 +264,12 @@ export async function initSecondInteractiveTree() {
     const containerWidth = container.node().getBoundingClientRect().width;
     const containerHeight = container.node().getBoundingClientRect().height;
     
-    // Global SVG (left half)
+    // Global SVG (left side)
     const globalSVG = container.append("svg")
       .attr("width", containerWidth / 3)
       .attr("height", containerHeight);
     
-    // Domestic SVG (right half)
+    // Domestic SVG (right side)
     const domesticSVG = container.append("svg")
       .attr("width", containerWidth * 2 / 3)
       .attr("height", containerHeight)
@@ -276,17 +294,18 @@ function renderTree(svg, rootData) {
   const svgHeight = parseInt(svg.attr("height"), 10);
   
   // Set the initial position of the root.
-  // Here we center the root horizontally and leave a small margin at the top.
+  // Here we center the root horizontally and give a small top margin.
   root.x = svgWidth / 2;
   root.y = 20; // top margin
 
-  // Define the vertical gap between parent and each child.
-  const verticalSpacing = 60; // adjust as needed
+  // Define spacing parameters.
+  const horizontalSpacing = 120; // for intermediate (non-leaf) levels
+  const verticalSpacing = 60;    // for leaf-level stacking
   
-  // Recursively assign positions to children so they stack vertically.
-  assignVerticalPositions(root, verticalSpacing);
+  // Recursively assign positions.
+  assignPositions(root, horizontalSpacing, verticalSpacing);
 
-  // Render links using d3.linkVertical (links will be straight vertical lines).
+  // Render links using d3.linkVertical.
   svg.selectAll('path.link')
     .data(root.links())
     .enter()
@@ -305,15 +324,19 @@ function renderTree(svg, rootData) {
     .enter()
     .append('g')
     .attr('class', 'node')
-    .attr('transform', d => translate(d.x, d.y));
+    .attr('transform', d => translate(d.x, d.y))
+    .call(d3.drag()
+      .on("start", dragStarted)
+      .on("drag", dragged)
+      .on("end", dragEnded)
+    );
 
   // Draw rectangles for each node.
   node.append('rect')
-    // Center the rectangle at the node position.
     .attr('width', 100)
     .attr('height', 30)
-    .attr('x', -50)  // shift left by half width
-    .attr('y', -15)  // shift up by half height
+    .attr('x', -50)  // center the rectangle horizontally
+    .attr('y', -15)  // center vertically
     .attr('rx', 5)
     .attr('ry', 5)
     .style('fill', d => d.depth === 0 ? '#f0f0f0' : '#fff')
@@ -327,11 +350,126 @@ function renderTree(svg, rootData) {
     .style('font-size', '12px')
     .text(d => {
       if (d.depth === 0) {
-        // The root node displays the division (Global or Domestic).
-        return d.data.label;
+        return d.data.label;  // root node shows division label
       } else {
-        // Other nodes display the employee’s name.
         return `${d.data.first_name} ${d.data.last_name}`;
       }
     });
+
+  // --- Drag Handlers ---
+  function dragStarted(event, d) {
+    d3.select(this).raise().classed("active", true);
+    // Save the starting positions.
+    d.startX = event.x;
+    d.startY = event.y;
+    const transform = d3.select(this).attr("transform");
+    if (transform) {
+      const values = transform.match(/translate\(([^)]+)\)/)[1].split(",");
+      d.transformX = parseFloat(values[0]);
+      d.transformY = parseFloat(values[1]);
+    } else {
+      d.transformX = 0;
+      d.transformY = 0;
+    }
+  }
+
+  function dragged(event, d) {
+    const dx = event.x - d.startX;
+    const dy = event.y - d.startY;
+    d3.select(this).attr("transform", translate(d.transformX + dx, d.transformY + dy));
+  }
+
+  async function dragEnded(event, d) {
+    d3.select(this).select('rect').attr('stroke', 'steelblue');
+
+    // Determine the drop position relative to the SVG container.
+    const svgElement = d3.select("svg").node();
+    const point = svgElement.createSVGPoint();
+    point.x = event.sourceEvent.clientX;
+    point.y = event.sourceEvent.clientY;
+    const dropPosition = point.matrixTransform(svgElement.getScreenCTM().inverse());
+    console.log("Drop Position:", dropPosition);
+    let targetNode = null;
+
+    // Loop over all nodes to detect the drop target.
+    d3.selectAll('.node').each(function(nodeData) {
+      // Exclude the dragged node itself.
+      if (nodeData === d) return;
+      
+      const rect = this.getBoundingClientRect();
+      const svgRect = svgElement.getBoundingClientRect();
+      const nodeX = rect.x - svgRect.x;
+      const nodeY = rect.y - svgRect.y;
+
+      if (
+        dropPosition.x >= nodeX &&
+        dropPosition.x <= nodeX + rect.width &&
+        dropPosition.y >= nodeY &&
+        dropPosition.y <= nodeY + rect.height
+      ) {
+        targetNode = nodeData;
+        console.log("Found target node:", targetNode.data);
+      }
+    });
+
+    if (targetNode) {
+      // If the target node's label is "Domestic" or "Global", update department and clear supervisor fields.
+      if (targetNode.data.label === "Domestic" || targetNode.data.label === "Global") {
+        const confirmChange = confirm(`Update department to ${targetNode.data.label}?`);
+        if (!confirmChange) return;
+        console.log(`Updating department to ${targetNode.data.label} for ${d.data.first_name}`);
+        await updateSupervisorInDatabase(
+          d.data.first_name,
+          d.data.last_name,
+          targetNode.data.label.toLowerCase(),
+          null,
+          null
+        );
+      } else {
+        // Otherwise, update using the target node's department and supervisor info.
+        const confirmChange = confirm(`Update department to ${targetNode.data.department} and direct supervisor to ${targetNode.data.first_name} ${targetNode.data.last_name}?`);
+        if (!confirmChange) return;
+        console.log(`Updating department to ${targetNode.data.department} for ${d.data.first_name}`);
+        await updateSupervisorInDatabase(
+          d.data.first_name,
+          d.data.last_name,
+          targetNode.data.department,
+          targetNode.data.first_name,
+          targetNode.data.last_name
+        );
+      }
+    } else {
+      console.warn("No valid drop target found. Update cancelled.");
+    }
+  }
+}
+
+/**
+ * Posts the updated node information to the server.
+ * The payload includes:
+ * - dragged_first_name & dragged_last_name (to identify the record in emailaid)
+ * - target_department (the new department value)
+ * - target_first_name & target_last_name (the new direct supervisor; if null, those fields are cleared)
+ */
+export async function updateSupervisorInDatabase(dragged_first_name, dragged_last_name, target_department, target_first_name, target_last_name) {
+  try {
+    const response = await fetch('/update-email', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        dragged_first_name,
+        dragged_last_name,
+        target_department,
+        target_first_name,
+        target_last_name
+      })
+    });
+    const result = await response.json();
+    if (!result.success) {
+      throw new Error(result.message);
+    }
+    return result;
+  } catch (error) {
+    console.error('Error updating supervisor in database:', error);
+  }
 }
