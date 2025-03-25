@@ -213,15 +213,7 @@ export async function initInteractiveTree() {
   }
 }
 
-export async function initInteractiveTree() {
-  try {
-    const data = await fetchHierarchy();
-    console.log("Hierarchy received from server:", data);
-    renderInteractiveTree(data); // Pass data directly to render
-  } catch (error) {
-    console.error("Error initializing interactive tree:", error);
-  }
-}
+
 
 export async function initSecondInteractiveTree() {
   console.log("Initializing second interactive tree...");
