@@ -243,11 +243,6 @@ function assignPositions(node, hSpacing, vSpacing) {
   }
 }
 
-// Helper for SVG translation.
-function translate(x, y) {
-  return `translate(${x}, ${y})`;
-}
-
 export async function initSecondInteractiveTree() {
   console.log("Initializing second interactive tree...");
   try {
