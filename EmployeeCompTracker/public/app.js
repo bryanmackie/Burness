@@ -227,11 +227,10 @@ export async function initSecondInteractiveTree() {
     console.log("Second hierarchy data received:", data);
     // data.global and data.domestic hold the tree structures for each division
 
-    // Clear container and prepare two divs or SVG groups
+    // Clear container and prepare two SVG groups
     const container = d3.select("#secondHierarchyContainer");
     container.html('');
     
-    // Retrieve container dimensions
     const containerWidth = container.node().getBoundingClientRect().width;
     const containerHeight = container.node().getBoundingClientRect().height;
     
@@ -247,7 +246,6 @@ export async function initSecondInteractiveTree() {
       .style("position", "absolute")
       .style("left", containerWidth / 2 + "px");
 
-    // Render each tree with logging
     console.log("Rendering Global tree...");
     renderTree(globalSVG, data.global);
     console.log("Rendering Domestic tree...");
@@ -262,13 +260,22 @@ function renderTree(svg, rootData) {
   // Create a hierarchy from the tree data.
   const root = d3.hierarchy(rootData, d => d.children);
   
-  // Define a tree layout; adjust the size as needed.
-  const svgHeight = parseInt(svg.attr("height"), 10);
   const svgWidth = parseInt(svg.attr("width"), 10);
-  const treeLayout = d3.tree().size([svgHeight, svgWidth - 100]);
+  const svgHeight = parseInt(svg.attr("height"), 10);
+  
+  // Define a tree layout for vertical orientation:
+  // - x: horizontal position
+  // - y: vertical position  
+  const treeLayout = d3.tree().size([svgWidth, svgHeight - 100]);
+  
+  // (Optional) Adjust separation to create extra horizontal offset for children:
+  treeLayout.separation((a, b) => a.parent === b.parent ? 1 : 1.5);
+  
   treeLayout(root);
 
-  // Render links
+  // Render links using d3.linkVertical. The link generator expects:
+  // - x: horizontal coordinate
+  // - y: vertical coordinate  
   svg.selectAll('path.link')
     .data(root.links())
     .enter()
@@ -276,18 +283,18 @@ function renderTree(svg, rootData) {
     .attr('class', 'link')
     .attr('fill', 'none')
     .attr('stroke', '#ccc')
-    .attr('d', d3.linkHorizontal()
-      .x(d => d.y + 50)
-      .y(d => d.x)
+    .attr('d', d3.linkVertical()
+      .x(d => d.x)
+      .y(d => d.y)
     );
 
-  // Render nodes
+  // Render nodes: position each node using its x (horizontal) and y (vertical) values.
   const node = svg.selectAll('g.node')
     .data(root.descendants())
     .enter()
     .append('g')
     .attr('class', 'node')
-    .attr('transform', d => translate(d.y, d.x));
+    .attr('transform', d => translate(d.x, d.y));
 
   // Draw rectangles for each node
   node.append('rect')
@@ -307,10 +314,8 @@ function renderTree(svg, rootData) {
     .style('font-size', '12px')
     .text(d => {
       if (d.depth === 0) {
-        // The root node displays the division (Global or Domestic)
         return d.data.label;
       } else {
-        // Other nodes display the employee’s name
         return `${d.data.first_name} ${d.data.last_name}`;
       }
     });
