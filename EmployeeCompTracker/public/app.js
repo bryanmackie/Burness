@@ -1,4 +1,7 @@
  // app.js
+ function translate(x, y) {
+  return `translate(${x}, ${y})`;
+}
 
 export async function fetchHierarchy() {
   try {
