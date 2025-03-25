@@ -502,9 +502,9 @@ app.post('/update-email', async (req, res) => {
   // - target_department: the department of the target node (e.g., "domestic" or "global", or from the target node)
   // - target_first_name: the first name from the target node (or "Domestic"/"Global")
   // - target_last_name: the last name from the target node (if applicable)
-  const { dragged_first_name, dragged_last_name, target_department, target_first_name, target_last_name } = req.body;
+  const { dragged_first_name, dragged_last_name, target_division, target_first_name, target_last_name } = req.body;
 
-  if (!dragged_first_name || !dragged_last_name || !target_department || !target_first_name) {
+  if (!dragged_first_name || !dragged_last_name || !target_division || !target_first_name) {
     return res.status(400).json({ success: false, message: 'Missing required fields.' });
   }
 
@@ -514,19 +514,19 @@ app.post('/update-email', async (req, res) => {
     if (target_first_name === "Domestic" || target_first_name === "Global") {
       updateQuery = `
         UPDATE emailaid 
-        SET department = $1, direct_first_name = NULL, direct_last_name = NULL 
+        SET division = $1, direct_first_name = NULL, direct_last_name = NULL 
         WHERE first_name = $2 AND last_name = $3
       `;
       // Force department to lower case (or adjust as needed)
-      updateValues = [target_department.toLowerCase(), dragged_first_name, dragged_last_name];
+      updateValues = [target_division.toLowerCase(), dragged_first_name, dragged_last_name];
     } else {
       // Otherwise update the table with the target node's information.
       updateQuery = `
         UPDATE emailaid 
-        SET department = $1, direct_first_name = $2, direct_last_name = $3 
+        SET division = $1, direct_first_name = $2, direct_last_name = $3 
         WHERE first_name = $4 AND last_name = $5
       `;
-      updateValues = [target_department, target_first_name, target_last_name, dragged_first_name, dragged_last_name];
+      updateValues = [target_division, target_first_name, target_last_name, dragged_first_name, dragged_last_name];
     }
 
     const updateResult = await client.query(updateQuery, updateValues);
@@ -537,9 +537,9 @@ app.post('/update-email', async (req, res) => {
 
     // Optionally, re-read the table and build a new hierarchy.
     const result = await client.query(`
-      SELECT first_name, last_name, department, direct_first_name, direct_last_name 
+      SELECT first_name, last_name, division, direct_first_name, direct_last_name 
       FROM emailaid
-      ORDER BY department, first_name, last_name;
+      ORDER BY division, first_name, last_name;
     `);
     const updatedHierarchy = buildHierarchy(result.rows);
 
