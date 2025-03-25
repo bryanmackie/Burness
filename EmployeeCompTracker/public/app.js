@@ -413,7 +413,7 @@ function renderTree(svg, rootData) {
         const confirmChange = confirm(`Update department to ${targetNode.data.label}?`);
         if (!confirmChange) return;
         console.log(`Updating department to ${targetNode.data.label} for ${d.data.first_name}`);
-        await updateSupervisorInDatabase(
+        await updateEmailAidInDatabase(
           d.data.first_name,
           d.data.last_name,
           targetNode.data.label.toLowerCase(),
@@ -425,7 +425,7 @@ function renderTree(svg, rootData) {
         const confirmChange = confirm(`Update department to ${targetNode.data.department} and direct supervisor to ${targetNode.data.first_name} ${targetNode.data.last_name}?`);
         if (!confirmChange) return;
         console.log(`Updating department to ${targetNode.data.department} for ${d.data.first_name}`);
-        await updateSupervisorInDatabase(
+        await updateEmailAidInDatabase(
           d.data.first_name,
           d.data.last_name,
           targetNode.data.department,
