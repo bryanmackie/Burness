@@ -216,7 +216,19 @@ export async function initInteractiveTree() {
   }
 }
 
-
+// Recursively assign positions so that each child is placed directly below its parent.
+// Each child gets the same x as its parent and a y offset based on its index.
+function assignVerticalPositions(node, verticalSpacing) {
+  if (node.children) {
+    node.children.forEach((child, i) => {
+      // Place the child directly under the parent with additional offset per child.
+      child.x = node.x;
+      child.y = node.y + verticalSpacing * (i + 1);
+      // Recurse for deeper levels.
+      assignVerticalPositions(child, verticalSpacing);
+    });
+  }
+}
 
 export async function initSecondInteractiveTree() {
   console.log("Initializing second interactive tree...");
@@ -227,7 +239,7 @@ export async function initSecondInteractiveTree() {
     console.log("Second hierarchy data received:", data);
     // data.global and data.domestic hold the tree structures for each division
 
-    // Clear container and prepare two SVG groups
+    // Clear container and prepare two SVG groups.
     const container = d3.select("#secondHierarchyContainer");
     container.html('');
     
@@ -263,19 +275,18 @@ function renderTree(svg, rootData) {
   const svgWidth = parseInt(svg.attr("width"), 10);
   const svgHeight = parseInt(svg.attr("height"), 10);
   
-  // Define a tree layout for vertical orientation:
-  // - x: horizontal position
-  // - y: vertical position  
-  const treeLayout = d3.tree().size([svgWidth, svgHeight - 100]);
-  
-  // (Optional) Adjust separation to create extra horizontal offset for children:
-  treeLayout.separation((a, b) => a.parent === b.parent ? 1 : 1.5);
-  
-  treeLayout(root);
+  // Set the initial position of the root.
+  // Here we center the root horizontally and leave a small margin at the top.
+  root.x = svgWidth / 2;
+  root.y = 20; // top margin
 
-  // Render links using d3.linkVertical. The link generator expects:
-  // - x: horizontal coordinate
-  // - y: vertical coordinate  
+  // Define the vertical gap between parent and each child.
+  const verticalSpacing = 60; // adjust as needed
+  
+  // Recursively assign positions to children so they stack vertically.
+  assignVerticalPositions(root, verticalSpacing);
+
+  // Render links using d3.linkVertical (links will be straight vertical lines).
   svg.selectAll('path.link')
     .data(root.links())
     .enter()
@@ -288,7 +299,7 @@ function renderTree(svg, rootData) {
       .y(d => d.y)
     );
 
-  // Render nodes: position each node using its x (horizontal) and y (vertical) values.
+  // Render nodes.
   const node = svg.selectAll('g.node')
     .data(root.descendants())
     .enter()
@@ -296,26 +307,30 @@ function renderTree(svg, rootData) {
     .attr('class', 'node')
     .attr('transform', d => translate(d.x, d.y));
 
-  // Draw rectangles for each node
+  // Draw rectangles for each node.
   node.append('rect')
+    // Center the rectangle at the node position.
     .attr('width', 100)
     .attr('height', 30)
+    .attr('x', -50)  // shift left by half width
+    .attr('y', -15)  // shift up by half height
     .attr('rx', 5)
     .attr('ry', 5)
     .style('fill', d => d.depth === 0 ? '#f0f0f0' : '#fff')
     .style('stroke', 'steelblue')
     .style('stroke-width', 2);
 
-  // Add text labels to nodes
+  // Add text labels to nodes.
   node.append('text')
-    .attr('x', 50)
-    .attr('y', 20)
     .attr('text-anchor', 'middle')
+    .attr('dy', '0.35em')
     .style('font-size', '12px')
     .text(d => {
       if (d.depth === 0) {
+        // The root node displays the division (Global or Domestic).
         return d.data.label;
       } else {
+        // Other nodes display the employee’s name.
         return `${d.data.first_name} ${d.data.last_name}`;
       }
     });
