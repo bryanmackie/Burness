@@ -95,6 +95,7 @@ function buildDivisionHierarchy(data, division) {
       const node = {
         first_name: item.first_name,
         last_name: item.last_name,
+        division: item.division,
 
         children: []
       };
@@ -111,6 +112,7 @@ function buildDivisionHierarchy(data, division) {
       const node = {
         first_name: item.first_name,
         last_name: item.last_name,
+        division: item.division,
         children: []
       };
       map[key] = node;
