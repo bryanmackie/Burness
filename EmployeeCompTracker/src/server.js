@@ -95,7 +95,7 @@ function buildDivisionHierarchy(data, division) {
       const node = {
         first_name: item.first_name,
         last_name: item.last_name,
-        email: item.email,
+
         children: []
       };
       map[key] = node;
@@ -110,8 +110,7 @@ function buildDivisionHierarchy(data, division) {
       const key = `${item.first_name} ${item.last_name}`;
       const node = {
         first_name: item.first_name,
-        last_name: item.last_name,
-        email: item.email,
+
         children: []
       };
       map[key] = node;
@@ -143,8 +142,8 @@ app.get('/get-second-hierarchy', async (req, res) => {
   try {
     // Query all employees (modify if needed)
     const result = await client.query(
-      `SELECT first_name, last_name, email, division, direct_first_name, direct_last_name 
-       FROM email 
+      `SELECT first_name, last_name, division, direct_first_name, direct_last_name 
+       FROM emailaid
        ORDER BY division, first_name;`
     );
     const data = result.rows;
