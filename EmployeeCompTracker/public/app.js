@@ -305,7 +305,7 @@ function renderTree(svg, rootData) {
     .enter()
     .append('g')
     .attr('class', 'node')
-    .attr('transform', d => translate(d.x + 30 px, d.y));
+    .attr('transform', d => translate(d.x + 30, d.y));
 
   // Draw rectangles for each node.
   node.append('rect')
