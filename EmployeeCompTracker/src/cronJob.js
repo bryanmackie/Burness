@@ -94,7 +94,7 @@ async function checkAndNotify(client) {
       SELECT led.first_name, led.last_name, led.latest_salary_effective_date
       FROM latest_employee_data led
       JOIN salary_review_data sr ON led.first_name = sr.first_name AND led.last_name = sr.last_name
-      WHERE led.latest_salary_effective_date < (CURRENT_DATE - INTERVAL '10 months')
+      WHERE led.latest_salary_effective_date < (CURRENT_DATE - INTERVAL '46 weeks')
         AND sr.raise_eligible = TRUE
     `;
     const employeeResult = await client.query(employeeQuery);
