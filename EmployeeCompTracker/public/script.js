@@ -365,6 +365,7 @@ document.getElementById("toggleTreeBtnTwo").addEventListener("click", function()
 // Ensure elements are hidden by default
 document.addEventListener("DOMContentLoaded", function() {
   document.getElementById("hierarchyContainer").style.display = "none";
+  document.getElementById("secondHierarchyContainer").style.display = "none";
 });
 
 // script.js
