@@ -337,7 +337,7 @@ document.getElementById("toggleTreeBtn").addEventListener("click", function() {
       form.style.display = "none";  // Hide form
       treeContainer.style.display = "block";  // Show hierarchy
       initInteractiveTree();  // Load the tree
-      initSecondInteractiveTree();
+
       this.textContent = "Back to Employee Form";
   } else {
       form.style.display = "block";  // Show form
@@ -345,7 +345,23 @@ document.getElementById("toggleTreeBtn").addEventListener("click", function() {
       this.textContent = "Show Employee Hierarchy";
   }
 });
+document.getElementById("toggleTreeBtnTwo").addEventListener("click", function() {
+  const form = document.querySelector("form");
+  const treeContainer = document.getElementById("secondHierarchyContainer");
 
+
+  if (treeContainer.style.display === "none" || treeContainer.style.display === "") {
+      form.style.display = "none";  // Hide form
+      treeContainer.style.display = "block";  // Show hierarchy
+
+      initSecondInteractiveTree();
+      this.textContent = "Back to Employee Form";
+  } else {
+      form.style.display = "block";  // Show form
+      treeContainer.style.display = "none";  // Hide hierarchy
+      this.textContent = "Show Divisions";
+  }
+});
 // Ensure elements are hidden by default
 document.addEventListener("DOMContentLoaded", function() {
   document.getElementById("hierarchyContainer").style.display = "none";
