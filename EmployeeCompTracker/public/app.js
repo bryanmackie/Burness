@@ -235,7 +235,7 @@ function assignPositions(node, hSpacing, vSpacing) {
     } else {
       // Horizontal spacing: spread out children.
       node.children.forEach((child, i) => {
-        child.x = node.x + hSpacing * (i + 1); // spread horizontally
+        child.x = node.x + hSpacing * (i); // spread horizontally
         child.y = node.y + vSpacing;           // common vertical offset
         assignPositions(child, hSpacing, vSpacing);
       });
