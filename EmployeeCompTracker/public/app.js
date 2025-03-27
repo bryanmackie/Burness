@@ -300,7 +300,7 @@ function renderTree(svg, rootData) {
   root.x = svgWidth / 2;
   root.y = 20;
   
-  const horizontalSpacing = 120;
+  const horizontalSpacing = 175;
   const verticalSpacing = 60;
   assignPositions(root, horizontalSpacing, verticalSpacing);
 
@@ -332,9 +332,9 @@ function renderTree(svg, rootData) {
 
   // Draw rectangles for each node (width increased to 130px, centered with x offset -65).
   node.append('rect')
-    .attr('width', 130)
+    .attr('width', 150)
     .attr('height', 30)
-    .attr('x', -65)
+    .attr('x', -75)
     .attr('y', -15)
     .attr('rx', 5)
     .attr('ry', 5)
