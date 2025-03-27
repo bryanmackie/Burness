@@ -254,6 +254,16 @@ export async function initSecondInteractiveTree() {
     const containerWidth = container.node().getBoundingClientRect().width;
     const containerHeight = container.node().getBoundingClientRect().height;
     
+    container.append("svg")
+    .attr("id", "dragOverlaySVG")
+    .attr("width", containerWidth)
+    .attr("height", containerHeight)
+    .style("position", "absolute")
+    .style("top", "0px")
+    .style("left", "0px")
+    .style("pointer-events", "none")
+    .style("z-index", 10);
+    
     // Global SVG (left side)
     const globalSVG = container.append("svg")
       .attr("id", "globalSVG")
@@ -272,16 +282,7 @@ export async function initSecondInteractiveTree() {
       
     // Create an overlay container that spans the whole container.
     // Dragged elements will be temporarily moved here so they render on top.
-    container.append("svg")
-      .attr("id", "dragOverlaySVG")
-      .attr("width", containerWidth)
-      .attr("height", containerHeight)
-      .style("position", "absolute")
-      .style("top", "0px")
-      .style("left", "0px")
-      .style("pointer-events", "none")
-      .style("z-index", 10);
-      
+
     console.log("Rendering Global tree...");
     renderTree(globalSVG, data.global);
     console.log("Rendering Domestic tree...");
