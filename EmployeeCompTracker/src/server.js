@@ -173,8 +173,8 @@ app.get('/get-second-hierarchy', async (req, res) => {
     const data = result.rows;
     
     // Build hierarchy for Global and Domestic divisions
-    const globalHierarchy = buildDivisionHierarchy(data, 'Global');
-    const domesticHierarchy = buildDivisionHierarchy(data, 'Domestic');
+    const globalHierarchy = buildDivisionHierarchy(data, 'global');
+    const domesticHierarchy = buildDivisionHierarchy(data, 'domestic');
     
     res.json({
       global: globalHierarchy,
