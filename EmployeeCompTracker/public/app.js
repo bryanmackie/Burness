@@ -344,25 +344,23 @@ function renderTree(svg, rootData, offsetX = 0) {
 
   // --- Drag Handlers (without overlay or helper) ---
   function dragStarted(event, d) {
-    // Record the starting pointer position.
-    d.startX = event.x;
-    d.startY = event.y;
-    // Record the node's current transform.
-    const transform = d3.select(this).attr("transform");
-    if (transform) {
-      const values = transform.match(/translate\\(([^)]+)\\)/)[1].split(",");
-      d.transformX = parseFloat(values[0]);
-      d.transformY = parseFloat(values[1]);
-    } else {
-      d.transformX = 0;
-      d.transformY = 0;
-    }
+    // Store the initial position from the layout (not from transform)
+    d.startX = d.x;
+    d.startY = d.y;
+    
+    // Highlight the node being dragged
+    d3.select(this).select('rect').attr('stroke', 'orange');
   }
-
+  
   function dragged(event, d) {
-    const dx = event.x - d.startX;
-    const dy = event.y - d.startY;
-    d3.select(this).attr("transform", translate(d.transformX + dx, d.transformY + dy));
+    // Update the node's position in the data (d.x, d.y)
+    d.x = d.startX + event.dx;
+    d.y = d.startY + event.dy;
+    
+    // Update the visual position
+    d3.select(this).attr("transform", translate(d.x, d.y));
+    
+
   }
 
   async function dragEnded(event, d) {
