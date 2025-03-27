@@ -469,10 +469,6 @@ function renderTree(svg, rootData) {
   }
 }
 
-function translate(x, y) {
-  return `translate(${x},${y})`;
-}
-
 /**
  * Posts the updated node information to the server.
  */
