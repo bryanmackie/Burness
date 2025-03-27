@@ -500,11 +500,11 @@ app.post('/update-email', async (req, res) => {
 
   try {
     let updateQuery, updateValues;
-    if (target_first_name == Null || target_first_name == Null) {
+    if (target_first_name == Null || target_last_name == Null) {
       updateQuery = `
         UPDATE emailaid 
         SET division = $1, direct_first_name = NULL, direct_last_name = NULL 
-        WHERE first_name = $2 AND last_name = $3
+        WHERE first_name = $4 AND last_name = $5
       `;
       updateValues = [target_division.toLowerCase(), dragged_first_name, dragged_last_name];
     } else {
