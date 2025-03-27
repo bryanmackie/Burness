@@ -359,18 +359,28 @@ function renderTree(svg, rootData) {
 
   // --- Drag Handlers with Drag Helper ---
   function dragStarted(event, d) {
-    // Optionally raise the element for styling purposes
     d3.select(this).raise().classed("active", true);
     
-    // Create a helper element as a floating copy of the node.
+    // Define helper dimensions
+    const helperWidth = 150;
+    const helperHeight = 30;
+    
+    // Get the bounding box of the dragged node
+    const bbox = this.getBoundingClientRect();
+  
+    // Calculate offsets to keep the helper positioned where the user grabbed the node
+    d.offsetX = event.sourceEvent.clientX - bbox.x;
+    d.offsetY = event.sourceEvent.clientY - bbox.y;
+    
+    // Create the helper element
     const helper = d3.select("body")
       .append("div")
       .attr("class", "drag-helper")
       .style("position", "absolute")
       .style("pointer-events", "none")
-      .style("width", "150px")
-      .style("height", "30px")
-      .style("line-height", "30px")
+      .style("width", helperWidth + "px")
+      .style("height", helperHeight + "px")
+      .style("line-height", helperHeight + "px")
       .style("text-align", "center")
       .style("font-size", "12px")
       .style("background", "#fff")
@@ -378,28 +388,22 @@ function renderTree(svg, rootData) {
       .style("border-radius", "5px")
       .style("box-shadow", "2px 2px 5px rgba(0,0,0,0.3)")
       .html(d.depth === 0 ? d.data.label : `${d.data.first_name} ${d.data.last_name}`);
-      
-    // Store the helper reference so we can update and remove it.
+  
+    // Store reference to the helper
     d.dragHelper = helper;
-    
-    // Hide the original node in the SVG.
+  
+    // Hide the original node in the SVG
     d3.select(this).style("visibility", "hidden");
-
-    // Record the starting pointer position.
-    d.startPointerX = event.sourceEvent.clientX;
-    d.startPointerY = event.sourceEvent.clientY;
-
-    // Position the helper at the pointer.
-    helper.style("left", `${d.startPointerX}px`)
-          .style("top", `${d.startPointerY}px`);
+  
+    // Position the helper exactly where the cursor is
+    helper.style("left", `${event.sourceEvent.clientX - d.offsetX}px`)
+          .style("top", `${event.sourceEvent.clientY - d.offsetY}px`);
   }
-
+  
   function dragged(event, d) {
-    // Update the helper's position to follow the pointer.
-    const currentX = event.sourceEvent.clientX;
-    const currentY = event.sourceEvent.clientY;
-    d.dragHelper.style("left", `${currentX}px`)
-                .style("top", `${currentY}px`);
+    // Move the helper along with the cursor, maintaining the original grab offset
+    d.dragHelper.style("left", `${event.sourceEvent.clientX - d.offsetX}px`)
+                .style("top", `${event.sourceEvent.clientY - d.offsetY}px`);
   }
 
   async function dragEnded(event, d) {
