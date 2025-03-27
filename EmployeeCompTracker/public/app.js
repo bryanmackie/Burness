@@ -262,7 +262,7 @@ export async function initSecondInteractiveTree() {
     .style("top", "0px")
     .style("left", "0px")
     .style("pointer-events", "none")
-    .style("z-index", 0);
+    .style("z-index", 9999);
     
     // Global SVG (left side)
     const globalSVG = container.append("svg")
