@@ -78,50 +78,72 @@ function buildHierarchy(data) {
 }
 
 function buildDivisionHierarchy(data, division) {
-  // Create the root box for the division.
+  // Create the root box for the division
   const root = {
     label: division,
     children: []
   };
 
-  // A map to hold nodes keyed by "first_name last_name" for quick lookup.
+  // A map to hold nodes keyed by "first_name last_name" for quick lookup
   const map = {};
 
-  // First pass: Add top-level employees (those without a direct supervisor) as children of the division header.
+  // First pass: Add top-level employees (those without a supervisor or with null supervisor)
   data.forEach(item => {
-    if (item.division === division && !item.direct_first_name && !item.direct_last_name) {
-      const key = `${item.first_name} ${item.last_name}`;
-      const node = {
-        first_name: item.first_name,
-        last_name: item.last_name,
-        division: item.division,
-        children: []
-      };
-      map[key] = node;
-      root.children.push(node);
-    }
-  });
+    if (item.division === division) {
+      // Check for both missing and null supervisor fields
+      const isTopLevel = (
+        (!item.direct_first_name && !item.direct_last_name) || // Missing fields
+        (item.direct_first_name === null && item.direct_last_name === null) // Explicit null
+      );
 
-  // Second pass: For employees with supervisor info, find their supervisor in the map and attach them.
-  data.forEach(item => {
-    if (item.division === division && item.direct_first_name && item.direct_last_name) {
-      const supervisorKey = `${item.direct_first_name} ${item.direct_last_name}`;
-      const key = `${item.first_name} ${item.last_name}`;
-      const node = {
-        first_name: item.first_name,
-        last_name: item.last_name,
-        division: item.division,
-        children: []
-      };
-      map[key] = node;
-      if (map[supervisorKey]) {
-        map[supervisorKey].children.push(node);
-      } else {
-        // Optionally attach to the root if supervisor not found
+      if (isTopLevel) {
+        const key = `${item.first_name} ${item.last_name}`;
+        const node = {
+          first_name: item.first_name,
+          last_name: item.last_name,
+          division: item.division,
+          children: []
+        };
+        map[key] = node;
         root.children.push(node);
       }
     }
   });
+
+  // Second pass: For employees with supervisor info, find their supervisor in the map and attach them
+  data.forEach(item => {
+    if (item.division === division) {
+      // Check if this item has a supervisor (non-null and exists)
+      const hasSupervisor = (
+        item.direct_first_name && item.direct_last_name && // Both fields exist
+        !(item.direct_first_name === null && item.direct_last_name === null) // Not both null
+      );
+
+      if (hasSupervisor) {
+        const supervisorKey = `${item.direct_first_name} ${item.direct_last_name}`;
+        const key = `${item.first_name} ${item.last_name}`;
+        
+        // Create node if it doesn't exist
+        if (!map[key]) {
+          map[key] = {
+            first_name: item.first_name,
+            last_name: item.last_name,
+            division: item.division,
+            children: []
+          };
+        }
+
+        // Attach to supervisor if found, otherwise to root
+        if (map[supervisorKey]) {
+          map[supervisorKey].children.push(map[key]);
+        } else {
+          // Optionally attach to root if supervisor not found
+          root.children.push(map[key]);
+        }
+      }
+    }
+  });
+
   return root;
 }
 
