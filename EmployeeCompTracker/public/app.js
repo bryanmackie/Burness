@@ -402,7 +402,7 @@ function renderTree(svg, rootData, offsetX = 0) {
 
     if (targetNode) {
       // Confirm and update based on the drop target.
-      if (targetNode.data.label === "Domestic" || targetNode.data.label === "Global") {
+      if (targetNode.data.label === "domestic" || targetNode.data.label === "global") {
         const confirmChange = confirm(`Update division to ${targetNode.data.label}?`);
         if (!confirmChange) return;
         console.log(`Updating division to ${targetNode.data.label} for ${d.data.first_name}`);
@@ -439,23 +439,26 @@ function renderTree(svg, rootData, offsetX = 0) {
  */
 export async function updateEmailAidInDatabase(dragged_first_name, dragged_last_name, target_division, target_first_name, target_last_name) {
   try {
+    const payload = {
+      dragged_first_name,
+      dragged_last_name,
+      target_division,
+      // Send null explicitly for Domestic/Global cases
+      ...(target_first_name !== undefined && { target_first_name }),
+      ...(target_last_name !== undefined && { target_last_name })
+    };
+
     const response = await fetch('/update-email', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({
-        dragged_first_name,
-        dragged_last_name,
-        target_division,
-        target_first_name,
-        target_last_name
-      })
+      body: JSON.stringify(payload)
     });
+    
     const result = await response.json();
-    if (!result.success) {
-      throw new Error(result.message);
-    }
+    if (!result.success) throw new Error(result.message);
     return result;
   } catch (error) {
-    console.error('Error updating supervisor in database:', error);
+    console.error('Update error:', error);
+    throw error;
   }
 }
