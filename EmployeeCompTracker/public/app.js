@@ -222,21 +222,17 @@ export async function initInteractiveTree() {
  */
 function assignPositions(node, hSpacing, vSpacing) {
   if (node.children) {
-    // Check if all children are leaves.
     const allLeaves = node.children.every(child => !child.children);
-    
     if (allLeaves) {
-      // Vertical stacking: maintain parent's x with a small horizontal offset.
       node.children.forEach((child, i) => {
-        child.x = node.x + 30;  // slight horizontal offset
+        child.x = node.x + 30;
         child.y = node.y + vSpacing * (i + 1);
         assignPositions(child, hSpacing, vSpacing);
       });
     } else {
-      // Horizontal spacing: spread out children.
       node.children.forEach((child, i) => {
-        child.x = node.x + hSpacing * (i); // spread horizontally
-        child.y = node.y + vSpacing;           // common vertical offset
+        child.x = node.x + hSpacing * i;
+        child.y = node.y + vSpacing;
         assignPositions(child, hSpacing, vSpacing);
       });
     }
@@ -250,7 +246,6 @@ export async function initSecondInteractiveTree() {
     if (!response.ok) throw new Error('Failed to fetch hierarchy');
     const data = await response.json();
     console.log("Second hierarchy data received:", data);
-    // data.global and data.domestic hold the tree structures for each division
 
     // Clear container and prepare two SVG groups.
     const container = d3.select("#secondHierarchyContainer");
@@ -261,15 +256,30 @@ export async function initSecondInteractiveTree() {
     
     // Global SVG (left side)
     const globalSVG = container.append("svg")
+      .attr("id", "globalSVG")
       .attr("width", containerWidth / 3)
-      .attr("height", containerHeight);
+      .attr("height", containerHeight)
+      .style("position", "absolute")
+      .style("left", "0px");
     
     // Domestic SVG (right side)
     const domesticSVG = container.append("svg")
+      .attr("id", "domesticSVG")
       .attr("width", containerWidth * 2 / 3)
       .attr("height", containerHeight)
       .style("position", "absolute")
       .style("left", containerWidth / 3 + "px");
+      
+    // Create an overlay container that spans the whole container.
+    // Dragged elements will be temporarily moved here so they render on top.
+    const overlay = container.append("div")
+      .attr("id", "dragOverlay")
+      .style("position", "absolute")
+      .style("top", "0px")
+      .style("left", "0px")
+      .style("width", containerWidth + "px")
+      .style("height", containerHeight + "px")
+      .style("pointer-events", "none");  // so it doesn't block drop detection
 
     console.log("Rendering Global tree...");
     renderTree(globalSVG, data.global);
@@ -282,25 +292,19 @@ export async function initSecondInteractiveTree() {
 }
 
 function renderTree(svg, rootData) {
-  // Create a hierarchy from the tree data.
   const root = d3.hierarchy(rootData, d => d.children);
-  
   const svgWidth = parseInt(svg.attr("width"), 10);
   const svgHeight = parseInt(svg.attr("height"), 10);
   
-  // Set the initial position of the root.
-  // Here we center the root horizontally and give a small top margin.
+  // Center the root.
   root.x = svgWidth / 2;
-  root.y = 20; // top margin
-
-  // Define spacing parameters.
-  const horizontalSpacing = 120; // for intermediate (non-leaf) levels
-  const verticalSpacing = 60;    // for leaf-level stacking
+  root.y = 20;
   
-  // Recursively assign positions.
+  const horizontalSpacing = 120;
+  const verticalSpacing = 60;
   assignPositions(root, horizontalSpacing, verticalSpacing);
 
-  // Render links using d3.linkVertical.
+  // Render links.
   svg.selectAll('path.link')
     .data(root.links())
     .enter()
@@ -326,26 +330,26 @@ function renderTree(svg, rootData) {
       .on("end", dragEnded)
     );
 
-  // Draw rectangles for each node.
+  // Draw rectangles for each node (width increased to 130px, centered with x offset -65).
   node.append('rect')
-    .attr('width', 100)
+    .attr('width', 130)
     .attr('height', 30)
-    .attr('x', -50)  // center the rectangle horizontally
-    .attr('y', -15)  // center vertically
+    .attr('x', -65)
+    .attr('y', -15)
     .attr('rx', 5)
     .attr('ry', 5)
     .style('fill', d => d.depth === 0 ? '#f0f0f0' : '#fff')
     .style('stroke', 'steelblue')
     .style('stroke-width', 2);
 
-  // Add text labels to nodes.
+  // Add text labels.
   node.append('text')
     .attr('text-anchor', 'middle')
     .attr('dy', '0.35em')
     .style('font-size', '12px')
     .text(d => {
       if (d.depth === 0) {
-        return d.data.label;  // root node shows division label
+        return d.data.label;
       } else {
         return `${d.data.first_name} ${d.data.last_name}`;
       }
@@ -354,7 +358,6 @@ function renderTree(svg, rootData) {
   // --- Drag Handlers ---
   function dragStarted(event, d) {
     d3.select(this).raise().classed("active", true);
-    // Save the starting positions.
     d.startX = event.x;
     d.startY = event.y;
     const transform = d3.select(this).attr("transform");
@@ -366,6 +369,13 @@ function renderTree(svg, rootData) {
       d.transformX = 0;
       d.transformY = 0;
     }
+    // Save reference to original parent so we can reattach if needed.
+    d.originalParent = this.parentNode;
+    // Move the dragged node to the overlay so it appears above both SVGs.
+    const overlay = d3.select("#dragOverlay").node();
+    overlay.appendChild(this);
+    // Allow pointer events on the dragged element itself.
+    d3.select(this).style("pointer-events", "all");
   }
 
   function dragged(event, d) {
@@ -376,31 +386,25 @@ function renderTree(svg, rootData) {
 
   async function dragEnded(event, d) {
     d3.select(this).select('rect').attr('stroke', 'steelblue');
-
-    // Determine the drop position relative to the SVG container.
-    const svgElement = d3.select("svg").node();
-    const point = svgElement.createSVGPoint();
-    point.x = event.sourceEvent.clientX;
-    point.y = event.sourceEvent.clientY;
-    const dropPosition = point.matrixTransform(svgElement.getScreenCTM().inverse());
-    console.log("Drop Position:", dropPosition);
+    // Calculate drop position relative to the top-level container.
+    const container = d3.select("#secondHierarchyContainer").node();
+    const containerRect = container.getBoundingClientRect();
+    const dropX = event.sourceEvent.clientX - containerRect.x;
+    const dropY = event.sourceEvent.clientY - containerRect.y;
+    console.log("Drop Position:", { x: dropX, y: dropY });
     let targetNode = null;
 
-    // Loop over all nodes to detect the drop target.
+    // Look for drop targets from the nodes in both SVGs.
     d3.selectAll('.node').each(function(nodeData) {
-      // Exclude the dragged node itself.
+      // Skip the dragged node.
       if (nodeData === d) return;
-      
       const rect = this.getBoundingClientRect();
-      const svgRect = svgElement.getBoundingClientRect();
-      const nodeX = rect.x - svgRect.x;
-      const nodeY = rect.y - svgRect.y;
-
+      // Convert the node's position to container coordinates.
       if (
-        dropPosition.x >= nodeX &&
-        dropPosition.x <= nodeX + rect.width &&
-        dropPosition.y >= nodeY &&
-        dropPosition.y <= nodeY + rect.height
+        dropX >= rect.x - containerRect.x &&
+        dropX <= rect.x - containerRect.x + rect.width &&
+        dropY >= rect.y - containerRect.y &&
+        dropY <= rect.y - containerRect.y + rect.height
       ) {
         targetNode = nodeData;
         console.log("Found target node:", targetNode.data);
@@ -408,10 +412,14 @@ function renderTree(svg, rootData) {
     });
 
     if (targetNode) {
-      // If the target node's label is "Domestic" or "Global", update department and clear supervisor fields.
+      // Confirm and update based on the drop target.
       if (targetNode.data.label === "Domestic" || targetNode.data.label === "Global") {
         const confirmChange = confirm(`Update division to ${targetNode.data.label}?`);
-        if (!confirmChange) return;
+        if (!confirmChange) {
+          // Reattach to original parent if cancelled.
+          d.originalParent.appendChild(this);
+          return;
+        }
         console.log(`Updating division to ${targetNode.data.label} for ${d.data.first_name}`);
         await updateEmailAidInDatabase(
           d.data.first_name,
@@ -420,11 +428,14 @@ function renderTree(svg, rootData) {
           null,
           null
         );
+        // Reinitialize the tree which redraws all elements.
         initSecondInteractiveTree();
       } else {
-        // Otherwise, update using the target node's department and supervisor info.
         const confirmChange = confirm(`Update division to ${targetNode.data.division} and direct supervisor to ${targetNode.data.first_name} ${targetNode.data.last_name}?`);
-        if (!confirmChange) return;
+        if (!confirmChange) {
+          d.originalParent.appendChild(this);
+          return;
+        }
         console.log(`Updating division to ${targetNode.data.division} for ${d.data.first_name}`);
         await updateEmailAidInDatabase(
           d.data.first_name,
@@ -435,18 +446,21 @@ function renderTree(svg, rootData) {
         );
         initInteractiveTree();
       }
+      // In either case, the tree is re-rendered so the dragged element is removed.
     } else {
       console.warn("No valid drop target found. Update cancelled.");
+      // If no valid drop, put the node back in its original group.
+      d.originalParent.appendChild(this);
     }
   }
 }
 
+function translate(x, y) {
+  return `translate(${x},${y})`;
+}
+
 /**
  * Posts the updated node information to the server.
- * The payload includes:
- * - dragged_first_name & dragged_last_name (to identify the record in emailaid)
- * - target_department (the new department value)
- * - target_first_name & target_last_name (the new direct supervisor; if null, those fields are cleared)
  */
 export async function updateEmailAidInDatabase(dragged_first_name, dragged_last_name, target_division, target_first_name, target_last_name) {
   try {
