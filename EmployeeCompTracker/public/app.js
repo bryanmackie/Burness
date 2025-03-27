@@ -261,7 +261,8 @@ export async function initSecondInteractiveTree() {
       .attr("width", containerWidth / 3)
       .attr("height", containerHeight)
       .style("position", "absolute")
-      .style("left", "0px");
+      .style("left", "0px")
+      .style("z-index", 1);
     
     // Domestic SVG (right side)
     const domesticSVG = container.append("svg")
@@ -269,8 +270,8 @@ export async function initSecondInteractiveTree() {
       .attr("width", containerWidth * 2 / 3)
       .attr("height", containerHeight)
       .style("position", "absolute")
-      .style("left", containerWidth / 3 + "px");
-      
+      .style("left", containerWidth / 3 + "px")
+      .style("z-index", 1);
 
           
     container.append("svg")
