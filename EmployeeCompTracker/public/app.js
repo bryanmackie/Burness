@@ -272,15 +272,16 @@ export async function initSecondInteractiveTree() {
       
     // Create an overlay container that spans the whole container.
     // Dragged elements will be temporarily moved here so they render on top.
-    const overlay = container.append("div")
-      .attr("id", "dragOverlay")
+    container.append("svg")
+      .attr("id", "dragOverlaySVG")
+      .attr("width", containerWidth)
+      .attr("height", containerHeight)
       .style("position", "absolute")
       .style("top", "0px")
       .style("left", "0px")
-      .style("width", containerWidth + "px")
-      .style("height", containerHeight + "px")
-      .style("pointer-events", "none");  // so it doesn't block drop detection
-
+      .style("pointer-events", "none")
+      .style("z-index", 10);
+      
     console.log("Rendering Global tree...");
     renderTree(globalSVG, data.global);
     console.log("Rendering Domestic tree...");
