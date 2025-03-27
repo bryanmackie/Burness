@@ -420,6 +420,7 @@ function renderTree(svg, rootData) {
           null,
           null
         );
+        initSecondInteractiveTree();
       } else {
         // Otherwise, update using the target node's department and supervisor info.
         const confirmChange = confirm(`Update division to ${targetNode.data.division} and direct supervisor to ${targetNode.data.first_name} ${targetNode.data.last_name}?`);
@@ -432,6 +433,7 @@ function renderTree(svg, rootData) {
           targetNode.data.first_name,
           targetNode.data.last_name
         );
+        initInteractiveTree();
       }
     } else {
       console.warn("No valid drop target found. Update cancelled.");
