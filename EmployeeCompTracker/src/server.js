@@ -494,7 +494,7 @@ app.post('/update-supervisor', async (req, res) => {
 app.post('/update-email', async (req, res) => {
   const { dragged_first_name, dragged_last_name, target_division, target_first_name, target_last_name } = req.body;
 
-  if (!dragged_first_name || !dragged_last_name || !target_division || !target_first_name) {
+  if (!dragged_first_name || !dragged_last_name || !target_division) {
     return res.status(400).json({ success: false, message: 'Missing required fields.' });
   }
 
