@@ -426,7 +426,7 @@ function renderTree(svg, rootData, offsetX = 0) {
           targetNode.data.first_name,
           targetNode.data.last_name
         );
-        initInteractiveTree();
+        initSecondInteractiveTree();
       }
     } else {
       console.warn("No valid drop target found. Update cancelled.");
