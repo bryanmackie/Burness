@@ -247,59 +247,44 @@ export async function initSecondInteractiveTree() {
     const data = await response.json();
     console.log("Second hierarchy data received:", data);
 
-    // Clear container and prepare two SVG groups.
+    // Clear container.
     const container = d3.select("#secondHierarchyContainer");
     container.html('');
     
     const containerWidth = container.node().getBoundingClientRect().width;
     const containerHeight = container.node().getBoundingClientRect().height;
     
-    // Global SVG (left side)
-    const globalSVG = container.append("svg")
-      .attr("id", "globalSVG")
-      .attr("width", containerWidth / 3)
-      .attr("height", containerHeight)
-      .style("position", "absolute")
-      .style("left", "0px")
-      .style("z-index", 1);
-    
-    // Domestic SVG (right side)
-    const domesticSVG = container.append("svg")
-      .attr("id", "domesticSVG")
-      .attr("width", containerWidth * 2 / 3)
-      .attr("height", containerHeight)
-      .style("position", "absolute")
-      .style("left", containerWidth / 3 + "px")
-      .style("z-index", 1);
-    
-    // Overlay for dragging (if needed for non-helper elements, not used by the helper itself)
-    container.append("svg")
-      .attr("id", "dragOverlaySVG")
+    // Create one combined SVG.
+    const svg = container.append("svg")
+      .attr("id", "combinedSVG")
       .attr("width", containerWidth)
-      .attr("height", containerHeight)
-      .style("position", "absolute")
-      .style("top", "0px")
-      .style("left", "0px")
-      .style("pointer-events", "none")
-      .style("z-index", 9999);
+      .attr("height", containerHeight);
 
+    // Render Global tree (no offset) and Domestic tree (offset by 250px).
     console.log("Rendering Global tree...");
-    renderTree(globalSVG, data.global);
+    renderTree(svg, data.global, 0);
     console.log("Rendering Domestic tree...");
-    renderTree(domesticSVG, data.domestic);
+    renderTree(svg, data.domestic, 250);
     
   } catch (error) {
     console.error("Error initializing second interactive tree:", error);
   }
 }
 
-function renderTree(svg, rootData) {
+/**
+ * Renders a tree in the provided SVG.
+ * @param {object} svg - The combined SVG.
+ * @param {object} rootData - The tree data.
+ * @param {number} offsetX - Horizontal offset for this tree.
+ */
+function renderTree(svg, rootData, offsetX = 0) {
   const root = d3.hierarchy(rootData, d => d.children);
   const svgWidth = parseInt(svg.attr("width"), 10);
-  const svgHeight = parseInt(svg.attr("height"), 10);
   
-  // Center the root.
-  root.x = svgWidth / 2;
+  // Center the root horizontally within its subarea.
+  // For example, for the global tree (offset 0), we center at svgWidth/4;
+  // for the domestic tree, we shift that center by offsetX.
+  root.x = svgWidth / 4 + offsetX;
   root.y = 20;
   
   const horizontalSpacing = 175;
@@ -307,11 +292,11 @@ function renderTree(svg, rootData) {
   assignPositions(root, horizontalSpacing, verticalSpacing);
 
   // Render links.
-  svg.selectAll('path.link')
+  svg.selectAll(`path.link-${root.data.label || 'tree'}`)
     .data(root.links())
     .enter()
     .append('path')
-    .attr('class', 'link')
+    .attr('class', `link-${root.data.label || 'tree'}`)
     .attr('fill', 'none')
     .attr('stroke', '#ccc')
     .attr('d', d3.linkVertical()
@@ -320,11 +305,11 @@ function renderTree(svg, rootData) {
     );
 
   // Render nodes.
-  const node = svg.selectAll('g.node')
+  const node = svg.selectAll(`g.node-${root.data.label || 'tree'}`)
     .data(root.descendants())
     .enter()
     .append('g')
-    .attr('class', 'node')
+    .attr('class', `node-${root.data.label || 'tree'} node`)
     .attr('transform', d => translate(d.x, d.y))
     .call(d3.drag()
       .on("start", dragStarted)
@@ -332,7 +317,7 @@ function renderTree(svg, rootData) {
       .on("end", dragEnded)
     );
 
-  // Draw rectangles for each node (width increased to 150px, centered with x offset -75).
+  // Draw rectangles for each node.
   node.append('rect')
     .attr('width', 150)
     .attr('height', 30)
@@ -357,61 +342,32 @@ function renderTree(svg, rootData) {
       }
     });
 
-  // --- Drag Handlers with Drag Helper ---
+  // --- Drag Handlers (without overlay or helper) ---
   function dragStarted(event, d) {
-    // Optionally raise the element for styling purposes
-    d3.select(this).raise().classed("active", true);
-    
-    // Create a helper element as a floating copy of the node.
-    const helper = d3.select("body")
-      .append("div")
-      .attr("class", "drag-helper")
-      .style("position", "absolute")
-      .style("pointer-events", "none")
-      .style("width", "150px")
-      .style("height", "30px")
-      .style("line-height", "30px")
-      .style("text-align", "center")
-      .style("font-size", "12px")
-      .style("background", "#fff")
-      .style("border", "1px solid steelblue")
-      .style("border-radius", "5px")
-      .style("box-shadow", "2px 2px 5px rgba(0,0,0,0.3)")
-      .html(d.depth === 0 ? d.data.label : `${d.data.first_name} ${d.data.last_name}`);
-      
-    // Store the helper reference so we can update and remove it.
-    d.dragHelper = helper;
-    
-    // Hide the original node in the SVG.
-    d3.select(this).style("visibility", "hidden");
-
     // Record the starting pointer position.
-    d.startPointerX = event.sourceEvent.clientX;
-    d.startPointerY = event.sourceEvent.clientY;
-
-    // Position the helper at the pointer.
-    helper.style("left", `${d.startPointerX}px`)
-          .style("top", `${d.startPointerY}px`);
+    d.startX = event.x;
+    d.startY = event.y;
+    // Record the node's current transform.
+    const transform = d3.select(this).attr("transform");
+    if (transform) {
+      const values = transform.match(/translate\\(([^)]+)\\)/)[1].split(",");
+      d.transformX = parseFloat(values[0]);
+      d.transformY = parseFloat(values[1]);
+    } else {
+      d.transformX = 0;
+      d.transformY = 0;
+    }
   }
 
   function dragged(event, d) {
-    // Update the helper's position to follow the pointer.
-    const currentX = event.sourceEvent.clientX;
-    const currentY = event.sourceEvent.clientY;
-    d.dragHelper.style("left", `${currentX}px`)
-                .style("top", `${currentY}px`);
+    const dx = event.x - d.startX;
+    const dy = event.y - d.startY;
+    d3.select(this).attr("transform", translate(d.transformX + dx, d.transformY + dy));
   }
 
   async function dragEnded(event, d) {
-    // Remove the helper.
-    if (d.dragHelper) {
-      d.dragHelper.remove();
-      delete d.dragHelper;
-    }
-    // Make the original node visible again.
-    d3.select(this).style("visibility", "visible");
-    
-    // Calculate drop position relative to the top-level container.
+    d3.select(this).select('rect').attr('stroke', 'steelblue');
+    // Calculate drop position relative to the container.
     const container = d3.select("#secondHierarchyContainer").node();
     const containerRect = container.getBoundingClientRect();
     const dropX = event.sourceEvent.clientX - containerRect.x;
@@ -419,7 +375,7 @@ function renderTree(svg, rootData) {
     console.log("Drop Position:", { x: dropX, y: dropY });
     let targetNode = null;
 
-    // Look for drop targets from the nodes in both SVGs.
+    // Look for drop targets among all nodes.
     d3.selectAll('.node').each(function(nodeData) {
       // Skip the dragged node.
       if (nodeData === d) return;
@@ -467,6 +423,10 @@ function renderTree(svg, rootData) {
       console.warn("No valid drop target found. Update cancelled.");
     }
   }
+}
+
+function translate(x, y) {
+  return `translate(${x},${y})`;
 }
 
 /**
