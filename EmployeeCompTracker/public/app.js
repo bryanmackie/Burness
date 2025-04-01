@@ -414,7 +414,7 @@ function dragged(event, d) {
   const mouseY = event.sourceEvent.clientY + container.scrollTop;
   const containerTop = container.offsetTop;
   const containerBottom = containerTop + container.offsetHeight;
-  console.log(containerTop, containerBottom)
+  console.log(containerTop, containerBottom, mouseY, scrollZone)
   if (mouseY < containerTop + scrollZone) {
     startAutoScroll(-scrollSpeed, container);
 } else if (mouseY > containerBottom - scrollZone) {
