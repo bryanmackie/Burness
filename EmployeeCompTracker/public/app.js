@@ -416,6 +416,8 @@ function dragged(event, d) {
 
   if (mouseY < containerRect.top + scrollZone) {
     startAutoScroll(-scrollSpeed, container);
+    console.log("Starting auto-scroll with speed:", speed);
+
   } else if (mouseY > containerRect.bottom - scrollZone) {
     startAutoScroll(scrollSpeed, container);
   } else {
