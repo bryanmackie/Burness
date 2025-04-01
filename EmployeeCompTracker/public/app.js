@@ -105,116 +105,115 @@ export function renderInteractiveTree(hierarchyData) {
     currentOffsetY += treeHeight;
   });
 
-  // Drag event handlers
-  let scrollInterval = null;
-  const scrollSpeed = 10; // Pixels per frame
-  const scrollZone = 50;  // Distance from top/bottom to trigger scrolling
+ // Drag event handlers
+let scrollInterval = null;
+const scrollSpeed = 10 * 1.75; // 17.5 pixels per frame (multiplied by 1.75x)
+const scrollZone = 50;         // Distance from top/bottom to trigger scrolling
 
-  function dragStarted(event, d) {
-    d3.select(this).raise().classed("active", true);
-    // Store starting positions
-    d.startX = event.x;
-    d.startY = event.y;
-    // Get current transform values if present
-    const transform = d3.select(this).attr("transform");
-    if (transform) {
-      const translate = transform.match(/translate\(([^)]+)\)/)[1].split(",");
-      d.transformX = parseFloat(translate[0]);
-      d.transformY = parseFloat(translate[1]);
-    } else {
-      d.transformX = 0;
-      d.transformY = 0;
-    }
-    clearInterval(scrollInterval);
+function dragStarted(event, d) {
+  d3.select(this).raise().classed("active", true);
+  // Store starting positions
+  d.startX = event.x;
+  d.startY = event.y;
+  // Get current transform values if present
+  const transform = d3.select(this).attr("transform");
+  if (transform) {
+    const translate = transform.match(/translate\(([^)]+)\)/)[1].split(",");
+    d.transformX = parseFloat(translate[0]);
+    d.transformY = parseFloat(translate[1]);
+  } else {
+    d.transformX = 0;
+    d.transformY = 0;
   }
+  clearInterval(scrollInterval);
+}
 
-  function dragged(event, d) {
-    // Update the node's position based on the movement delta
-    const dx = event.x - d.startX;
-    const dy = event.y - d.startY;
-    d3.select(this).attr("transform", `translate(${d.transformX + dx}, ${d.transformY + dy})`);
+function dragged(event, d) {
+  // Update the node's position based on the movement delta
+  const dx = event.x - d.startX;
+  const dy = event.y - d.startY;
+  d3.select(this).attr("transform", `translate(${d.transformX + dx}, ${d.transformY + dy})`);
 
-    const mouseY = event.sourceEvent.clientY;
-    const windowHeight = window.innerHeight;
+  const mouseY = event.sourceEvent.clientY;
+  const windowHeight = window.innerHeight;
 
-    if (mouseY < scrollZone) {
-      startAutoScroll(-scrollSpeed);
-    } else if (mouseY > windowHeight - scrollZone) {
-      startAutoScroll(scrollSpeed);
-    } else {
-      stopAutoScroll();
-    }
-  }
-
-  function dragEnded(event, d) {
+  if (mouseY < scrollZone) {
+    startAutoScroll(-scrollSpeed);
+  } else if (mouseY > windowHeight - scrollZone) {
+    startAutoScroll(scrollSpeed);
+  } else {
     stopAutoScroll();
-    
-    // Restore the rectangle's original stroke
-    d3.select(this).select('rect').attr('stroke', 'steelblue');
-
-    // Determine the drop position relative to the SVG container
-    const svgElement = d3.select("svg").node();
-    const point = svgElement.createSVGPoint();
-    point.x = event.sourceEvent.clientX;
-    point.y = event.sourceEvent.clientY;
-    const dropPosition = point.matrixTransform(svgElement.getScreenCTM().inverse());
-    console.log("Drop Position:", dropPosition);
-    let targetSupervisor = null;
-
-    // Loop over all nodes to detect the drop target
-    d3.selectAll('.node').each(function(nodeData) {
-      const rect = this.getBoundingClientRect(); // Get node dimensions
-      const svgRect = svgElement.getBoundingClientRect(); // Get SVG's position on screen
-      const nodeX = rect.x - svgRect.x;
-      const nodeY = rect.y - svgRect.y;
-
-      if (
-        dropPosition.x >= nodeX &&
-        dropPosition.x <= nodeX + rect.width &&
-        dropPosition.y >= nodeY &&
-        dropPosition.y <= nodeY + rect.height &&
-        nodeData.data.emp_id !== d.data.emp_id
-      ) {
-        targetSupervisor = nodeData;
-        console.log("Found target supervisor:", targetSupervisor.data.emp_first_name);
-      }
-    });
-
-    if (targetSupervisor) {
-      console.log(`Updating supervisor for ${d.data.emp_first_name}`);
-      const confirmChange = confirm(`Are you sure you want to change ${d.data.emp_first_name} ${d.data.emp_last_name}'s supervisor to ${targetSupervisor.data.emp_first_name} ${targetSupervisor.data.emp_last_name}?`);
-      if (!confirmChange) {
-        console.log("Supervisor change canceled.");
-        return;
-      }
-      console.log(`Dropped on: ${targetSupervisor.data.emp_first_name} ${targetSupervisor.data.emp_last_name}`);
-
-      updateSupervisorInDatabase(d.data.emp_id, {
-        new_sup_id: targetSupervisor.data.emp_id,
-        new_sup_first_name: targetSupervisor.data.emp_first_name,
-        new_sup_last_name: targetSupervisor.data.emp_last_name
-      }).then(() => {
-        initInteractiveTree(); // Refresh the tree display after update
-      });
-    } else {
-      console.warn("No valid drop target found. Supervisor not updated.");
-    }
-  }
-
-  function startAutoScroll(speed) {
-    if (!scrollInterval) {
-      scrollInterval = setInterval(() => {
-        window.scrollBy(0, speed);
-      }, 30);
-    }
-  }
-
-  function stopAutoScroll() {
-    clearInterval(scrollInterval);
-    scrollInterval = null;
   }
 }
 
+function dragEnded(event, d) {
+  stopAutoScroll();
+  
+  // Restore the rectangle's original stroke
+  d3.select(this).select('rect').attr('stroke', 'steelblue');
+
+  // Determine the drop position relative to the SVG container
+  const svgElement = d3.select("svg").node();
+  const point = svgElement.createSVGPoint();
+  point.x = event.sourceEvent.clientX;
+  point.y = event.sourceEvent.clientY;
+  const dropPosition = point.matrixTransform(svgElement.getScreenCTM().inverse());
+  console.log("Drop Position:", dropPosition);
+  let targetSupervisor = null;
+
+  // Loop over all nodes to detect the drop target
+  d3.selectAll('.node').each(function(nodeData) {
+    const rect = this.getBoundingClientRect(); // Get node dimensions
+    const svgRect = svgElement.getBoundingClientRect(); // Get SVG's position on screen
+    const nodeX = rect.x - svgRect.x;
+    const nodeY = rect.y - svgRect.y;
+
+    if (
+      dropPosition.x >= nodeX &&
+      dropPosition.x <= nodeX + rect.width &&
+      dropPosition.y >= nodeY &&
+      dropPosition.y <= nodeY + rect.height &&
+      nodeData.data.emp_id !== d.data.emp_id
+    ) {
+      targetSupervisor = nodeData;
+      console.log("Found target supervisor:", targetSupervisor.data.emp_first_name);
+    }
+  });
+
+  if (targetSupervisor) {
+    console.log(`Updating supervisor for ${d.data.emp_first_name}`);
+    const confirmChange = confirm(`Are you sure you want to change ${d.data.emp_first_name} ${d.data.emp_last_name}'s supervisor to ${targetSupervisor.data.emp_first_name} ${targetSupervisor.data.emp_last_name}?`);
+    if (!confirmChange) {
+      console.log("Supervisor change canceled.");
+      return;
+    }
+    console.log(`Dropped on: ${targetSupervisor.data.emp_first_name} ${targetSupervisor.data.emp_last_name}`);
+
+    updateSupervisorInDatabase(d.data.emp_id, {
+      new_sup_id: targetSupervisor.data.emp_id,
+      new_sup_first_name: targetSupervisor.data.emp_first_name,
+      new_sup_last_name: targetSupervisor.data.emp_last_name
+    }).then(() => {
+      initInteractiveTree(); // Refresh the tree display after update
+    });
+  } else {
+    console.warn("No valid drop target found. Supervisor not updated.");
+  }
+}
+
+function startAutoScroll(speed) {
+  if (!scrollInterval) {
+    scrollInterval = setInterval(() => {
+      window.scrollBy(0, speed);
+    }, 30);
+  }
+}
+
+function stopAutoScroll() {
+  clearInterval(scrollInterval);
+  scrollInterval = null;
+}
+}
 export async function updateSupervisorInDatabase(empId, newSupervisorData) {
   try {
     const response = await fetch('/update-supervisor', {
@@ -373,96 +372,130 @@ function renderTree(svg, rootData, offsetX = 0) {
       }
     });
 
-  // --- Drag Handlers (without overlay or helper) ---
-  function dragStarted(event, d) {
-    // Store the initial position from the layout
-    d.dragStartX = d.x;
-    d.dragStartY = d.y;
-    
-    // Store the initial mouse position
-    d.mouseStartX = event.x;
-    d.mouseStartY = event.y;
-    
-    // Highlight the node
-    d3.select(this).select('rect').attr('stroke', 'orange');
-    
-    // Prevent default behavior that might cause jitter
-    event.sourceEvent.preventDefault();
-  }
+  // --- Drag Handlers (without overlay or helper) with Auto Scroll ---
+
+let scrollInterval = null;
+const scrollSpeed = 10; // Pixels per frame for auto scroll
+const scrollZone = 50;  // Distance from container's top/bottom to trigger scrolling
+
+function dragStarted(event, d) {
+  // Store the initial position from the layout
+  d.dragStartX = d.x;
+  d.dragStartY = d.y;
   
-  function dragged(event, d) {
-    // Calculate the delta from mouse movement
-    const dx = event.x - d.mouseStartX;
-    const dy = event.y - d.mouseStartY;
-    
-    // Update the node's position
-    d.x = d.dragStartX + dx;
-    d.y = d.dragStartY + dy;
-    
-    // Apply the transformation
-    d3.select(this)
-      .attr("transform", translate(d.x, d.y));
+  // Store the initial mouse position
+  d.mouseStartX = event.x;
+  d.mouseStartY = event.y;
+  
+  // Highlight the node
+  d3.select(this).select('rect').attr('stroke', 'orange');
+  
+  // Prevent default behavior that might cause jitter
+  event.sourceEvent.preventDefault();
+  
+  clearInterval(scrollInterval);
+}
 
+function dragged(event, d) {
+  // Calculate the delta from mouse movement
+  const dx = event.x - d.mouseStartX;
+  const dy = event.y - d.mouseStartY;
+  
+  // Update the node's position
+  d.x = d.dragStartX + dx;
+  d.y = d.dragStartY + dy;
+  
+  // Apply the transformation
+  d3.select(this)
+    .attr("transform", translate(d.x, d.y));
+
+  // Auto scroll functionality on the container
+  const container = d3.select("#secondHierarchyContainer").node();
+  const containerRect = container.getBoundingClientRect();
+  const mouseY = event.sourceEvent.clientY;
+
+  if (mouseY < containerRect.top + scrollZone) {
+    startAutoScroll(-scrollSpeed, container);
+  } else if (mouseY > containerRect.bottom - scrollZone) {
+    startAutoScroll(scrollSpeed, container);
+  } else {
+    stopAutoScroll();
   }
+}
 
-  async function dragEnded(event, d) {
-    d3.select(this).select('rect').attr('stroke', 'steelblue');
-    // Calculate drop position relative to the container.
-    const container = d3.select("#secondHierarchyContainer").node();
-    const containerRect = container.getBoundingClientRect();
-    const dropX = event.sourceEvent.clientX - containerRect.x;
-    const dropY = event.sourceEvent.clientY - containerRect.y;
-    console.log("Drop Position:", { x: dropX, y: dropY });
-    let targetNode = null;
+async function dragEnded(event, d) {
+  stopAutoScroll();
+  
+  d3.select(this).select('rect').attr('stroke', 'steelblue');
+  // Calculate drop position relative to the container.
+  const container = d3.select("#secondHierarchyContainer").node();
+  const containerRect = container.getBoundingClientRect();
+  const dropX = event.sourceEvent.clientX - containerRect.x;
+  const dropY = event.sourceEvent.clientY - containerRect.y;
+  console.log("Drop Position:", { x: dropX, y: dropY });
+  let targetNode = null;
 
-    // Look for drop targets among all nodes.
-    d3.selectAll('.node').each(function(nodeData) {
-      // Skip the dragged node.
-      if (nodeData === d) return;
-      const rect = this.getBoundingClientRect();
-      if (
-        dropX >= rect.x - containerRect.x &&
-        dropX <= rect.x - containerRect.x + rect.width &&
-        dropY >= rect.y - containerRect.y &&
-        dropY <= rect.y - containerRect.y + rect.height
-      ) {
-        targetNode = nodeData;
-        console.log("Found target node:", targetNode.data);
-      }
-    });
-
-    if (targetNode) {
-      // Confirm and update based on the drop target.
-      if (targetNode.data.label === "domestic" || targetNode.data.label === "global") {
-        const confirmChange = confirm(`Update division to ${targetNode.data.label}?`);
-        if (!confirmChange) return;
-        console.log(`Updating division to ${targetNode.data.label} for ${d.data.first_name}`);
-        await updateEmailAidInDatabase(
-          d.data.first_name,
-          d.data.last_name,
-          targetNode.data.label.toLowerCase(),
-          null,
-          null
-        );
-        // Reinitialize the tree which redraws all elements.
-        initSecondInteractiveTree();
-      } else {
-        const confirmChange = confirm(`Update division to ${targetNode.data.division} and direct supervisor to ${targetNode.data.first_name} ${targetNode.data.last_name}?`);
-        if (!confirmChange) return;
-        console.log(`Updating division to ${targetNode.data.division} for ${d.data.first_name}`);
-        await updateEmailAidInDatabase(
-          d.data.first_name,
-          d.data.last_name,
-          targetNode.data.division,
-          targetNode.data.first_name,
-          targetNode.data.last_name
-        );
-        initSecondInteractiveTree();
-      }
-    } else {
-      console.warn("No valid drop target found. Update cancelled.");
+  // Look for drop targets among all nodes.
+  d3.selectAll('.node').each(function(nodeData) {
+    // Skip the dragged node.
+    if (nodeData === d) return;
+    const rect = this.getBoundingClientRect();
+    if (
+      dropX >= rect.x - containerRect.x &&
+      dropX <= rect.x - containerRect.x + rect.width &&
+      dropY >= rect.y - containerRect.y &&
+      dropY <= rect.y - containerRect.y + rect.height
+    ) {
+      targetNode = nodeData;
+      console.log("Found target node:", targetNode.data);
     }
+  });
+
+  if (targetNode) {
+    // Confirm and update based on the drop target.
+    if (targetNode.data.label === "domestic" || targetNode.data.label === "global") {
+      const confirmChange = confirm(`Update division to ${targetNode.data.label}?`);
+      if (!confirmChange) return;
+      console.log(`Updating division to ${targetNode.data.label} for ${d.data.first_name}`);
+      await updateEmailAidInDatabase(
+        d.data.first_name,
+        d.data.last_name,
+        targetNode.data.label.toLowerCase(),
+        null,
+        null
+      );
+      // Reinitialize the tree which redraws all elements.
+      initSecondInteractiveTree();
+    } else {
+      const confirmChange = confirm(`Update division to ${targetNode.data.division} and direct supervisor to ${targetNode.data.first_name} ${targetNode.data.last_name}?`);
+      if (!confirmChange) return;
+      console.log(`Updating division to ${targetNode.data.division} for ${d.data.first_name}`);
+      await updateEmailAidInDatabase(
+        d.data.first_name,
+        d.data.last_name,
+        targetNode.data.division,
+        targetNode.data.first_name,
+        targetNode.data.last_name
+      );
+      initSecondInteractiveTree();
+    }
+  } else {
+    console.warn("No valid drop target found. Update cancelled.");
   }
+}
+
+function startAutoScroll(speed, container) {
+  if (!scrollInterval) {
+    scrollInterval = setInterval(() => {
+      container.scrollBy(0, speed);
+    }, 30);
+  }
+}
+
+function stopAutoScroll() {
+  clearInterval(scrollInterval);
+  scrollInterval = null;
+}
 }
 
 /**
