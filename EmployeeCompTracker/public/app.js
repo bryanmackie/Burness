@@ -413,6 +413,7 @@ function dragged(event, d) {
   const container = d3.select("#secondHierarchyContainer").node();
   const containerRect = container.getBoundingClientRect();
   const mouseY = event.sourceEvent.clientY;
+  console.log("MouseY:", mouseY, "Container Top:", containerRect.top, "Container Bottom:", containerRect.bottom);
 
   if (mouseY < containerRect.top + scrollZone) {
     startAutoScroll(-scrollSpeed, container);
