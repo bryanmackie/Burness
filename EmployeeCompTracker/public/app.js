@@ -106,6 +106,10 @@ export function renderInteractiveTree(hierarchyData) {
   });
 
   // Drag event handlers
+  let scrollInterval = null;
+  const scrollSpeed = 10; // Pixels per frame
+  const scrollZone = 50;  // Distance from top/bottom to trigger scrolling
+
   function dragStarted(event, d) {
     d3.select(this).raise().classed("active", true);
     // Store starting positions
@@ -121,6 +125,7 @@ export function renderInteractiveTree(hierarchyData) {
       d.transformX = 0;
       d.transformY = 0;
     }
+    clearInterval(scrollInterval);
   }
 
   function dragged(event, d) {
@@ -128,9 +133,22 @@ export function renderInteractiveTree(hierarchyData) {
     const dx = event.x - d.startX;
     const dy = event.y - d.startY;
     d3.select(this).attr("transform", `translate(${d.transformX + dx}, ${d.transformY + dy})`);
+
+    const mouseY = event.sourceEvent.clientY;
+    const windowHeight = window.innerHeight;
+
+    if (mouseY < scrollZone) {
+      startAutoScroll(-scrollSpeed);
+    } else if (mouseY > windowHeight - scrollZone) {
+      startAutoScroll(scrollSpeed);
+    } else {
+      stopAutoScroll();
+    }
   }
 
-  async function dragEnded(event, d) {
+  function dragEnded(event, d) {
+    stopAutoScroll();
+    
     // Restore the rectangle's original stroke
     d3.select(this).select('rect').attr('stroke', 'steelblue');
 
@@ -171,16 +189,29 @@ export function renderInteractiveTree(hierarchyData) {
       }
       console.log(`Dropped on: ${targetSupervisor.data.emp_first_name} ${targetSupervisor.data.emp_last_name}`);
 
-      await updateSupervisorInDatabase(d.data.emp_id, {
+      updateSupervisorInDatabase(d.data.emp_id, {
         new_sup_id: targetSupervisor.data.emp_id,
         new_sup_first_name: targetSupervisor.data.emp_first_name,
         new_sup_last_name: targetSupervisor.data.emp_last_name
+      }).then(() => {
+        initInteractiveTree(); // Refresh the tree display after update
       });
-
-      initInteractiveTree(); // Refresh the tree display after update
     } else {
       console.warn("No valid drop target found. Supervisor not updated.");
     }
+  }
+
+  function startAutoScroll(speed) {
+    if (!scrollInterval) {
+      scrollInterval = setInterval(() => {
+        window.scrollBy(0, speed);
+      }, 30);
+    }
+  }
+
+  function stopAutoScroll() {
+    clearInterval(scrollInterval);
+    scrollInterval = null;
   }
 }
 
