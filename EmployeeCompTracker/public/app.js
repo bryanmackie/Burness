@@ -374,9 +374,9 @@ function renderTree(svg, rootData, offsetX = 0) {
 
   // --- Drag Handlers (without overlay or helper) with Auto Scroll ---
 
-let scrollInterval = null;
-const scrollSpeed = 10; // Pixels per frame for auto scroll
-const scrollZone = 50;  // Distance from container's top/bottom to trigger scrolling
+let scrollInterval2 = null;
+const scrollSpeed2 = 18; // Pixels per frame for auto scroll
+const scrollZone2 = 50;  // Distance from container's top/bottom to trigger scrolling
 
 function dragStarted(event, d) {
   // Store the initial position from the layout
@@ -393,7 +393,7 @@ function dragStarted(event, d) {
   // Prevent default behavior that might cause jitter
   event.sourceEvent.preventDefault();
   
-  clearInterval(scrollInterval);
+  clearInterval(scrollInterval2);
 }
 
 function dragged(event, d) {
@@ -414,11 +414,11 @@ function dragged(event, d) {
   const mouseY = event.sourceEvent.clientY + container.scrollTop;
   const containerTop = container.offsetTop;
   const containerBottom = containerTop + container.offsetHeight;
-  console.log(containerTop, containerBottom, mouseY, scrollZone)
-  if (mouseY < containerTop + scrollZone) {
-    startAutoScroll(-scrollSpeed, container);
+  console.log(containerTop, containerBottom, mouseY, scrollZone2)
+  if (mouseY < containerTop + scrollZone2) {
+    startAutoScroll(-scrollSpeed2, container);
 } else if (mouseY > containerBottom - scrollZone) {
-    startAutoScroll(scrollSpeed, container);
+    startAutoScroll(scrollSpeed2, container);
 } else {
     stopAutoScroll();
 }
@@ -487,16 +487,16 @@ async function dragEnded(event, d) {
 }
 
 function startAutoScroll(speed, container) {
-  if (!scrollInterval) {
-    scrollInterval = setInterval(() => {
+  if (!scrollInterval2) {
+    scrollInterval2 = setInterval(() => {
       container.scrollBy(0, speed);
     }, 30);
   }
 }
 
 function stopAutoScroll() {
-  clearInterval(scrollInterval);
-  scrollInterval = null;
+  clearInterval(scrollInterval2);
+  scrollInterval2 = null;
 }
 }
 
