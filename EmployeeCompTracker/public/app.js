@@ -411,19 +411,18 @@ function dragged(event, d) {
 
   // Auto scroll functionality on the container
   const container = d3.select("#secondHierarchyContainer").node();
-  const containerRect = container.getBoundingClientRect();
-  const mouseY = event.sourceEvent.clientY;
-  console.log("MouseY:", mouseY, "Container Top:", containerRect.top, "Container Bottom:", containerRect.bottom, "Scroll Zone:", scrollZone);
-
-  if (mouseY < containerRect.top + scrollZone) {
+  const mouseY = event.sourceEvent.clientY + container.scrollTop;
+  const containerTop = container.offsetTop;
+  const containerBottom = containerTop + container.offsetHeight;
+  
+  if (mouseY < containerTop + scrollZone) {
     startAutoScroll(-scrollSpeed, container);
-    console.log("Starting auto-scroll with speed:", speed);
-
-  } else if (mouseY > containerRect.bottom - scrollZone) {
+} else if (mouseY > containerBottom - scrollZone) {
     startAutoScroll(scrollSpeed, container);
-  } else {
+} else {
     stopAutoScroll();
-  }
+}
+
 }
 
 async function dragEnded(event, d) {
