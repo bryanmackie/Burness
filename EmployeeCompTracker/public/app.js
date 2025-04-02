@@ -411,7 +411,8 @@ function dragged(event, d) {
 
   // Auto scroll functionality on the container
   const container = d3.select("#secondHierarchyContainer").node();
-  const mouseY = event.sourceEvent.clientY;
+  const mouseY = event.sourceEvent.pageY;
+
   const containerRect = container.getBoundingClientRect();
   const containerTop = containerRect.top + window.scrollY;
   const containerBottom = containerTop + containerRect.height;
