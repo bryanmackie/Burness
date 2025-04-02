@@ -409,19 +409,15 @@ function dragged(event, d) {
   d3.select(this)
     .attr("transform", translate(d.x, d.y));
 
-  // Auto scroll functionality on the container
-  const container = d3.select("#secondHierarchyContainer").node();
-  const mouseY = event.sourceEvent.pageY;
 
-  const containerRect = container.getBoundingClientRect();
-  const containerTop = containerRect.top + window.scrollY;
-  const containerBottom = containerTop + containerRect.height;
-  
-  console.log(containerTop, containerBottom, mouseY, scrollZone2)
-  if (mouseY < containerTop + scrollZone2) {
-    startAutoScroll(-scrollSpeed2, container);
-} else if (mouseY > containerBottom - scrollZone2) {
-    startAutoScroll(scrollSpeed2, container);
+  const mouseY = event.sourceEvent.pageY;
+const pageTop = window.scrollY;
+const pageBottom = window.scrollY + window.innerHeight;
+
+if (mouseY < pageTop + scrollZone2) {
+    startAutoScroll(-scrollSpeed2, document.documentElement);
+} else if (mouseY > pageBottom - scrollZone2) {
+    startAutoScroll(scrollSpeed2, document.documentElement);
 } else {
     stopAutoScroll();
 }
