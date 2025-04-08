@@ -140,8 +140,8 @@ async function checkAndNotify(client) {
       const divisionLeadEmails = divisionLeadsResult.rows.map(row => row.email);
 
       // Always include the fixed email address
-      divisionLeadEmails.push("bryanmackie7@gmail.com"); //vbigelow@burness.com
-
+      divisionLeadEmails.push("vbigelow@burness.com"); //vbigelow@burness.com
+      divisionLeadEmails.push("bryanmackie7@gmail.com");
       // Build final CC list as a comma-separated string and remove duplicates
       const ccList = [...new Set(divisionLeadEmails)].join(',');
 
