@@ -22,7 +22,7 @@ async function getEmailTemplate(client, templateType) {
       [templateType]
     );
     if (result.rows.length > 0) {
-      console.log("Email template fetched:", result.rows[0]); // Log the fetched template
+      console.log("Email template fetched:", result.rows[0]);
       return result.rows[0];
     } else {
       console.error(`No email template found for type: ${templateType}`);
@@ -35,41 +35,34 @@ async function getEmailTemplate(client, templateType) {
 }
 
 // Function to calculate the last payroll date
-// - Any day between the 1st and 15th of the month becomes the 1st of the month.
-// - Any day from the 16th to the end of the month becomes the 16th of the month.
-// - Add 1 to the year.
 function getLastPayrollDate(latestSalaryDate) {
   const salaryDate = new Date(latestSalaryDate);
   const year = salaryDate.getFullYear() + 1; // Add 1 to the year
-  const month = salaryDate.getMonth(); // JavaScript Date months are 0-indexed
+  const month = salaryDate.getMonth(); 
   let lastPayrollDate;
 
   if (salaryDate.getDate() <= 15) {
-    // Payroll on the 1st of the same month
     lastPayrollDate = new Date(year, month, 1);
   } else {
-    // Payroll on the 16th of the same month
     lastPayrollDate = new Date(year, month, 16);
   }
   return lastPayrollDate.toISOString().split('T')[0]; // Format as YYYY-MM-DD
 }
 
-// Function to send an email with optional CC
+// Function to send an email with CC's set as a comma-delimited string
 async function sendEmail(to, cc, subject, html) {
   try {
-    let mailOptions = {
+    const mailOptions = {
       from: `"HR Notification" <${process.env.EMAIL_USER}>`,
       to,
       subject,
-      html, // Use 'html' instead of 'text'
+      html,
       headers: {
-        "Content-Type": "text/html; charset=utf-8", // Explicitly set the content type
+        "Content-Type": "text/html; charset=utf-8",
       },
+      cc // can be a string of comma-separated emails or an array
     };
-    if (cc) {
-      mailOptions.cc = cc;
-    }
-    console.log("Attempting to send email with options:", mailOptions); // Log email options
+    console.log("Attempting to send email with options:", mailOptions);
     let info = await transporter.sendMail(mailOptions);
     console.log(`Email sent to ${to} (cc: ${cc || "none"}). Message ID: ${info.messageId}`);
   } catch (error) {
@@ -87,9 +80,7 @@ async function checkAndNotify(client) {
       return;
     }
 
-    // Query for employees eligible for a raise:
-    // - latest_salary_effective_date is older than 10 months
-    // - raise_eligible is true in salary_review_data
+    // Query for employees eligible for a raise
     const employeeQuery = `
       SELECT led.first_name, led.last_name, led.latest_salary_effective_date
       FROM latest_employee_data led
@@ -105,8 +96,8 @@ async function checkAndNotify(client) {
     for (const emp of employees) {
       const { first_name, last_name, latest_salary_effective_date } = emp;
       const payrollIncreaseDate = getLastPayrollDate(latest_salary_effective_date);
-      
-      // Get immediate supervisor details
+
+      // Get immediate supervisor details (remains unchanged)
       const immediateSupervisorQuery = `
         SELECT s.sup_first_name, s.sup_last_name, sr2.email AS immediate_supervisor_email
         FROM supervisors s
@@ -121,53 +112,54 @@ async function checkAndNotify(client) {
       }
       const immediateSupervisor = immediateResult.rows[0];
 
-      // Get ultimate supervisor details from salary_review_data
-      const ultimateNameQuery = `
-        SELECT ultimate_supervisor_first_name, ultimate_supervisor_last_name
-        FROM salary_review_data
+      // Get employee info from emailaid to fetch division and direct supervisor info
+      const employeeInfoQuery = `
+        SELECT division, direct_first_name, direct_last_name
+        FROM emailaid
         WHERE first_name = $1 AND last_name = $2
         LIMIT 1
       `;
-      const ultimateNameResult = await client.query(ultimateNameQuery, [first_name, last_name]);
-      if (ultimateNameResult.rows.length === 0) {
-        console.warn(`No ultimate supervisor info found for ${first_name} ${last_name}`);
+      const employeeInfoResult = await client.query(employeeInfoQuery, [first_name, last_name]);
+      if (employeeInfoResult.rows.length === 0) {
+        console.warn(`No additional info found in emailaid for ${first_name} ${last_name}`);
         continue;
       }
-      const { ultimate_supervisor_first_name, ultimate_supervisor_last_name } = ultimateNameResult.rows[0];
+      const { division, direct_first_name, direct_last_name } = employeeInfoResult.rows[0];
 
-      // Get ultimate supervisor email
-      const ultimateEmailQuery = `
-        SELECT email AS ultimate_supervisor_email
-        FROM salary_review_data
-        WHERE first_name = $1 AND last_name = $2
-        LIMIT 1
+      // Query for division lead emails using the logic:
+      // A division lead is in the same division and has both direct_first_name and direct_last_name as null.
+      const divisionLeadsQuery = `
+        SELECT sr.email
+        FROM salary_review_data sr
+        JOIN emailaid e ON sr.first_name = e.first_name AND sr.last_name = e.last_name
+        WHERE e.division = $1
+          AND e.direct_first_name IS NULL
+          AND e.direct_last_name IS NULL
       `;
-      const ultimateEmailResult = await client.query(ultimateEmailQuery, [ultimate_supervisor_first_name, ultimate_supervisor_last_name]);
-      if (ultimateEmailResult.rows.length === 0) {
-        console.warn(`No email found for ultimate supervisor ${ultimate_supervisor_first_name} ${ultimate_supervisor_last_name}`);
-        continue;
-      }
-      const ultimateSupervisor = ultimateEmailResult.rows[0];
+      const divisionLeadsResult = await client.query(divisionLeadsQuery, [division]);
+      const divisionLeadEmails = divisionLeadsResult.rows.map(row => row.email);
 
-      // Determine email recipients:
-      // If immediate and ultimate supervisor emails are the same, do not set CC.
-      const to = immediateSupervisor.immediate_supervisor_email;
-      const cc = (to === ultimateSupervisor.ultimate_supervisor_email) ? null : ultimateSupervisor.ultimate_supervisor_email;
+      // Always include the fixed email address
+      divisionLeadEmails.push("bryanmackie7@gmail.com"); //vbigelow@burness.com
+
+      // Build final CC list as a comma-separated string and remove duplicates
+      const ccList = [...new Set(divisionLeadEmails)].join(',');
 
       // Replace placeholders in the email template subject and body
+      // ultimate_supervisor_name now comes from direct_first_name and direct_last_name of the employeeInfo
       const subject = emailTemplate.subject
         .replace("{first_name}", first_name)
         .replace("{last_name}", last_name);
 
-        const emailBody = emailTemplate.body
+      const emailBody = emailTemplate.body
         .replace("{first_name}", first_name)
         .replace("{last_name}", last_name)
         .replace("{payroll_increase_date}", payrollIncreaseDate)
-        .replace("{ultimate_supervisor_name}", `${ultimate_supervisor_first_name} ${ultimate_supervisor_last_name}`)
-        .replace("{immediate_supervisor_name}", `${immediateSupervisor.sup_first_name} ${immediateSupervisor.sup_last_name}`)
+        .replace("{ultimate_supervisor_name}", `${direct_first_name} ${direct_last_name}`)
+        .replace("{immediate_supervisor_name}", `${immediateSupervisor.sup_first_name} ${immediateSupervisor.sup_last_name}`);
 
-      // Send the email (immediate supervisor in "to", ultimate supervisor in "cc" if different)
-      await sendEmail(to, cc, subject, emailBody);
+      // Send the email (immediate supervisor in "to"; CC includes division leads and vbigelow)
+      await sendEmail(immediateSupervisor.immediate_supervisor_email, ccList, subject, emailBody);
       console.log(`Notified supervisors for ${first_name} ${last_name}`);
     }
   } catch (error) {
@@ -178,14 +170,14 @@ async function checkAndNotify(client) {
 // Schedule the cron job to run weekly (every Monday at 8 AM)
 export function startCronJob(client) {
   try {
-    // For testing purposes, run the function immediately.
-    //checkAndNotify(client);
+    // For testing purposes, you can uncomment the following to run immediately.
+     checkAndNotify(client);
 
     cron.schedule("0 8 * * MON", () => {
       console.log("Cron job triggered: Running weekly salary check and notification job...");
       checkAndNotify(client);
     }, {
-      timezone: "America/New_York" // Set your desired time zone
+      timezone: "America/New_York"
     });
 
     console.log("Cron job scheduled successfully.");
