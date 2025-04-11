@@ -171,7 +171,7 @@ async function checkAndNotify(client) {
 export function startCronJob(client) {
   try {
     // For testing purposes, you can uncomment the following to run immediately.
-     //checkAndNotify(client);
+     checkAndNotify(client);
 
     cron.schedule("0 8 * * MON", () => {
       console.log("Cron job triggered: Running weekly salary check and notification job...");
