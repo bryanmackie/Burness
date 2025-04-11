@@ -140,7 +140,7 @@ async function checkAndNotify(client) {
       const divisionLeadEmails = divisionLeadsResult.rows.map(row => row.email);
 
       // Always include the fixed email address
-      divisionLeadEmails.push("vbigelow@burness.com"); //vbigelow@burness.com
+     // divisionLeadEmails.push("vbigelow@burness.com"); //vbigelow@burness.com
       divisionLeadEmails.push("bryanmackie7@gmail.com");
       // Build final CC list as a comma-separated string and remove duplicates
       const ccList = [...new Set(divisionLeadEmails)].join(',');
@@ -155,7 +155,7 @@ async function checkAndNotify(client) {
         .replace("{first_name}", first_name)
         .replace("{last_name}", last_name)
         .replace("{payroll_increase_date}", payrollIncreaseDate)
-        .replace("{ultimate_supervisor_name}", `${direct_first_name} ${direct_last_name}`)
+        .replace(/{ultimate_supervisor_name}/g, `${direct_first_name} ${direct_last_name}`)
         .replace("{immediate_supervisor_name}", `${immediateSupervisor.sup_first_name} ${immediateSupervisor.sup_last_name}`);
 
       // Send the email (immediate supervisor in "to"; CC includes division leads and vbigelow)
