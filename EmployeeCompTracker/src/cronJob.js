@@ -155,8 +155,8 @@ async function checkAndNotify(client) {
         .replace("{first_name}", first_name)
         .replace("{last_name}", last_name)
         .replace("{payroll_increase_date}", payrollIncreaseDate)
-        .replace(/{ultimate_supervisor_name}/g, `${direct_first_name} ${direct_last_name}`)
-        .replace("{immediate_supervisor_name}", `${immediateSupervisor.sup_first_name} ${immediateSupervisor.sup_last_name}`);
+        .replace(/{ultimate_supervisor_name}/g, `${direct_first_name}`)
+        .replace("{immediate_supervisor_name}", `${immediateSupervisor.sup_first_name}`);
 
       // Send the email (immediate supervisor in "to"; CC includes division leads and vbigelow)
       await sendEmail(immediateSupervisor.immediate_supervisor_email, ccList, subject, emailBody);
