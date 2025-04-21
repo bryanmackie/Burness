@@ -140,7 +140,7 @@ async function checkAndNotify(client) {
       const divisionLeadEmails = divisionLeadsResult.rows.map(row => row.email);
 
       // Always include the fixed email address
-      divisionLeadEmails.push("vbigelow@burness.com"); //vbigelow@burness.com
+      //divisionLeadEmails.push("vbigelow@burness.com"); //vbigelow@burness.com
       //divisionLeadEmails.push("bryanmackie7@gmail.com");
       // Build final CC list as a comma-separated string and remove duplicates
       const ccList = [...new Set(divisionLeadEmails)].join(',');
@@ -171,7 +171,7 @@ async function checkAndNotify(client) {
 export function startCronJob(client) {
   try {
     // For testing purposes
-     //checkAndNotify(client);
+     checkAndNotify(client);
 
     cron.schedule("0 11 * * MON", () => {
       console.log("Cron job triggered: Running weekly salary check and notification job...");
