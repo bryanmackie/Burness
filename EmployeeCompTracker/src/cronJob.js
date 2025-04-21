@@ -170,7 +170,7 @@ async function checkAndNotify(client) {
 // Schedule the cron job to run weekly (every Monday at 8 AM)
 export function startCronJob(client) {
   try {
-    // For testing purposes, you can uncomment the following to run immediately.
+    // For testing purposes
      checkAndNotify(client);
 
     cron.schedule("0 8 * * MON", () => {
