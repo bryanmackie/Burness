@@ -171,9 +171,9 @@ async function checkAndNotify(client) {
 export function startCronJob(client) {
   try {
     // For testing purposes
-     checkAndNotify(client);
+     //checkAndNotify(client);
 
-    cron.schedule("0 8 * * MON", () => {
+    cron.schedule("0 11 * * MON", () => {
       console.log("Cron job triggered: Running weekly salary check and notification job...");
       checkAndNotify(client);
     }, {
