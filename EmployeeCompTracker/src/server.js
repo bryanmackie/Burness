@@ -293,11 +293,16 @@ app.post('/update', async (req, res) => {
     }
 
     if (sanitizedRaise !== null) {
-      const raiseDecimal = parseFloat(sanitizedRaise) / 100;
-      newSalary = Math.ceil((currentSalary * (1 + raiseDecimal)) / 10) * 10;
-    } else if (sanitizedSalary !== null) {
-      newSalary = Math.ceil(sanitizedSalary / 10) * 10;
-    }
+  const raiseDecimal = parseFloat(sanitizedRaise) / 100;
+  if (raiseDecimal === 0) {
+    newSalary = currentSalary;
+  } else {
+    newSalary = Math.ceil((currentSalary * (1 + raiseDecimal)) / 10) * 10;
+  }
+} else if (sanitizedSalary !== null) {
+  newSalary = Math.ceil(sanitizedSalary / 10) * 10;
+}
+
 
     const setClause = [];
     const setValues = [];
