@@ -291,3 +291,19 @@ button:hover {
 }
 
 /* End of Toggle Button */
+
+#addEmployeeForm label { display:block; margin-top:8px; }
+#addEmployeeForm input, #addEmployeeForm select, #addEmployeeForm textarea { width:100%; }
+
+.diversity-details { margin-top:12px; }
+.diversity-fieldset { border:1px solid #ddd; padding:12px; margin-top:8px; }
+.sr-only { position:absolute; left:-10000px; top:auto; width:1px; height:1px; overflow:hidden; }
+
+/* Grid for readability; adjusts to width */
+.diversity-grid {
+  display:grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap:8px 16px;
+}
+.diversity-grid label { display:flex; align-items:flex-start; gap:8px; }
+.diversity-grid input[type="checkbox"] { margin-top:2px; }

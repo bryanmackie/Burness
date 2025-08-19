@@ -107,33 +107,63 @@
       <button type="submit">Submit</button>
     </form>
 
-     <!-- Container for Add and Delete Employee dropdowns -->
-     <div class="dropdown-container">
-      <!-- Dropdown for adding a new employee -->
-      <div class="dropdown" id="addEmployeeContainer">
-        <button class="dropbtn">Add Employee</button>
-        <div class="dropdown-content">
-          <form id="addEmployeeForm">
-            <h2>Add Employee</h2>
-            <label for="add_first_name">First Name:</label>
-            <input type="text" id="add_first_name" name="add_first_name" required />
-  
-            <label for="add_last_name">Last Name:</label>
-            <input type="text" id="add_last_name" name="add_last_name" required />
-            <label for="add_email">Email Address:</label>
-            <input type="email" id="add_email" name="add_email" required />
-            <!-- Restricted or Unrestricted Dropdown -->
-            <label for="employeeStatus">Employee Status:</label>
-            <select id="employeeStatus" name="employeeStatus" required>
-              <option value="restricted">Restricted</option>
-              <option value="unrestricted">Unrestricted</option>
-            </select>
-  
-            <button type="submit">Add Employee</button>
-          </form>
-        </div>
-      </div>
-  
+    <div class="dropdown" id="addEmployeeContainer">
+  <button class="dropbtn">Add Employee</button>
+  <div class="dropdown-content">
+    <form id="addEmployeeForm">
+      <h2>Add Employee</h2>
+
+      <label for="add_first_name">First Name:</label>
+      <input type="text" id="add_first_name" name="add_first_name" required />
+
+      <label for="add_last_name">Last Name:</label>
+      <input type="text" id="add_last_name" name="add_last_name" required />
+
+      <label for="add_email">Email Address:</label>
+      <input type="email" id="add_email" name="add_email" required />
+
+      <label for="employeeStatus">Employee Status:</label>
+      <select id="employeeStatus" name="employeeStatus" required>
+        <option value="restricted">Restricted</option>
+        <option value="unrestricted">Unrestricted</option>
+      </select>
+
+      <!-- Collapsible diversity block -->
+      <details class="diversity-details">
+        <summary>Diversity</summary>
+
+        <fieldset class="diversity-fieldset">
+          <legend class="sr-only">Diversity</legend>
+
+          <div class="diversity-grid">
+            <!-- Gender -->
+            <label><input type="checkbox" id="div_Male"> <span>Male</span></label>
+            <label><input type="checkbox" id="div_Female"> <span>Female</span></label>
+            <label><input type="checkbox" id="div_NonBinary"> <span>Non-Binary/Non-Conforming</span></label>
+
+            <!-- Race / Ethnicity -->
+            <label><input type="checkbox" id="div_Black"> <span>Black</span></label>
+            <label><input type="checkbox" id="div_Asian"> <span>Asian or Asian American</span></label>
+            <label><input type="checkbox" id="div_NHPI"> <span>Native Hawaiian or Pacific Islander</span></label>
+            <label><input type="checkbox" id="div_Indigenous"> <span>Indigenous, Native American or Native Alaskan</span></label>
+            <label><input type="checkbox" id="div_Latino"> <span>Latino, Hispanic, Latin American</span></label>
+            <label><input type="checkbox" id="div_MENA"> <span>Middle Eastern or North African</span></label>
+            <label><input type="checkbox" id="div_Multi"> <span>Multiracial or Multi-Ethnic</span></label>
+            <label><input type="checkbox" id="div_White"> <span>White</span></label>
+
+            <!-- Other -->
+            <label><input type="checkbox" id="div_Disabled"> <span>Disabled</span></label>
+            <label><input type="checkbox" id="div_Veteran"> <span>Veteran</span></label>
+            <label><input type="checkbox" id="div_LGBTQ"> <span>LGBTQIA+</span></label>
+          </div>
+        </fieldset>
+      </details>
+
+      <button type="submit">Add Employee</button>
+    </form>
+  </div>
+</div>
+
       <!-- Dropdown for deleting an employee -->
       <div class="dropdown" id="deleteEmployeeContainer">
         <button class="dropbtn">Delete Employee</button>

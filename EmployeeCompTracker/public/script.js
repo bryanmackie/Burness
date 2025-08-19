@@ -229,6 +229,29 @@ passphraseInput.focus();
 
     const formData = new FormData(e.target);
     const data = Object.fromEntries(formData.entries());
+const DIVERSITY_MAP = {
+  div_Male:     'Male',
+  div_Female:   'Female',
+  div_NonBinary:'Non-Binary/Non-Conforming',
+  div_Black:    'Black',
+  div_Asian:    'Asian or Asian American',
+  div_NHPI:     'Native Hawaiian or Pacific Islander',
+  div_Indigenous:'Indigenous, Native American or Native Alaskan',
+  div_Latino:   'Latino, Hispanic, Latin American',
+  div_MENA:     'Middle Eastern or North African',
+  div_Multi:    'Multiracial or Multi-Ethnic',
+  div_White:    'White',
+  div_Disabled: 'Disabled',
+  div_Veteran:  'Veteran',
+  div_LGBTQ:    'LGBTQIA+'
+};
+
+const diversity = {};
+Object.entries(DIVERSITY_MAP).forEach(([id, col]) => {
+  const el = document.getElementById(id);
+  if (el) diversity[col] = !!el.checked;
+});
+data.diversity = diversity;
 
     if (!data.add_first_name || !data.add_last_name) {
       alert('Please select an employee to add.');
