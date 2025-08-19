@@ -107,7 +107,7 @@
       <button type="submit">Submit</button>
     </form>
 
-    <div class="dropdown" id="addEmployeeContainer">
+   <div class="dropdown" id="addEmployeeContainer">
   <button class="dropbtn">Add Employee</button>
   <div class="dropdown-content">
     <form id="addEmployeeForm">
@@ -128,34 +128,34 @@
         <option value="unrestricted">Unrestricted</option>
       </select>
 
-      <!-- Collapsible diversity block -->
-      <details class="diversity-details">
-        <summary>Diversity</summary>
+      <!-- Collapsible Diversity section (optional) -->
+      <details>
+        <summary>Diversity (optional)</summary>
 
-        <fieldset class="diversity-fieldset">
-          <legend class="sr-only">Diversity</legend>
+        <fieldset style="margin-top:12px">
+          <legend>Gender Identity</legend>
+          <label><input type="checkbox" id="div_Male"> Male</label>
+          <label><input type="checkbox" id="div_Female"> Female</label>
+          <label><input type="checkbox" id="div_NonBinary"> Non-Binary/Non-Conforming</label>
+        </fieldset>
 
-          <div class="diversity-grid">
-            <!-- Gender -->
-            <label><input type="checkbox" id="div_Male"> <span>Male</span></label>
-            <label><input type="checkbox" id="div_Female"> <span>Female</span></label>
-            <label><input type="checkbox" id="div_NonBinary"> <span>Non-Binary/Non-Conforming</span></label>
+        <fieldset style="margin-top:12px">
+          <legend>Race / Ethnicity</legend>
+          <label><input type="checkbox" id="div_Black"> Black</label>
+          <label><input type="checkbox" id="div_Asian"> Asian or Asian American</label>
+          <label><input type="checkbox" id="div_NHPI"> Native Hawaiian or Pacific Islander</label>
+          <label><input type="checkbox" id="div_Indigenous"> Indigenous, Native American or Native Alaskan</label>
+          <label><input type="checkbox" id="div_Latino"> Latino, Hispanic, Latin American</label>
+          <label><input type="checkbox" id="div_MENA"> Middle Eastern or North African</label>
+          <label><input type="checkbox" id="div_Multi"> Multiracial or Multi-Ethnic</label>
+          <label><input type="checkbox" id="div_White"> White</label>
+        </fieldset>
 
-            <!-- Race / Ethnicity -->
-            <label><input type="checkbox" id="div_Black"> <span>Black</span></label>
-            <label><input type="checkbox" id="div_Asian"> <span>Asian or Asian American</span></label>
-            <label><input type="checkbox" id="div_NHPI"> <span>Native Hawaiian or Pacific Islander</span></label>
-            <label><input type="checkbox" id="div_Indigenous"> <span>Indigenous, Native American or Native Alaskan</span></label>
-            <label><input type="checkbox" id="div_Latino"> <span>Latino, Hispanic, Latin American</span></label>
-            <label><input type="checkbox" id="div_MENA"> <span>Middle Eastern or North African</span></label>
-            <label><input type="checkbox" id="div_Multi"> <span>Multiracial or Multi-Ethnic</span></label>
-            <label><input type="checkbox" id="div_White"> <span>White</span></label>
-
-            <!-- Other -->
-            <label><input type="checkbox" id="div_Disabled"> <span>Disabled</span></label>
-            <label><input type="checkbox" id="div_Veteran"> <span>Veteran</span></label>
-            <label><input type="checkbox" id="div_LGBTQ"> <span>LGBTQIA+</span></label>
-          </div>
+        <fieldset style="margin-top:12px">
+          <legend>Other</legend>
+          <label><input type="checkbox" id="div_Disabled"> Disabled</label>
+          <label><input type="checkbox" id="div_Veteran"> Veteran</label>
+          <label><input type="checkbox" id="div_LGBTQ"> LGBTQIA+</label>
         </fieldset>
       </details>
 
@@ -163,6 +163,7 @@
     </form>
   </div>
 </div>
+
 
       <!-- Dropdown for deleting an employee -->
       <div class="dropdown" id="deleteEmployeeContainer">
