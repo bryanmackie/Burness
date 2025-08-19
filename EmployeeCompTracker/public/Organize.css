@@ -292,3 +292,12 @@ button:hover {
 
 /* End of Toggle Button */
 
+/* Don't treat checkboxes like text inputs */
+input[type="checkbox"],
+input[type="radio"] {
+  width: auto;
+  padding: 0;
+  margin: 0 8px 0 0;   /* space before the label text */
+  border: 0;
+  vertical-align: middle; /* align with label text */
+}
