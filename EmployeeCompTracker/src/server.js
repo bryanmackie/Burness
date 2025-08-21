@@ -448,7 +448,7 @@ app.post('/add-employee', async (req, res) => {
       const values       = DIVERSITY_COLS.map(c => diversity[c] === true); // booleans
 
       const sql = `
-        INSERT INTO "Diversity"(first_name, last_name, ${colList})
+        INSERT INTO "information"(first_name, last_name, ${colList})
         VALUES ($1, $2, ${placeholders})
         ON CONFLICT (first_name, last_name)
         DO UPDATE SET ${updates};
