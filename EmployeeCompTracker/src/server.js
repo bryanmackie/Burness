@@ -509,6 +509,10 @@ app.post('/delete-employee', async (req, res) => {
       'DELETE FROM emailaid WHERE first_name = $1 AND last_name = $2',
       [delete_first_name, delete_last_name]
     );
+ await client.query(
+      'DELETE FROM information WHERE first_name = $1 AND last_name = $2',
+      [delete_first_name, delete_last_name]
+    );
 
     await client.query('INSERT INTO pushInc (first_name, last_name) VALUES ($1, $2)', [delete_first_name, delete_last_name]);
     res.status(200).json({ success: true, message: 'Employee deleted successfully.' });
