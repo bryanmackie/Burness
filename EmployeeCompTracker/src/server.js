@@ -39,6 +39,9 @@ const DIVERSITY_COLS = [
   'LGBTQIA+'
 ];
 
+const makeNameId = (first, last) =>
+  `${(first||'').trim()}${(last||'').trim()}`.replace(/\s+/g,'');
+
 let client;
 
 // Helper function to handle database errors
@@ -431,9 +434,10 @@ app.post('/add-employee', async (req, res) => {
     );
 
     await client.query(
-      'INSERT INTO supervisors (emp_first_name, emp_last_name) VALUES ($1, $2)',
-      [fn, ln]
-    );
+  'INSERT INTO supervisors (emp_id, emp_first_name, emp_last_name) VALUES ($1, $2, $3)',
+  [makeNameId(fn, ln), fn, ln]
+);
+
 
     await client.query(
       'INSERT INTO salary_review_data (first_name, last_name, email) VALUES ($1, $2, $3)',
