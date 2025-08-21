@@ -21,6 +21,23 @@ app.use(bodyParser.json());
 
 const validPassphrase = process.env.validPassphrase;
 const validPassphraseAdmin = process.env.validPassphraseAdmin;
+// Exact column names in the "Diversity" table (order matters)
+const DIVERSITY_COLS = [
+  'Male',
+  'Female',
+  'Non-Binary/Non-Conforming',
+  'Black',
+  'Asian or Asian American',
+  'Native Hawaiian or Pacific Islander',
+  'Indigenous, Native American or Native Alaskan',
+  'Latino, Hispanic, Latin American',
+  'Middle Eastern or North African',
+  'Multiracial or Multi-Ethnic',
+  'White',
+  'Disabled',
+  'Veteran',
+  'LGBTQIA+'
+];
 
 let client;
 
@@ -393,32 +410,67 @@ app.post('/update', async (req, res) => {
 });
 
 // Add a new employee
+// Add a new employee (atomic: employee + supervisors + salary_review_data + Diversity + pushInc)
 app.post('/add-employee', async (req, res) => {
-  const { add_first_name, add_last_name, employeeStatus, add_email } = req.body;
+  const { add_first_name, add_last_name, employeeStatus, add_email, diversity } = req.body;
 
   if (!add_first_name || !add_last_name || !employeeStatus) {
     return res.status(400).json({ success: false, message: 'First Name, Last Name, and Status are required.' });
   }
 
+  const fn = add_first_name.trim();
+  const ln = add_last_name.trim();
+  const email = (add_email || '').trim().toLowerCase();
+
   try {
+    await client.query('BEGIN');
+
     await client.query(
       'INSERT INTO employee_salary (first_name, last_name, access_status) VALUES ($1, $2, $3)',
-      [add_first_name, add_last_name, employeeStatus]
+      [fn, ln, employeeStatus]
     );
+
     await client.query(
       'INSERT INTO supervisors (emp_first_name, emp_last_name) VALUES ($1, $2)',
-      [add_first_name, add_last_name]
+      [fn, ln]
     );
+
     await client.query(
       'INSERT INTO salary_review_data (first_name, last_name, email) VALUES ($1, $2, $3)',
-      [add_first_name, add_last_name, add_email]
+      [fn, ln, email]
     );
-    await client.query('INSERT INTO pushInc (first_name, last_name) VALUES ($1, $2)', [add_first_name, add_last_name]);
+
+    // Parallel write to Diversity (if the client sent flags)
+    if (diversity && typeof diversity === 'object') {
+      const colList      = DIVERSITY_COLS.map(c => `"${c}"`).join(', ');
+      const placeholders = DIVERSITY_COLS.map((_, i) => `$${i + 3}`).join(', ');
+      const updates      = DIVERSITY_COLS.map(c => `"${c}" = EXCLUDED."${c}"`).join(', ');
+      const values       = DIVERSITY_COLS.map(c => diversity[c] === true); // booleans
+
+      const sql = `
+        INSERT INTO "Diversity"(first_name, last_name, ${colList})
+        VALUES ($1, $2, ${placeholders})
+        ON CONFLICT (first_name, last_name)
+        DO UPDATE SET ${updates};
+      `;
+
+      // [fn, ln, ...values] maps to $1, $2, $3..$N in order
+      await client.query(sql, [fn, ln, ...values]);
+    }
+
+    await client.query(
+      'INSERT INTO pushInc (first_name, last_name) VALUES ($1, $2)',
+      [fn, ln]
+    );
+
+    await client.query('COMMIT');
     res.status(200).json({ success: true, message: 'Employee added successfully.' });
   } catch (error) {
+    await client.query('ROLLBACK');
     handleDatabaseError(res, error);
   }
 });
+
 
 // Delete an employee
 app.post('/delete-employee', async (req, res) => {
