@@ -173,12 +173,14 @@ export function startCronJob(client) {
     // For testing purposes
      //checkAndNotify(client);
 
-    cron.schedule("0 11 * * MON", () => {
-      console.log("Cron job triggered: Running weekly salary check and notification job...");
-      checkAndNotify(client);
-    }, {
-      timezone: "America/New_York"
-    });
+
+    //begin commented out block for temp disablement 
+   // cron.schedule("0 11 * * MON", () => {
+      //console.log("Cron job triggered: Running weekly salary check and notification job...");
+     // checkAndNotify(client);
+   // }, {
+   //   timezone: "America/New_York"
+   // });
 
     console.log("Cron job scheduled successfully.");
   } catch (error) {
