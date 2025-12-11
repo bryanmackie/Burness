@@ -94,74 +94,62 @@ async function checkAndNotify(client) {
 
     // Process each employee
     for (const emp of employees) {
-      const { first_name, last_name, latest_salary_effective_date } = emp;
-      const payrollIncreaseDate = getLastPayrollDate(latest_salary_effective_date);
+  const { first_name, last_name, latest_salary_effective_date } = emp;
+  const payrollIncreaseDate = getLastPayrollDate(latest_salary_effective_date);
 
-      // Get immediate supervisor details (remains unchanged)
-      const immediateSupervisorQuery = `
-        SELECT s.sup_first_name, s.sup_last_name, sr2.email AS immediate_supervisor_email
-        FROM supervisors s
-        JOIN salary_review_data sr2 ON s.sup_first_name = sr2.first_name AND s.sup_last_name = sr2.last_name
-        WHERE s.emp_first_name = $1 AND s.emp_last_name = $2
-        LIMIT 1
-      `;
-      const immediateResult = await client.query(immediateSupervisorQuery, [first_name, last_name]);
-      if (immediateResult.rows.length === 0) {
-        console.warn(`No immediate supervisor found for ${first_name} ${last_name}`);
-        continue;
-      }
-      const immediateSupervisor = immediateResult.rows[0];
+  // Get employee info including ultimate supervisor names
+  const employeeInfoQuery = `
+    SELECT division, direct_first_name, direct_last_name
+    FROM emailaid
+    WHERE first_name = $1 AND last_name = $2
+    LIMIT 1
+  `;
+  const employeeInfoResult = await client.query(employeeInfoQuery, [first_name, last_name]);
+  if (employeeInfoResult.rows.length === 0) {
+    console.warn(`No additional info found in emailaid for ${first_name} ${last_name}`);
+    continue;
+  }
 
-      // Get employee info from emailaid to fetch division and direct supervisor info
-      const employeeInfoQuery = `
-        SELECT division, direct_first_name, direct_last_name
-        FROM emailaid
-        WHERE first_name = $1 AND last_name = $2
-        LIMIT 1
-      `;
-      const employeeInfoResult = await client.query(employeeInfoQuery, [first_name, last_name]);
-      if (employeeInfoResult.rows.length === 0) {
-        console.warn(`No additional info found in emailaid for ${first_name} ${last_name}`);
-        continue;
-      }
-      const { division, direct_first_name, direct_last_name } = employeeInfoResult.rows[0];
+  const { direct_first_name, direct_last_name } = employeeInfoResult.rows[0];
 
-      // Query for division lead emails using the logic:
-      // A division lead is in the same division and has both direct_first_name and direct_last_name as null.
-      const divisionLeadsQuery = `
-        SELECT sr.email
-        FROM salary_review_data sr
-        JOIN emailaid e ON sr.first_name = e.first_name AND sr.last_name = e.last_name
-        WHERE e.division = $1
-          AND e.direct_first_name IS NULL
-          AND e.direct_last_name IS NULL
-      `;
-      const divisionLeadsResult = await client.query(divisionLeadsQuery, [division]);
-      const divisionLeadEmails = divisionLeadsResult.rows.map(row => row.email);
+  // Lookup ultimate supervisor's email
+  const ultimateSupervisorEmailQuery = `
+    SELECT email
+    FROM salary_review_data
+    WHERE first_name = $1 AND last_name = $2
+    LIMIT 1
+  `;
+  const ultimateEmailResult = await client.query(
+    ultimateSupervisorEmailQuery,
+    [direct_first_name, direct_last_name]
+  );
 
-      // Always include the fixed email address
-      divisionLeadEmails.push("vbigelow@burness.com"); //vbigelow@burness.com
-      //divisionLeadEmails.push("bryanmackie7@gmail.com");
-      // Build final CC list as a comma-separated string and remove duplicates
-      const ccList = [...new Set(divisionLeadEmails)].join(',');
+  if (ultimateEmailResult.rows.length === 0) {
+    console.warn(`No email found for ultimate supervisor ${direct_first_name} ${direct_last_name}`);
+    continue;
+  }
 
-      // Replace placeholders in the email template subject and body
-      // ultimate_supervisor_name now comes from direct_first_name and direct_last_name of the employeeInfo
-      const subject = emailTemplate.subject
-        .replace("{first_name}", first_name)
-        .replace("{last_name}", last_name);
+  const ultimateSupervisorEmail = ultimateEmailResult.rows[0].email;
 
-      const emailBody = emailTemplate.body
-        .replace("{first_name}", first_name)
-        .replace("{last_name}", last_name)
-        .replace("{payroll_increase_date}", payrollIncreaseDate)
-        .replace(/{ultimate_supervisor_name}/g, `${direct_first_name}`)
-        .replace("{immediate_supervisor_name}", `${immediateSupervisor.sup_first_name}`);
+  // Only CC address required
+  const ccList = "vbigelow@burness.com";
 
-      // Send the email (immediate supervisor in "to"; CC includes division leads and vbigelow)
-      await sendEmail(immediateSupervisor.immediate_supervisor_email, ccList, subject, emailBody);
-      console.log(`Notified supervisors for ${first_name} ${last_name}`);
-    }
+  // Build subject + body
+  const subject = emailTemplate.subject
+    .replace("{first_name}", first_name)
+    .replace("{last_name}", last_name);
+
+  const emailBody = emailTemplate.body
+    .replace("{first_name}", first_name)
+    .replace("{last_name}", last_name)
+    .replace("{payroll_increase_date}", payrollIncreaseDate)
+    .replace(/{ultimate_supervisor_name}/g, `${direct_first_name}`);
+
+  // Send the email
+  await sendEmail(ultimateSupervisorEmail, ccList, subject, emailBody);
+
+  console.log(`Notified ultimate supervisor for ${first_name} ${last_name}`);
+}
   } catch (error) {
     console.error("Error in checkAndNotify:", error);
   }
@@ -175,12 +163,12 @@ export function startCronJob(client) {
 
 
     //begin commented out block for temp disablement 
-   // cron.schedule("0 11 * * MON", () => {
-      //console.log("Cron job triggered: Running weekly salary check and notification job...");
-     // checkAndNotify(client);
-   // }, {
-   //   timezone: "America/New_York"
-   // });
+    cron.schedule("0 9 * * MON", () => {
+      console.log("Cron job triggered: Running weekly salary check and notification job...");
+      checkAndNotify(client);
+    }, {
+      timezone: "America/New_York"
+    });
 
     console.log("Cron job scheduled successfully.");
   } catch (error) {
